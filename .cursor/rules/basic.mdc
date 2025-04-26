@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Most Important Rule
+
+- [prd.md](mdc:prd.md)의 제품을 만들고 있습니다.
+- 각 작업은 [tasklist.md](mdc:tasklist.md) 의 내용을 참고하여 수행합니다.
+- 작업을 할 때, 그에 상응하는 테스트코드도 함께 만듭니다.
+- 도커로 이미지를 빌드하고 테스트할 때는, 단지 서버를 띄우는 것뿐 아니라, 외부의 curl 등에 잘 결과를 리턴하는지도 확인합니다.
