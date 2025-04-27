@@ -62,9 +62,10 @@ class AttendanceService(
      */
     private fun validateLeaderAccess(currentUser: User, gbsId: Long) {
         val isAdmin = currentUser.role in listOf(Role.ADMIN, Role.MINISTER, Role.VILLAGE_LEADER)
+        if (isAdmin) return
+
         val hasGbsAccess = hasLeaderAccess(gbsId, currentUser.id!!)
-        
-        if (!isAdmin && !hasGbsAccess) {
+        if (!hasGbsAccess) {
             throw AccessDeniedException("이 GBS에 대한 출석 입력 권한이 없습니다")
         }
     }

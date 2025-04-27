@@ -25,38 +25,42 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.jupiter.api.assertThrows
+import io.mockk.*
+import io.mockk.junit5.MockKExtension
+import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.InjectMockKs
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class AttendanceServiceTest {
 
-    @Mock
+    @MockK
     private lateinit var attendanceRepository: AttendanceRepository
 
-    @Mock
+    @MockK
     private lateinit var gbsGroupRepository: GbsGroupRepository
 
-    @Mock
+    @MockK
     private lateinit var userRepository: UserRepository
 
-    @Mock
+    @MockK
     private lateinit var gbsLeaderHistoryRepository: GbsLeaderHistoryRepository
 
-    @Mock
+    @MockK
     private lateinit var gbsMemberHistoryRepository: GbsMemberHistoryRepository
 
-    @Mock
+    @MockK
     private lateinit var leaderDelegationRepository: LeaderDelegationRepository
 
-    @Mock
+    @MockK
     private lateinit var villageRepository: VillageRepository
 
-    @Mock
+    @MockK
     private lateinit var securityContext: SecurityContext
 
-    @Mock
+    @MockK
     private lateinit var authentication: Authentication
 
-    @InjectMocks
+    @InjectMockKs
     private lateinit var attendanceService: AttendanceService
 
     private lateinit var currentUser: User
@@ -68,6 +72,8 @@ class AttendanceServiceTest {
 
     @BeforeEach
     fun setUp() {
+        MockKAnnotations.init(this)
+        clearAllMocks()
         // 부서 생성
         department = Department(
             id = 1L,
@@ -114,16 +120,15 @@ class AttendanceServiceTest {
             startDate = today.minusDays(30)
         )
 
-        `when`(gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId))
-            .thenReturn(leaderHistory)
+        every { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId) } returns leaderHistory
 
         // when
         val result = attendanceService.hasLeaderAccess(gbsId, userId)
 
         // then
         assertTrue(result)
-        verify(gbsLeaderHistoryRepository).findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId)
-        verifyNoMoreInteractions(leaderDelegationRepository)
+        verify { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId) }
+        confirmVerified(leaderDelegationRepository)
     }
 
     @Test
@@ -134,8 +139,7 @@ class AttendanceServiceTest {
         val userId = 1L
         
         // 직접 리더가 아님
-        `when`(gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId))
-            .thenReturn(null)
+        every { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId) } returns null
         
         // 위임된 권한이 있음
         val delegator = User(
@@ -158,16 +162,15 @@ class AttendanceServiceTest {
             )
         )
         
-        `when`(leaderDelegationRepository.findActiveDelegationsByDelegateeAndGbs(userId, gbsId, today))
-            .thenReturn(delegations)
+        every { leaderDelegationRepository.findActiveDelegationsByDelegateeAndGbs(userId, gbsId, today) } returns delegations
 
         // when
         val result = attendanceService.hasLeaderAccess(gbsId, userId)
 
         // then
         assertTrue(result)
-        verify(gbsLeaderHistoryRepository).findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId)
-        verify(leaderDelegationRepository).findActiveDelegationsByDelegateeAndGbs(userId, gbsId, today)
+        verify { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId) }
+        verify { leaderDelegationRepository.findActiveDelegationsByDelegateeAndGbs(userId, gbsId, today) }
     }
 
     @Test
@@ -178,20 +181,18 @@ class AttendanceServiceTest {
         val userId = 1L
         
         // 직접 리더가 아님
-        `when`(gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId))
-            .thenReturn(null)
+        every { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId) } returns null
         
         // 위임된 권한도 없음
-        `when`(leaderDelegationRepository.findActiveDelegationsByDelegateeAndGbs(userId, gbsId, today))
-            .thenReturn(emptyList())
+        every { leaderDelegationRepository.findActiveDelegationsByDelegateeAndGbs(userId, gbsId, today) } returns emptyList()
 
         // when
         val result = attendanceService.hasLeaderAccess(gbsId, userId)
 
         // then
         assertFalse(result)
-        verify(gbsLeaderHistoryRepository).findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId)
-        verify(leaderDelegationRepository).findActiveDelegationsByDelegateeAndGbs(userId, gbsId, today)
+        verify { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId, userId) }
+        verify { leaderDelegationRepository.findActiveDelegationsByDelegateeAndGbs(userId, gbsId, today) }
     }
 
     @Test
@@ -211,8 +212,8 @@ class AttendanceServiceTest {
         
         // SecurityContext 모킹 설정
         val userDetails = UserDetailsAdapter(adminUser)
-        `when`(securityContext.authentication).thenReturn(authentication)
-        `when`(authentication.principal).thenReturn(userDetails)
+        every { securityContext.authentication } returns authentication
+        every { authentication.principal } returns userDetails
         SecurityContextHolder.setContext(securityContext)
         
         val batchRequest = AttendanceBatchRequest(
@@ -223,8 +224,8 @@ class AttendanceServiceTest {
             )
         )
         
-        `when`(gbsGroupRepository.findById(gbsId)).thenReturn(Optional.of(gbsGroup))
-        `when`(attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart)).thenReturn(emptyList())
+        every { gbsGroupRepository.findById(gbsId) } returns Optional.of(gbsGroup)
+        every { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
         
         val member = User(
             id = 2L, 
@@ -235,7 +236,7 @@ class AttendanceServiceTest {
             department = department
         )
         
-        `when`(userRepository.findById(2L)).thenReturn(Optional.of(member))
+        every { userRepository.findById(2L) } returns Optional.of(member)
         
         val savedAttendance = Attendance(
             id = 1L,
@@ -248,7 +249,7 @@ class AttendanceServiceTest {
             createdBy = adminUser
         )
         
-        `when`(attendanceRepository.saveAll(anyList())).thenReturn(listOf(savedAttendance))
+        every { attendanceRepository.saveAll(any<List<Attendance>>()) } returns listOf(savedAttendance)
         
         // when - then
         // validateLeaderAccess는 private 메소드이므로 createAttendances를 통해 간접적으로 테스트
@@ -264,8 +265,8 @@ class AttendanceServiceTest {
     fun testCreateAttendances_WithValidAccess() {
         // SecurityContext 모킹 설정
         val userDetails = UserDetailsAdapter(currentUser)
-        `when`(securityContext.authentication).thenReturn(authentication)
-        `when`(authentication.principal).thenReturn(userDetails)
+        every { securityContext.authentication } returns authentication
+        every { authentication.principal } returns userDetails
         SecurityContextHolder.setContext(securityContext)
         
         // given
@@ -297,7 +298,7 @@ class AttendanceServiceTest {
         )
         
         // GBS 그룹 조회
-        `when`(gbsGroupRepository.findById(1L)).thenReturn(Optional.of(gbsGroup))
+        every { gbsGroupRepository.findById(1L) } returns Optional.of(gbsGroup)
         
         // 리더 권한 확인
         val leaderHistory = GbsLeaderHistory(
@@ -306,14 +307,14 @@ class AttendanceServiceTest {
             gbsGroup = gbsGroup,
             startDate = today.minusDays(30)
         )
-        `when`(gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L)).thenReturn(leaderHistory)
+        every { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) } returns leaderHistory
         
         // 기존 출석 데이터 조회
-        `when`(attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart)).thenReturn(emptyList())
+        every { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
         
         // 조원 정보 조회
-        `when`(userRepository.findById(2L)).thenReturn(Optional.of(member1))
-        `when`(userRepository.findById(3L)).thenReturn(Optional.of(member2))
+        every { userRepository.findById(2L) } returns Optional.of(member1)
+        every { userRepository.findById(3L) } returns Optional.of(member2)
         
         // 출석 정보 저장
         val savedAttendance1 = Attendance(
@@ -338,7 +339,7 @@ class AttendanceServiceTest {
             createdBy = currentUser
         )
         
-        `when`(attendanceRepository.saveAll(anyList())).thenReturn(listOf(savedAttendance1, savedAttendance2))
+        every { attendanceRepository.saveAll(any<List<Attendance>>()) } returns listOf(savedAttendance1, savedAttendance2)
         
         // when
         val result = attendanceService.createAttendances(batchRequest)
@@ -349,11 +350,11 @@ class AttendanceServiceTest {
         assertEquals("조원1", result[0].memberName)
         assertEquals(WorshipStatus.O, result[0].worship)
         
-        verify(gbsGroupRepository).findById(1L)
-        verify(attendanceRepository).findByGbsGroupAndWeekStart(gbsGroup, weekStart)
-        verify(userRepository).findById(2L)
-        verify(userRepository).findById(3L)
-        verify(attendanceRepository).saveAll(anyList())
+        verify { gbsGroupRepository.findById(1L) }
+        verify { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) }
+        verify { userRepository.findById(2L) }
+        verify { userRepository.findById(3L) }
+        verify { attendanceRepository.saveAll(any<List<Attendance>>()) }
     }
     
     @Test
@@ -361,8 +362,8 @@ class AttendanceServiceTest {
     fun testCreateAttendances_WithoutAccess() {
         // SecurityContext 모킹 설정
         val userDetails = UserDetailsAdapter(currentUser)
-        `when`(securityContext.authentication).thenReturn(authentication)
-        `when`(authentication.principal).thenReturn(userDetails)
+        every { securityContext.authentication } returns authentication
+        every { authentication.principal } returns userDetails
         SecurityContextHolder.setContext(securityContext)
         
         // given
@@ -375,20 +376,20 @@ class AttendanceServiceTest {
         )
         
         // GBS 그룹 조회
-        `when`(gbsGroupRepository.findById(1L)).thenReturn(Optional.of(gbsGroup))
+        every { gbsGroupRepository.findById(1L) } returns Optional.of(gbsGroup)
         
         // 리더 권한이 없음
-        `when`(gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L)).thenReturn(null)
-        `when`(leaderDelegationRepository.findActiveDelegationsByDelegateeAndGbs(1L, 1L, today)).thenReturn(emptyList())
+        every { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) } returns null
+        every { leaderDelegationRepository.findActiveDelegationsByDelegateeAndGbs(1L, 1L, today) } returns emptyList()
         
         // when, then
         assertThrows<AccessDeniedException> {
             attendanceService.createAttendances(batchRequest)
         }
         
-        verify(gbsGroupRepository).findById(1L)
-        verify(gbsLeaderHistoryRepository).findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L)
-        verify(leaderDelegationRepository).findActiveDelegationsByDelegateeAndGbs(1L, 1L, today)
+        verify { gbsGroupRepository.findById(1L) }
+        verify { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) }
+        verify { leaderDelegationRepository.findActiveDelegationsByDelegateeAndGbs(1L, 1L, today) }
     }
     
     @Test
@@ -416,8 +417,8 @@ class AttendanceServiceTest {
             createdBy = currentUser
         )
         
-        `when`(gbsGroupRepository.findById(gbsId)).thenReturn(Optional.of(gbsGroup))
-        `when`(attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart)).thenReturn(listOf(attendance))
+        every { gbsGroupRepository.findById(gbsId) } returns Optional.of(gbsGroup)
+        every { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns listOf(attendance)
         
         // when
         val result = attendanceService.getAttendancesByGbs(gbsId, weekStart)
@@ -428,8 +429,8 @@ class AttendanceServiceTest {
         assertEquals("조원", result[0].memberName)
         assertEquals(WorshipStatus.O, result[0].worship)
         
-        verify(gbsGroupRepository).findById(gbsId)
-        verify(attendanceRepository).findByGbsGroupAndWeekStart(gbsGroup, weekStart)
+        verify { gbsGroupRepository.findById(gbsId) }
+        verify { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) }
     }
     
     @Test
@@ -467,11 +468,11 @@ class AttendanceServiceTest {
             createdBy = currentUser
         )
         
-        `when`(villageRepository.findById(villageId)).thenReturn(Optional.of(village))
-        `when`(gbsGroupRepository.findActiveGroupsByVillageId(villageId, today)).thenReturn(listOf(gbsGroup))
-        `when`(attendanceRepository.findDetailsByGbsIdAndWeek(1L, weekStart)).thenReturn(listOf(attendance))
-        `when`(gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L)).thenReturn(leader)
-        `when`(gbsMemberHistoryRepository.countActiveMembers(1L, today)).thenReturn(10L)
+        every { villageRepository.findById(villageId) } returns Optional.of(village)
+        every { gbsGroupRepository.findActiveGroupsByVillageId(villageId, today) } returns listOf(gbsGroup)
+        every { attendanceRepository.findDetailsByGbsIdAndWeek(1L, weekStart) } returns listOf(attendance)
+        every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L) } returns leader
+        every { gbsMemberHistoryRepository.countActiveMembers(1L, today) } returns 10L
         
         // when
         val result = attendanceService.getVillageAttendance(villageId, weekStart)
@@ -487,11 +488,11 @@ class AttendanceServiceTest {
         assertEquals(1, result.gbsAttendances[0].attendedMembers)
         assertEquals(10.0, result.gbsAttendances[0].attendanceRate)
         
-        verify(villageRepository).findById(villageId)
-        verify(gbsGroupRepository).findActiveGroupsByVillageId(villageId, today)
-        verify(attendanceRepository).findDetailsByGbsIdAndWeek(1L, weekStart)
-        verify(gbsLeaderHistoryRepository).findCurrentLeaderByGbsId(1L)
-        verify(gbsMemberHistoryRepository).countActiveMembers(1L, today)
+        verify { villageRepository.findById(villageId) }
+        verify { gbsGroupRepository.findActiveGroupsByVillageId(villageId, today) }
+        verify { attendanceRepository.findDetailsByGbsIdAndWeek(1L, weekStart) }
+        verify { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L) }
+        verify { gbsMemberHistoryRepository.countActiveMembers(1L, today) }
     }
     
     @Test
@@ -529,11 +530,11 @@ class AttendanceServiceTest {
         
         // createGbsAttendanceSummary는 private 메소드이므로 getVillageAttendance를 통해 간접적으로 테스트
         
-        `when`(villageRepository.findById(1L)).thenReturn(Optional.of(village))
-        `when`(gbsGroupRepository.findActiveGroupsByVillageId(1L, today)).thenReturn(listOf(gbsGroup))
-        `when`(attendanceRepository.findDetailsByGbsIdAndWeek(1L, weekStart)).thenReturn(listOf(attendance))
-        `when`(gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L)).thenReturn(leader)
-        `when`(gbsMemberHistoryRepository.countActiveMembers(1L, today)).thenReturn(5L)
+        every { villageRepository.findById(1L) } returns Optional.of(village)
+        every { gbsGroupRepository.findActiveGroupsByVillageId(1L, today) } returns listOf(gbsGroup)
+        every { attendanceRepository.findDetailsByGbsIdAndWeek(1L, weekStart) } returns listOf(attendance)
+        every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L) } returns leader
+        every { gbsMemberHistoryRepository.countActiveMembers(1L, today) } returns 5L
         
         // when
         val result = attendanceService.getVillageAttendance(1L, weekStart)
