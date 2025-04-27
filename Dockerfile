@@ -7,7 +7,7 @@ RUN chmod +x ./gradlew
 
 # 메모리 문제 해결을 위한 Gradle 설정
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx512m"
-RUN ./gradlew build --no-daemon -x test
+RUN ./gradlew clean bootJar --no-daemon -x test
 
 FROM amazoncorretto:21
 WORKDIR /app

@@ -35,10 +35,13 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers(
-                        "/auth/**",
+                        "/auth/login",
+                        "/auth/signup",
+                        "/auth/refresh",
                         "/api-docs/**",
                         "/swagger-ui/**",
-                        "/swagger-ui.html"
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**"
                     ).permitAll()
                     .requestMatchers("/api/**").authenticated()
                     .anyRequest().authenticated()

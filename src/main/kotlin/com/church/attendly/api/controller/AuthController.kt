@@ -2,13 +2,17 @@ package com.church.attendly.api.controller
 
 import com.church.attendly.api.dto.LoginRequest
 import com.church.attendly.api.dto.LoginResponse
+import com.church.attendly.api.dto.SignupRequest
+import com.church.attendly.api.dto.SignupResponse
 import com.church.attendly.api.dto.TokenRefreshRequest
 import com.church.attendly.api.dto.TokenRefreshResponse
 import com.church.attendly.security.JwtTokenProvider
 import com.church.attendly.security.UserDetailsAdapter
+import com.church.attendly.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -20,12 +24,20 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "인증 API", description = "로그인 및 토큰 갱신 API")
+@Tag(name = "인증 API", description = "회원가입, 로그인 및 토큰 갱신 API")
 class AuthController(
     private val authenticationManager: AuthenticationManager,
     private val jwtTokenProvider: JwtTokenProvider,
-    private val userDetailsService: UserDetailsService
+    private val userDetailsService: UserDetailsService,
+    private val userService: UserService
 ) {
+
+    @PostMapping("/signup")
+    @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
+    fun signup(@Valid @RequestBody request: SignupRequest): ResponseEntity<SignupResponse> {
+        val response = userService.signup(request)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+    }
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하여 JWT 토큰을 발급받습니다.")
