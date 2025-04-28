@@ -6,13 +6,13 @@ import com.church.attendly.domain.entity.Village
 import com.church.attendly.domain.entity.VillageLeader
 import com.church.attendly.domain.repository.VillageRepository
 import com.church.attendly.service.AttendanceService
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyLong
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -38,55 +38,55 @@ class MethodSecurityExpressionsTest {
 
     @BeforeEach
     fun setUp() {
-        attendanceService = mock(AttendanceService::class.java)
-        villageRepository = mock(VillageRepository::class.java)
-        authentication = mock(Authentication::class.java)
-        securityContext = mock(SecurityContext::class.java)
+        attendanceService = mockk(relaxed = true)
+        villageRepository = mockk(relaxed = true)
+        authentication = mockk(relaxed = true)
+        securityContext = mockk(relaxed = true)
         
         methodSecurityExpressions = MethodSecurityExpressions(attendanceService, villageRepository)
         
         // 테스트 사용자 생성
-        adminUser = mock(User::class.java)
-        `when`(adminUser.role).thenReturn(Role.ADMIN)
-        `when`(adminUser.id).thenReturn(1L)
+        adminUser = mockk(relaxed = true)
+        every { adminUser.role } returns Role.ADMIN
+        every { adminUser.id } returns 1L
         
-        ministerUser = mock(User::class.java)
-        `when`(ministerUser.role).thenReturn(Role.MINISTER)
-        `when`(ministerUser.id).thenReturn(2L)
+        ministerUser = mockk(relaxed = true)
+        every { ministerUser.role } returns Role.MINISTER
+        every { ministerUser.id } returns 2L
         
-        villageLeaderUser = mock(User::class.java)
-        `when`(villageLeaderUser.role).thenReturn(Role.VILLAGE_LEADER)
-        `when`(villageLeaderUser.id).thenReturn(3L)
+        villageLeaderUser = mockk(relaxed = true)
+        every { villageLeaderUser.role } returns Role.VILLAGE_LEADER
+        every { villageLeaderUser.id } returns 3L
         
-        leaderUser = mock(User::class.java)
-        `when`(leaderUser.role).thenReturn(Role.LEADER)
-        `when`(leaderUser.id).thenReturn(4L)
+        leaderUser = mockk(relaxed = true)
+        every { leaderUser.role } returns Role.LEADER
+        every { leaderUser.id } returns 4L
         
-        memberUser = mock(User::class.java)
-        `when`(memberUser.role).thenReturn(Role.MEMBER)
-        `when`(memberUser.id).thenReturn(5L)
+        memberUser = mockk(relaxed = true)
+        every { memberUser.role } returns Role.MEMBER
+        every { memberUser.id } returns 5L
         
         // 마을 및 마을장 설정
-        village = mock(Village::class.java)
-        `when`(village.id).thenReturn(1L)
+        village = mockk(relaxed = true)
+        every { village.id } returns 1L
         
-        villageLeader = mock(VillageLeader::class.java)
-        `when`(villageLeader.village).thenReturn(village)
+        villageLeader = mockk(relaxed = true)
+        every { villageLeader.village } returns village
         
-        `when`(villageLeaderUser.villageLeader).thenReturn(villageLeader)
+        every { villageLeaderUser.villageLeader } returns villageLeader
         
         // SecurityContext 설정
         SecurityContextHolder.setContext(securityContext)
-        `when`(securityContext.authentication).thenReturn(authentication)
+        every { securityContext.authentication } returns authentication
     }
 
     @Test
     @DisplayName("canManageGbsAttendance - 관리자는 모든 GBS에 접근 가능")
     fun canManageGbsAttendance_AdminHasAccess() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(adminUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns adminUser
+        every { authentication.principal } returns userDetailsAdapter
         
         // when
         val result = methodSecurityExpressions.canManageGbsAttendance(1L)
@@ -99,9 +99,9 @@ class MethodSecurityExpressionsTest {
     @DisplayName("canManageGbsAttendance - 교역자는 모든 GBS에 접근 가능")
     fun canManageGbsAttendance_MinisterHasAccess() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(ministerUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns ministerUser
+        every { authentication.principal } returns userDetailsAdapter
         
         // when
         val result = methodSecurityExpressions.canManageGbsAttendance(1L)
@@ -114,9 +114,9 @@ class MethodSecurityExpressionsTest {
     @DisplayName("canManageGbsAttendance - 마을장은 모든 GBS에 접근 가능")
     fun canManageGbsAttendance_VillageLeaderHasAccess() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(villageLeaderUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns villageLeaderUser
+        every { authentication.principal } returns userDetailsAdapter
         
         // when
         val result = methodSecurityExpressions.canManageGbsAttendance(1L)
@@ -129,47 +129,49 @@ class MethodSecurityExpressionsTest {
     @DisplayName("canManageGbsAttendance - 리더는 자신의 GBS에 접근 가능")
     fun canManageGbsAttendance_LeaderHasAccessToOwnGbs() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(leaderUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns leaderUser
+        every { authentication.principal } returns userDetailsAdapter
         
         val gbsId = 1L
-        `when`(attendanceService.hasLeaderAccess(gbsId, leaderUser.id!!)).thenReturn(true)
+        every { leaderUser.id } returns 4L
+        every { attendanceService.hasLeaderAccess(gbsId, 4L) } returns true
         
         // when
         val result = methodSecurityExpressions.canManageGbsAttendance(gbsId)
         
         // then
         assertTrue(result)
-        verify(attendanceService).hasLeaderAccess(gbsId, leaderUser.id!!)
+        verify(exactly = 1) { attendanceService.hasLeaderAccess(gbsId, 4L) }
     }
 
     @Test
     @DisplayName("canManageGbsAttendance - 리더는 자신의 GBS가 아닌 경우 접근 불가")
     fun canManageGbsAttendance_LeaderHasNoAccessToOtherGbs() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(leaderUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns leaderUser
+        every { authentication.principal } returns userDetailsAdapter
         
         val gbsId = 1L
-        `when`(attendanceService.hasLeaderAccess(gbsId, leaderUser.id!!)).thenReturn(false)
+        every { leaderUser.id } returns 4L
+        every { attendanceService.hasLeaderAccess(gbsId, 4L) } returns false
         
         // when
         val result = methodSecurityExpressions.canManageGbsAttendance(gbsId)
         
         // then
         assertFalse(result)
-        verify(attendanceService).hasLeaderAccess(gbsId, leaderUser.id!!)
+        verify(exactly = 1) { attendanceService.hasLeaderAccess(gbsId, 4L) }
     }
 
     @Test
     @DisplayName("canManageGbsAttendance - 일반 회원은 GBS 접근 불가")
     fun canManageGbsAttendance_MemberHasNoAccess() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(memberUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns memberUser
+        every { authentication.principal } returns userDetailsAdapter
         
         // when
         val result = methodSecurityExpressions.canManageGbsAttendance(1L)
@@ -182,7 +184,7 @@ class MethodSecurityExpressionsTest {
     @DisplayName("canManageGbsAttendance - 인증되지 않은 사용자는 접근 불가")
     fun canManageGbsAttendance_UnauthenticatedHasNoAccess() {
         // given
-        `when`(authentication.principal).thenReturn(null)
+        every { authentication.principal } returns null
         
         // when
         val result = methodSecurityExpressions.canManageGbsAttendance(1L)
@@ -195,9 +197,9 @@ class MethodSecurityExpressionsTest {
     @DisplayName("canAccessVillage - 관리자는 모든 마을에 접근 가능")
     fun canAccessVillage_AdminHasAccess() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(adminUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns adminUser
+        every { authentication.principal } returns userDetailsAdapter
         
         // when
         val result = methodSecurityExpressions.canAccessVillage(1L)
@@ -210,9 +212,9 @@ class MethodSecurityExpressionsTest {
     @DisplayName("canAccessVillage - 교역자는 모든 마을에 접근 가능")
     fun canAccessVillage_MinisterHasAccess() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(ministerUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns ministerUser
+        every { authentication.principal } returns userDetailsAdapter
         
         // when
         val result = methodSecurityExpressions.canAccessVillage(1L)
@@ -225,9 +227,9 @@ class MethodSecurityExpressionsTest {
     @DisplayName("canAccessVillage - 마을장은 자신의 마을에만 접근 가능")
     fun canAccessVillage_VillageLeaderHasAccessToOwnVillage() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(villageLeaderUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns villageLeaderUser
+        every { authentication.principal } returns userDetailsAdapter
         
         val villageId = 1L
         
@@ -242,9 +244,9 @@ class MethodSecurityExpressionsTest {
     @DisplayName("canAccessVillage - 마을장은 다른 마을에 접근 불가")
     fun canAccessVillage_VillageLeaderHasNoAccessToOtherVillage() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(villageLeaderUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns villageLeaderUser
+        every { authentication.principal } returns userDetailsAdapter
         
         val otherVillageId = 2L
         
@@ -259,9 +261,9 @@ class MethodSecurityExpressionsTest {
     @DisplayName("canAccessVillage - 리더는 마을 접근 불가")
     fun canAccessVillage_LeaderHasNoAccess() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(leaderUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns leaderUser
+        every { authentication.principal } returns userDetailsAdapter
         
         // when
         val result = methodSecurityExpressions.canAccessVillage(1L)
@@ -274,7 +276,7 @@ class MethodSecurityExpressionsTest {
     @DisplayName("canAccessVillage - 인증되지 않은 사용자는 접근 불가")
     fun canAccessVillage_UnauthenticatedHasNoAccess() {
         // given
-        `when`(authentication.principal).thenReturn(null)
+        every { authentication.principal } returns null
         
         // when
         val result = methodSecurityExpressions.canAccessVillage(1L)
@@ -287,9 +289,9 @@ class MethodSecurityExpressionsTest {
     @DisplayName("isMinister - 교역자 권한 확인")
     fun isMinister_WithMinisterRole() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(ministerUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns ministerUser
+        every { authentication.principal } returns userDetailsAdapter
         
         // when
         val result = methodSecurityExpressions.isMinister(authentication)
@@ -302,9 +304,9 @@ class MethodSecurityExpressionsTest {
     @DisplayName("isMinister - 교역자가 아닌 경우")
     fun isMinister_WithNonMinisterRole() {
         // given
-        userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(adminUser)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        userDetailsAdapter = mockk(relaxed = true)
+        every { userDetailsAdapter.getUser() } returns adminUser
+        every { authentication.principal } returns userDetailsAdapter
         
         // when
         val result = methodSecurityExpressions.isMinister(authentication)
@@ -317,7 +319,7 @@ class MethodSecurityExpressionsTest {
     @DisplayName("isMinister - 인증되지 않은 사용자")
     fun isMinister_WithUnauthenticatedUser() {
         // given
-        `when`(authentication.principal).thenReturn(null)
+        every { authentication.principal } returns null
         
         // when
         val result = methodSecurityExpressions.isMinister(authentication)
