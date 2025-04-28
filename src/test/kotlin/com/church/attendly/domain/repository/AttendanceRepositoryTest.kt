@@ -1,5 +1,6 @@
 package com.church.attendly.domain.repository
 
+import com.church.attendly.config.TestQuerydslConfig
 import com.church.attendly.domain.entity.*
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
@@ -9,32 +10,14 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@Configuration
-class AttendanceTestConfig {
-    @PersistenceContext
-    private lateinit var entityManager: EntityManager
-
-    @Bean
-    fun jpaQueryFactory(): JPAQueryFactory {
-        return JPAQueryFactory(entityManager)
-    }
-
-    @Bean
-    fun attendanceRepositoryImpl(jpaQueryFactory: JPAQueryFactory): AttendanceRepositoryImpl {
-        return AttendanceRepositoryImpl(jpaQueryFactory)
-    }
-}
-
 @DataJpaTest
-@Import(AttendanceTestConfig::class, AttendanceRepositoryImpl::class)
+@Import(TestQuerydslConfig::class, AttendanceRepositoryImpl::class)
 class AttendanceRepositoryTest {
 
     @Autowired

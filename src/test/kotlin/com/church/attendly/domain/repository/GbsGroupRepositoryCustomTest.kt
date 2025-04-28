@@ -1,5 +1,6 @@
 package com.church.attendly.domain.repository
 
+import com.church.attendly.config.TestQuerydslConfig
 import com.church.attendly.domain.entity.Department
 import com.church.attendly.domain.entity.GbsGroup
 import com.church.attendly.domain.entity.Village
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
@@ -19,15 +19,8 @@ import java.time.LocalDateTime
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import(GbsGroupRepositoryCustomTest.TestConfig::class)
+@Import(TestQuerydslConfig::class)
 class GbsGroupRepositoryCustomTest {
-
-    class TestConfig {
-        @Bean
-        fun jpaQueryFactory(entityManager: EntityManager): JPAQueryFactory {
-            return JPAQueryFactory(entityManager)
-        }
-    }
 
     @Autowired
     private lateinit var entityManager: TestEntityManager

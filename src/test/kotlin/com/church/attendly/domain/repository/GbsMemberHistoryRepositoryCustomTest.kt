@@ -1,33 +1,25 @@
 package com.church.attendly.domain.repository
 
+import com.church.attendly.config.TestQuerydslConfig
 import com.church.attendly.domain.entity.Department
 import com.church.attendly.domain.entity.GbsGroup
 import com.church.attendly.domain.entity.GbsMemberHistory
 import com.church.attendly.domain.entity.Role
 import com.church.attendly.domain.entity.User
 import com.church.attendly.domain.entity.Village
-import com.querydsl.jpa.impl.JPAQueryFactory
-import jakarta.persistence.EntityManager
+import com.church.attendly.domain.model.GbsMemberHistorySearchCondition
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import(GbsMemberHistoryRepositoryCustomTest.TestConfig::class)
+@Import(TestQuerydslConfig::class)
 class GbsMemberHistoryRepositoryCustomTest {
-
-    class TestConfig {
-        @Bean
-        fun jpaQueryFactory(entityManager: EntityManager): JPAQueryFactory {
-            return JPAQueryFactory(entityManager)
-        }
-    }
 
     @Autowired
     private lateinit var gbsMemberHistoryRepository: GbsMemberHistoryRepository
@@ -120,7 +112,13 @@ class GbsMemberHistoryRepositoryCustomTest {
         gbsMemberHistoryRepository.save(inactiveMember)
 
         // when
-        val activeMembers = gbsMemberHistoryRepository.findActiveMembers(gbsGroup.id!!, LocalDate.now())
+        val activeMembers = gbsMemberHistoryRepository.findActiveMembers(
+            GbsMemberHistorySearchCondition(
+                gbsId = gbsGroup.id!!,
+                startDate = LocalDate.now(),
+                endDate = LocalDate.now()
+            )
+        )
 
         // then
         assertThat(activeMembers).hasSize(1)
@@ -128,7 +126,7 @@ class GbsMemberHistoryRepositoryCustomTest {
     }
 
     @Test
-    fun `findByGbsGroupIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual는 주어진 기간 동안의 멤버 목록을 반환한다`() {
+    fun `findActiveMembers는 주어진 기간 동안의 멤버 목록을 반환한다`() {
         // given
         val department = departmentRepository.save(Department(name = "테스트 부서"))
         val village = villageRepository.save(Village(name = "테스트 마을", department = department))
@@ -173,10 +171,12 @@ class GbsMemberHistoryRepositoryCustomTest {
         gbsMemberHistoryRepository.save(member3)
 
         // when
-        val members = gbsMemberHistoryRepository.findByGbsGroupIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
-            gbsId = gbsGroup.id!!,
-            startDate = startDate,
-            endDate = endDate
+        val members = gbsMemberHistoryRepository.findActiveMembers(
+            GbsMemberHistorySearchCondition(
+                gbsId = gbsGroup.id!!,
+                startDate = startDate,
+                endDate = endDate
+            )
         )
 
         // then
