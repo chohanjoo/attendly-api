@@ -10,11 +10,12 @@ import com.church.attendly.security.TestSecurityConfig
 import com.church.attendly.security.UserDetailsAdapter
 import com.church.attendly.service.UserService
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.AuthenticationManager
@@ -37,16 +38,16 @@ class AuthControllerTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    @MockBean
+    @MockkBean
     private lateinit var userService: UserService
 
-    @MockBean
+    @MockkBean
     private lateinit var authenticationManager: AuthenticationManager
 
-    @MockBean
+    @MockkBean
     private lateinit var jwtTokenProvider: JwtTokenProvider
 
-    @MockBean
+    @MockkBean
     private lateinit var userDetailsService: UserDetailsService
 
     @Test
@@ -67,7 +68,7 @@ class AuthControllerTest {
             role = "LEADER"
         )
 
-        `when`(userService.signup(signupRequest)).thenReturn(signupResponse)
+        every { userService.signup(signupRequest) } returns signupResponse
 
         // When & Then
         mockMvc.perform(
@@ -112,21 +113,21 @@ class AuthControllerTest {
             password = "password123"
         )
 
-        val user = mock(User::class.java)
-        `when`(user.id).thenReturn(1L)
-        `when`(user.name).thenReturn("홍길동")
-        `when`(user.role).thenReturn(Role.LEADER)
+        val user = mockk<User>()
+        every { user.id } returns 1L
+        every { user.name } returns "홍길동"
+        every { user.role } returns Role.LEADER
 
-        val userDetailsAdapter = mock(UserDetailsAdapter::class.java)
-        `when`(userDetailsAdapter.getUser()).thenReturn(user)
+        val userDetailsAdapter = mockk<UserDetailsAdapter>()
+        every { userDetailsAdapter.getUser() } returns user
 
-        val authentication = mock(Authentication::class.java)
-        `when`(authentication.principal).thenReturn(userDetailsAdapter)
+        val authentication = mockk<Authentication>()
+        every { authentication.principal } returns userDetailsAdapter
 
         val authToken = UsernamePasswordAuthenticationToken(loginRequest.email, loginRequest.password)
-        `when`(authenticationManager.authenticate(authToken)).thenReturn(authentication)
-        `when`(jwtTokenProvider.generateToken(userDetailsAdapter)).thenReturn("access-token")
-        `when`(jwtTokenProvider.generateRefreshToken(userDetailsAdapter)).thenReturn("refresh-token")
+        every { authenticationManager.authenticate(authToken) } returns authentication
+        every { jwtTokenProvider.generateToken(userDetailsAdapter) } returns "access-token"
+        every { jwtTokenProvider.generateRefreshToken(userDetailsAdapter) } returns "refresh-token"
 
         // When & Then
         mockMvc.perform(
