@@ -19,9 +19,11 @@ spring:
       enabled: true
   security:
     jwt:
-      secret-key: W69y1eJ8PbhfCHWTrTQrNcSY5yYOVBvTmcSoKVGpMxj0rIrx
+      secret-key: test-secret-key-for-jwt-token-that-must-be-at-least-256-bits-long
       expiration-time: 3600000  # 1시간
       refresh-expiration-time: 2592000000  # 30일
+  main:
+    allow-bean-definition-overriding: true
 
 logging:
   level:
