@@ -19,7 +19,7 @@ CREATE TABLE village (
 ) ENGINE=InnoDB;
 
 -- User table
-CREATE TABLE user (
+CREATE TABLE users (
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
     birth_date DATE NULL,
@@ -55,7 +55,7 @@ CREATE TABLE village_leader (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id),
-    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (village_id) REFERENCES village(id)
 ) ENGINE=InnoDB;
 
@@ -70,7 +70,7 @@ CREATE TABLE gbs_leader_history (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (gbs_id) REFERENCES gbs_group(id),
-    FOREIGN KEY (leader_id) REFERENCES user(id)
+    FOREIGN KEY (leader_id) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
 -- GBS Member History table
@@ -84,7 +84,7 @@ CREATE TABLE gbs_member_history (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (gbs_id) REFERENCES gbs_group(id),
-    FOREIGN KEY (member_id) REFERENCES user(id)
+    FOREIGN KEY (member_id) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
 -- Leader Delegation table
@@ -98,8 +98,8 @@ CREATE TABLE leader_delegation (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    FOREIGN KEY (delegator_id) REFERENCES user(id),
-    FOREIGN KEY (delegatee_id) REFERENCES user(id),
+    FOREIGN KEY (delegator_id) REFERENCES users(id),
+    FOREIGN KEY (delegatee_id) REFERENCES users(id),
     FOREIGN KEY (gbs_id) REFERENCES gbs_group(id),
     INDEX idx_delegation_delegatee (delegatee_id, gbs_id, end_dt)
 ) ENGINE=InnoDB;
@@ -117,8 +117,8 @@ CREATE TABLE attendance (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    FOREIGN KEY (member_id) REFERENCES user(id),
+    FOREIGN KEY (member_id) REFERENCES users(id),
     FOREIGN KEY (gbs_id) REFERENCES gbs_group(id),
-    FOREIGN KEY (created_by) REFERENCES user(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
     INDEX idx_attendance_gbs_week (gbs_id, week_start)
 ) ENGINE=InnoDB; 
