@@ -9,34 +9,34 @@ import com.church.attendly.domain.repository.GbsGroupRepository
 import com.church.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.church.attendly.domain.repository.VillageRepository
 import com.church.attendly.exception.ResourceNotFoundException
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class OrganizationServiceTest {
 
-    @Mock
+    @MockK
     private lateinit var departmentRepository: DepartmentRepository
 
-    @Mock
+    @MockK
     private lateinit var villageRepository: VillageRepository
 
-    @Mock
+    @MockK
     private lateinit var gbsGroupRepository: GbsGroupRepository
 
-    @Mock
+    @MockK
     private lateinit var gbsLeaderHistoryRepository: GbsLeaderHistoryRepository
 
-    @InjectMocks
+    @InjectMockKs
     private lateinit var organizationService: OrganizationService
 
     private lateinit var department: Department
@@ -85,7 +85,7 @@ class OrganizationServiceTest {
     fun `getAllDepartments 모든 부서를 반환해야 함`() {
         // given
         val departments = listOf(department)
-        `when`(departmentRepository.findAll()).thenReturn(departments)
+        every { departmentRepository.findAll() } returns departments
 
         // when
         val result = organizationService.getAllDepartments()
@@ -97,7 +97,7 @@ class OrganizationServiceTest {
     @Test
     fun `getDepartmentById 유효한 ID로 부서를 반환해야 함`() {
         // given
-        `when`(departmentRepository.findById(1L)).thenReturn(Optional.of(department))
+        every { departmentRepository.findById(1L) } returns Optional.of(department)
 
         // when
         val result = organizationService.getDepartmentById(1L)
@@ -109,7 +109,7 @@ class OrganizationServiceTest {
     @Test
     fun `getDepartmentById 유효하지 않은 ID로 예외를 발생시켜야 함`() {
         // given
-        `when`(departmentRepository.findById(999L)).thenReturn(Optional.empty())
+        every { departmentRepository.findById(999L) } returns Optional.empty()
 
         // then
         assertThrows(ResourceNotFoundException::class.java) {
@@ -122,8 +122,8 @@ class OrganizationServiceTest {
     fun `getVillagesByDepartment 부서에 속한 마을들을 반환해야 함`() {
         // given
         val villages = listOf(village)
-        `when`(departmentRepository.findById(1L)).thenReturn(Optional.of(department))
-        `when`(villageRepository.findByDepartment(department)).thenReturn(villages)
+        every { departmentRepository.findById(1L) } returns Optional.of(department)
+        every { villageRepository.findByDepartment(department) } returns villages
 
         // when
         val result = organizationService.getVillagesByDepartment(1L)
@@ -135,7 +135,7 @@ class OrganizationServiceTest {
     @Test
     fun `getVillageById 유효한 ID로 마을을 반환해야 함`() {
         // given
-        `when`(villageRepository.findById(1L)).thenReturn(Optional.of(village))
+        every { villageRepository.findById(1L) } returns Optional.of(village)
 
         // when
         val result = organizationService.getVillageById(1L)
@@ -147,7 +147,7 @@ class OrganizationServiceTest {
     @Test
     fun `getVillageById 유효하지 않은 ID로 예외를 발생시켜야 함`() {
         // given
-        `when`(villageRepository.findById(999L)).thenReturn(Optional.empty())
+        every { villageRepository.findById(999L) } returns Optional.empty()
 
         // then
         assertThrows(ResourceNotFoundException::class.java) {
@@ -160,8 +160,8 @@ class OrganizationServiceTest {
     fun `getGbsGroupsByVillage 마을에 속한 GBS 그룹들을 반환해야 함`() {
         // given
         val gbsGroups = listOf(gbsGroup)
-        `when`(villageRepository.findById(1L)).thenReturn(Optional.of(village))
-        `when`(gbsGroupRepository.findByVillage(village)).thenReturn(gbsGroups)
+        every { villageRepository.findById(1L) } returns Optional.of(village)
+        every { gbsGroupRepository.findByVillage(village) } returns gbsGroups
 
         // when
         val result = organizationService.getGbsGroupsByVillage(1L)
@@ -175,7 +175,7 @@ class OrganizationServiceTest {
         // given
         val date = LocalDate.now()
         val gbsGroups = listOf(gbsGroup)
-        `when`(gbsGroupRepository.findActiveGroupsByVillageId(1L, date)).thenReturn(gbsGroups)
+        every { gbsGroupRepository.findActiveGroupsByVillageId(1L, date) } returns gbsGroups
 
         // when
         val result = organizationService.getActiveGbsGroupsByVillage(1L, date)
@@ -187,7 +187,7 @@ class OrganizationServiceTest {
     @Test
     fun `getGbsGroupById 유효한 ID로 GBS 그룹을 반환해야 함`() {
         // given
-        `when`(gbsGroupRepository.findById(1L)).thenReturn(Optional.of(gbsGroup))
+        every { gbsGroupRepository.findById(1L) } returns Optional.of(gbsGroup)
 
         // when
         val result = organizationService.getGbsGroupById(1L)
@@ -199,7 +199,7 @@ class OrganizationServiceTest {
     @Test
     fun `getGbsGroupById 유효하지 않은 ID로 예외를 발생시켜야 함`() {
         // given
-        `when`(gbsGroupRepository.findById(999L)).thenReturn(Optional.empty())
+        every { gbsGroupRepository.findById(999L) } returns Optional.empty()
 
         // then
         assertThrows(ResourceNotFoundException::class.java) {
@@ -211,7 +211,7 @@ class OrganizationServiceTest {
     @Test
     fun `getCurrentLeaderForGbs 현재 GBS 리더를 반환해야 함`() {
         // given
-        `when`(gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L)).thenReturn(leader)
+        every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L) } returns leader
 
         // when
         val result = organizationService.getCurrentLeaderForGbs(1L)
@@ -223,7 +223,7 @@ class OrganizationServiceTest {
     @Test
     fun `getCurrentLeaderForGbs 리더가 없을 때 예외를 발생시켜야 함`() {
         // given
-        `when`(gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(999L)).thenReturn(null)
+        every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(999L) } returns null
 
         // then
         assertThrows(ResourceNotFoundException::class.java) {

@@ -7,39 +7,36 @@ import jakarta.servlet.http.HttpServletResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import java.io.IOException
 import java.util.Collections
+import io.mockk.junit5.MockKExtension
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class JwtAuthenticationFilterTest {
 
-    @Mock
+    @MockK
     private lateinit var jwtTokenProvider: JwtTokenProvider
 
-    @Mock
+    @MockK
     private lateinit var userDetailsService: UserDetailsService
 
-    @Mock
+    @RelaxedMockK
     private lateinit var request: HttpServletRequest
 
-    @Mock
+    @RelaxedMockK
     private lateinit var response: HttpServletResponse
 
-    @Mock
+    @RelaxedMockK
     private lateinit var filterChain: FilterChain
-
-    @Mock
-    private lateinit var securityContext: SecurityContext
 
     private lateinit var jwtAuthenticationFilter: JwtAuthenticationFilterForTest
 
@@ -48,48 +45,52 @@ class JwtAuthenticationFilterTest {
 
     @BeforeEach
     fun setUp() {
+        clearAllMocks()
+        
         SecurityContextHolder.clearContext()
+        
+        // JwtAuthenticationFilter 생성
         jwtAuthenticationFilter = JwtAuthenticationFilterForTest(jwtTokenProvider, userDetailsService)
     }
 
     @Test
     fun `인증 헤더가 없을 때 필터가 계속 진행되어야 한다`() {
         // Given
-        `when`(request.getHeader("Authorization")).thenReturn(null)
+        every { request.getHeader("Authorization") } returns null
 
         // When
         jwtAuthenticationFilter.doFilterInternalForTest(request, response, filterChain)
 
         // Then
-        verify(filterChain, times(1)).doFilter(request, response)
-        verify(jwtTokenProvider, never()).extractUsername(anyString())
+        verify(exactly = 1) { filterChain.doFilter(request, response) }
+        verify(exactly = 0) { jwtTokenProvider.extractUsername(any()) }
     }
 
     @Test
     fun `Bearer 형식이 아닌 인증 헤더가 있을 때 필터가 계속 진행되어야 한다`() {
         // Given
-        `when`(request.getHeader("Authorization")).thenReturn("InvalidFormat")
+        every { request.getHeader("Authorization") } returns "InvalidFormat"
 
         // When
         jwtAuthenticationFilter.doFilterInternalForTest(request, response, filterChain)
 
         // Then
-        verify(filterChain, times(1)).doFilter(request, response)
-        verify(jwtTokenProvider, never()).extractUsername(anyString())
+        verify(exactly = 1) { filterChain.doFilter(request, response) }
+        verify(exactly = 0) { jwtTokenProvider.extractUsername(any()) }
     }
 
     @Test
     fun `토큰 추출 중 예외가 발생하면 필터가 계속 진행되어야 한다`() {
         // Given
-        `when`(request.getHeader("Authorization")).thenReturn("Bearer $testToken")
-        `when`(jwtTokenProvider.extractUsername(testToken)).thenThrow(RuntimeException("Token extraction failed"))
+        every { request.getHeader("Authorization") } returns "Bearer $testToken"
+        every { jwtTokenProvider.extractUsername(testToken) } throws RuntimeException("Token extraction failed")
 
         // When
         jwtAuthenticationFilter.doFilterInternalForTest(request, response, filterChain)
 
         // Then
-        verify(filterChain, times(1)).doFilter(request, response)
-        verify(userDetailsService, never()).loadUserByUsername(anyString())
+        verify(exactly = 1) { filterChain.doFilter(request, response) }
+        verify(exactly = 0) { userDetailsService.loadUserByUsername(any()) }
     }
 
     @Test
@@ -97,22 +98,24 @@ class JwtAuthenticationFilterTest {
         // Given
         val userDetails = User(testUsername, "", Collections.emptyList())
         
-        // SecurityContext 설정
-        SecurityContextHolder.setContext(securityContext)
+        mockkStatic(SecurityContextHolder::class)
+        val mockContext = mockk<SecurityContext>(relaxed = true)
+        every { SecurityContextHolder.getContext() } returns mockContext
+        every { mockContext.authentication } returns null
         
-        `when`(request.getHeader("Authorization")).thenReturn("Bearer $testToken")
-        `when`(jwtTokenProvider.extractUsername(testToken)).thenReturn(testUsername)
-        `when`(userDetailsService.loadUserByUsername(testUsername)).thenReturn(userDetails)
-        `when`(jwtTokenProvider.validateToken(testToken, userDetails)).thenReturn(true)
-
+        every { request.getHeader("Authorization") } returns "Bearer $testToken"
+        every { jwtTokenProvider.extractUsername(testToken) } returns testUsername
+        every { userDetailsService.loadUserByUsername(testUsername) } returns userDetails
+        every { jwtTokenProvider.validateToken(testToken, userDetails) } returns true
+        
         // When
         jwtAuthenticationFilter.doFilterInternalForTest(request, response, filterChain)
 
         // Then
-        verify(filterChain, times(1)).doFilter(request, response)
-        verify(userDetailsService, times(1)).loadUserByUsername(testUsername)
-        verify(jwtTokenProvider, times(1)).validateToken(testToken, userDetails)
-        verify(securityContext).authentication = any(UsernamePasswordAuthenticationToken::class.java)
+        verify(exactly = 1) { filterChain.doFilter(request, response) }
+        verify(exactly = 1) { userDetailsService.loadUserByUsername(testUsername) }
+        verify(exactly = 1) { jwtTokenProvider.validateToken(testToken, userDetails) }
+        verify(exactly = 1) { mockContext.setAuthentication(any()) }
     }
 
     @Test
@@ -120,22 +123,24 @@ class JwtAuthenticationFilterTest {
         // Given
         val userDetails = User(testUsername, "", Collections.emptyList())
         
-        // SecurityContext 설정
-        SecurityContextHolder.setContext(securityContext)
+        mockkStatic(SecurityContextHolder::class)
+        val mockContext = mockk<SecurityContext>(relaxed = true)
+        every { SecurityContextHolder.getContext() } returns mockContext
+        every { mockContext.authentication } returns null
         
-        `when`(request.getHeader("Authorization")).thenReturn("Bearer $testToken")
-        `when`(jwtTokenProvider.extractUsername(testToken)).thenReturn(testUsername)
-        `when`(userDetailsService.loadUserByUsername(testUsername)).thenReturn(userDetails)
-        `when`(jwtTokenProvider.validateToken(testToken, userDetails)).thenReturn(false)
+        every { request.getHeader("Authorization") } returns "Bearer $testToken"
+        every { jwtTokenProvider.extractUsername(testToken) } returns testUsername
+        every { userDetailsService.loadUserByUsername(testUsername) } returns userDetails
+        every { jwtTokenProvider.validateToken(testToken, userDetails) } returns false
 
         // When
         jwtAuthenticationFilter.doFilterInternalForTest(request, response, filterChain)
 
         // Then
-        verify(filterChain, times(1)).doFilter(request, response)
-        verify(userDetailsService, times(1)).loadUserByUsername(testUsername)
-        verify(jwtTokenProvider, times(1)).validateToken(testToken, userDetails)
-        verify(securityContext, never()).authentication = any()
+        verify(exactly = 1) { filterChain.doFilter(request, response) }
+        verify(exactly = 1) { userDetailsService.loadUserByUsername(testUsername) }
+        verify(exactly = 1) { jwtTokenProvider.validateToken(testToken, userDetails) }
+        verify(exactly = 0) { mockContext.setAuthentication(any()) }
     }
 
     // 테스트를 위한 하위 클래스

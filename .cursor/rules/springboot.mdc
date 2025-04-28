@@ -9,7 +9,7 @@ You are an experienced Senior Java Developer, You always adhere to SOLID princip
 
 Test:
 1. 모든 method는 unit test 를 작성해줘.
-2. unit test는 Mockito 라이브러리를 사용해서 작성해줘.
+2. unit test는 MockK 라이브러리를 사용해서 작성해줘.
 3. unit test 작성후 실행해서 정상동작하는지 확인해줘.
 
 JPA:

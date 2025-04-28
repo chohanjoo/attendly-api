@@ -7,38 +7,32 @@ import com.church.attendly.domain.entity.User
 import com.church.attendly.domain.repository.DepartmentRepository
 import com.church.attendly.domain.repository.UserRepository
 import com.church.attendly.exception.ResourceNotFoundException
+import io.mockk.*
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.security.crypto.password.PasswordEncoder
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class UserServiceTest {
 
-    @Mock
+    @MockK
     private lateinit var userRepository: UserRepository
 
-    @Mock
+    @MockK
     private lateinit var departmentRepository: DepartmentRepository
 
-    @Mock
+    @MockK
     private lateinit var passwordEncoder: PasswordEncoder
 
-    @InjectMocks
+    @InjectMockKs
     private lateinit var userService: UserService
-
-    @Captor
-    private lateinit var userCaptor: ArgumentCaptor<User>
 
     private lateinit var department: Department
     private lateinit var signupRequest: SignupRequest
@@ -74,21 +68,23 @@ class UserServiceTest {
             department = department
         )
 
-        `when`(userRepository.findByEmail(signupRequest.email)).thenReturn(Optional.empty())
-        `when`(departmentRepository.findById(signupRequest.departmentId)).thenReturn(Optional.of(department))
-        `when`(passwordEncoder.encode(signupRequest.password)).thenReturn(encodedPassword)
-        `when`(userRepository.save(any(User::class.java))).thenReturn(savedUser)
+        every { userRepository.findByEmail(signupRequest.email) } returns Optional.empty()
+        every { departmentRepository.findById(signupRequest.departmentId) } returns Optional.of(department)
+        every { passwordEncoder.encode(signupRequest.password) } returns encodedPassword
+        every { userRepository.save(any()) } returns savedUser
 
         // When
         val response = userService.signup(signupRequest)
 
         // Then
-        verify(userRepository).findByEmail(signupRequest.email)
-        verify(departmentRepository).findById(signupRequest.departmentId)
-        verify(passwordEncoder).encode(signupRequest.password)
-        verify(userRepository).save(userCaptor.capture())
-
-        val capturedUser = userCaptor.value
+        verify { userRepository.findByEmail(signupRequest.email) }
+        verify { departmentRepository.findById(signupRequest.departmentId) }
+        verify { passwordEncoder.encode(signupRequest.password) }
+        
+        val userSlot = slot<User>()
+        verify { userRepository.save(capture(userSlot)) }
+        
+        val capturedUser = userSlot.captured
         assertEquals(signupRequest.name, capturedUser.name)
         assertEquals(signupRequest.email, capturedUser.email)
         assertEquals(encodedPassword, capturedUser.password)
@@ -113,34 +109,34 @@ class UserServiceTest {
             department = department
         )
 
-        `when`(userRepository.findByEmail(signupRequest.email)).thenReturn(Optional.of(existingUser))
+        every { userRepository.findByEmail(signupRequest.email) } returns Optional.of(existingUser)
 
         // When & Then
         val exception = assertThrows(IllegalArgumentException::class.java) {
             userService.signup(signupRequest)
         }
         assertEquals("이미 사용 중인 이메일입니다", exception.message)
-        verify(userRepository).findByEmail(signupRequest.email)
-        verify(departmentRepository, never()).findById(anyLong())
-        verify(passwordEncoder, never()).encode(anyString())
-        verify(userRepository, never()).save(any(User::class.java))
+        verify { userRepository.findByEmail(signupRequest.email) }
+        verify(exactly = 0) { departmentRepository.findById(any()) }
+        verify(exactly = 0) { passwordEncoder.encode(any()) }
+        verify(exactly = 0) { userRepository.save(any()) }
     }
 
     @Test
     fun `존재하지 않는 부서 ID로 회원가입 시도 시 예외 발생`() {
         // Given
-        `when`(userRepository.findByEmail(signupRequest.email)).thenReturn(Optional.empty())
-        `when`(departmentRepository.findById(signupRequest.departmentId)).thenReturn(Optional.empty())
+        every { userRepository.findByEmail(signupRequest.email) } returns Optional.empty()
+        every { departmentRepository.findById(signupRequest.departmentId) } returns Optional.empty()
 
         // When & Then
         val exception = assertThrows(ResourceNotFoundException::class.java) {
             userService.signup(signupRequest)
         }
         assertEquals("찾을 수 없는 부서입니다: ID ${signupRequest.departmentId}", exception.message)
-        verify(userRepository).findByEmail(signupRequest.email)
-        verify(departmentRepository).findById(signupRequest.departmentId)
-        verify(passwordEncoder, never()).encode(anyString())
-        verify(userRepository, never()).save(any(User::class.java))
+        verify { userRepository.findByEmail(signupRequest.email) }
+        verify { departmentRepository.findById(signupRequest.departmentId) }
+        verify(exactly = 0) { passwordEncoder.encode(any()) }
+        verify(exactly = 0) { userRepository.save(any()) }
     }
 
     @Test
@@ -155,7 +151,7 @@ class UserServiceTest {
             role = Role.LEADER,
             department = department
         )
-        `when`(userRepository.findByEmail(email)).thenReturn(Optional.of(user))
+        every { userRepository.findByEmail(email) } returns Optional.of(user)
 
         // When
         val result = userService.findByEmail(email)
@@ -163,7 +159,7 @@ class UserServiceTest {
         // Then
         assertTrue(result.isPresent)
         assertEquals(user, result.get())
-        verify(userRepository).findByEmail(email)
+        verify { userRepository.findByEmail(email) }
     }
 
     @Test
@@ -178,7 +174,7 @@ class UserServiceTest {
             role = Role.LEADER,
             department = department
         )
-        `when`(userRepository.findById(userId)).thenReturn(Optional.of(user))
+        every { userRepository.findById(userId) } returns Optional.of(user)
 
         // When
         val result = userService.findById(userId)
@@ -186,6 +182,6 @@ class UserServiceTest {
         // Then
         assertTrue(result.isPresent)
         assertEquals(user, result.get())
-        verify(userRepository).findById(userId)
+        verify { userRepository.findById(userId) }
     }
 } 
