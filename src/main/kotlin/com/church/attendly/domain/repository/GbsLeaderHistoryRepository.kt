@@ -8,5 +8,4 @@ import java.time.LocalDate
 
 @Repository
 interface GbsLeaderHistoryRepository : JpaRepository<GbsLeaderHistory, Long>, GbsLeaderHistoryRepositoryCustom {
-    fun findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId: Long, leaderId: Long): GbsLeaderHistory?
 } 

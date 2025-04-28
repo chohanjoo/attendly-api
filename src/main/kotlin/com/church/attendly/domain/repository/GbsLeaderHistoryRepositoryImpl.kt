@@ -1,5 +1,6 @@
 package com.church.attendly.domain.repository
 
+import com.church.attendly.domain.entity.GbsLeaderHistory
 import com.church.attendly.domain.entity.QGbsLeaderHistory
 import com.church.attendly.domain.entity.User
 import com.querydsl.jpa.impl.JPAQueryFactory
@@ -7,7 +8,7 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 
 class GbsLeaderHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory
-) : QuerydslRepositorySupport(User::class.java), GbsLeaderHistoryRepositoryCustom {
+) : QuerydslRepositorySupport(GbsLeaderHistory::class.java), GbsLeaderHistoryRepositoryCustom {
 
     private val gbsLeaderHistory = QGbsLeaderHistory.gbsLeaderHistory
 
@@ -17,6 +18,17 @@ class GbsLeaderHistoryRepositoryImpl(
             .from(gbsLeaderHistory)
             .where(
                 gbsLeaderHistory.gbsGroup.id.eq(gbsId),
+                gbsLeaderHistory.endDate.isNull
+            )
+            .fetchOne()
+    }
+
+    override fun findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId: Long, leaderId: Long): GbsLeaderHistory? {
+        return queryFactory
+            .selectFrom(gbsLeaderHistory)
+            .where(
+                gbsLeaderHistory.gbsGroup.id.eq(gbsId),
+                gbsLeaderHistory.leader.id.eq(leaderId),
                 gbsLeaderHistory.endDate.isNull
             )
             .fetchOne()

@@ -4,8 +4,10 @@ import com.church.attendly.domain.entity.GbsMemberHistory
 import com.church.attendly.domain.entity.QGbsMemberHistory
 import com.querydsl.jpa.impl.JPAQueryFactory
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
+import org.springframework.stereotype.Repository
 import java.time.LocalDate
 
+@Repository
 class GbsMemberHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory
 ) : QuerydslRepositorySupport(GbsMemberHistory::class.java), GbsMemberHistoryRepositoryCustom {
@@ -32,6 +34,22 @@ class GbsMemberHistoryRepositoryImpl(
                 gbsMemberHistory.gbsGroup.id.eq(gbsId),
                 gbsMemberHistory.startDate.loe(date),
                 gbsMemberHistory.endDate.isNull.or(gbsMemberHistory.endDate.goe(date))
+            )
+            .fetch()
+    }
+
+    override fun findByGbsGroupIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+        gbsId: Long,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<GbsMemberHistory> {
+        return queryFactory
+            .selectFrom(gbsMemberHistory)
+            .join(gbsMemberHistory.member).fetchJoin()
+            .where(
+                gbsMemberHistory.gbsGroup.id.eq(gbsId),
+                gbsMemberHistory.startDate.loe(endDate),
+                gbsMemberHistory.endDate.isNull.or(gbsMemberHistory.endDate.goe(startDate))
             )
             .fetch()
     }
