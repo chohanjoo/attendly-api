@@ -33,4 +33,14 @@ class GbsLeaderHistoryRepositoryImpl(
             )
             .fetchOne()
     }
+    
+    override fun findCurrentLeaderByGbsGroupId(gbsGroupId: Long): GbsLeaderHistory? {
+        return queryFactory
+            .selectFrom(gbsLeaderHistory)
+            .where(
+                gbsLeaderHistory.gbsGroup.id.eq(gbsGroupId),
+                gbsLeaderHistory.endDate.isNull
+            )
+            .fetchOne()
+    }
 } 

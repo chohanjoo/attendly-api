@@ -38,4 +38,14 @@ class GbsMemberHistoryRepositoryImpl(
             )
             .fetch()
     }
+    
+    override fun findCurrentMemberHistoryByMemberId(memberId: Long): GbsMemberHistory? {
+        return queryFactory
+            .selectFrom(gbsMemberHistory)
+            .where(
+                gbsMemberHistory.member.id.eq(memberId),
+                gbsMemberHistory.endDate.isNull
+            )
+            .fetchOne()
+    }
 } 

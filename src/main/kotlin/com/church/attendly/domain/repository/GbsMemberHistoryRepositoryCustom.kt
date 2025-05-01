@@ -7,4 +7,5 @@ import java.time.LocalDate
 interface GbsMemberHistoryRepositoryCustom {
     fun countActiveMembers(gbsId: Long, date: LocalDate): Long
     fun findActiveMembers(condition: GbsMemberHistorySearchCondition): List<GbsMemberHistory>
+    fun findCurrentMemberHistoryByMemberId(memberId: Long): GbsMemberHistory?
 } 

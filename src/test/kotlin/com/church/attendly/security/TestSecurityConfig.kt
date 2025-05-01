@@ -21,6 +21,7 @@ class TestSecurityConfig {
         http
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
+                auth.requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 auth.anyRequest().permitAll()
             }
         
