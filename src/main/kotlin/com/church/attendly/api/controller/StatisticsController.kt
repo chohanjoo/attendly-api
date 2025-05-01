@@ -28,7 +28,7 @@ class StatisticsController(
     @Operation(
         summary = "부서 출석 통계 조회",
         description = "특정 부서의 출석 통계를 조회합니다.",
-        security = [SecurityRequirement(name = "Bearer Authentication")]
+        security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PreAuthorize("@methodSecurityExpressions.isMinister(authentication) or hasRole('ADMIN')")
     fun getDepartmentStatistics(
@@ -44,7 +44,7 @@ class StatisticsController(
     @Operation(
         summary = "마을 출석 통계 조회",
         description = "특정 마을의 출석 통계를 조회합니다.",
-        security = [SecurityRequirement(name = "Bearer Authentication")]
+        security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PreAuthorize("@methodSecurityExpressions.canAccessVillage(#id)")
     fun getVillageStatistics(
@@ -60,7 +60,7 @@ class StatisticsController(
     @Operation(
         summary = "GBS 출석 통계 조회",
         description = "특정 GBS의 출석 통계를 조회합니다.",
-        security = [SecurityRequirement(name = "Bearer Authentication")]
+        security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PreAuthorize("@methodSecurityExpressions.canManageGbsAttendance(#id) or hasAnyRole('ADMIN', 'MINISTER')")
     fun getGbsStatistics(
