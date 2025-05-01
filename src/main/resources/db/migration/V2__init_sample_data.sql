@@ -8,7 +8,7 @@ VALUES ('1마을', (SELECT id FROM department WHERE name = '대학부'));
 -- Sample users with different roles
 -- 1. Admin
 INSERT INTO users (name, role, email, password, department_id)
-VALUES ('관리자', 'ADMIN', 'admin@church.com', '$2a$10$3i9Z7pOs2/wW1bkbMK8RO.PYU4TDZ1VQo.uFI11z4vjQqEZS0f4iW', -- password: admin123
+VALUES ('관리자', 'ADMIN', 'admin@church.com', '$2a$10$mAKXJL22kfEyAcAvdqGEde.RF1srMqtt/ToCJmbOgSdxlueEQfsVW', -- password: admin123
         (SELECT id FROM department WHERE name = '대학부'));
 
 -- 2. Minister

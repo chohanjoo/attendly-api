@@ -70,3 +70,13 @@ sourceSets {
 		java.srcDir("$buildDir/generated/source/kapt/main")
 	}
 }
+
+tasks {
+	// 메인 클래스를 실행하기 위한 태스크 추가
+	register<JavaExec>("execute") {
+		description = "Executes the specified main class"
+		mainClass.set(project.findProperty("mainClass") as? String ?: "")
+		classpath = sourceSets["main"].runtimeClasspath + sourceSets["test"].runtimeClasspath
+		jvmArgs = listOf("-Dspring.profiles.active=test")
+	}
+}
