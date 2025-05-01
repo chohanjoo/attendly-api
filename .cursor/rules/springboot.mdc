@@ -15,7 +15,7 @@ Test:
 2. unit test 작성후 실행해서 정상동작하는지 확인해줘.
 
 JPA:
-1. 단순 JPA로 해결되지 않는 query는 querydsl로 작성해줘.
+1. "@Query" 를 사용하지 말고 Querydsl로 작성해줘.
 2. 비슷한 쿼리가 있다면 쿼리명을 단순화하고, 파라미터들은 Dto Class 로 따로 분리해서 쿼리들을 합쳐줘.
 
 Docs:

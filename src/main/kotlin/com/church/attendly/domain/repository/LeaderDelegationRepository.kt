@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository
 import java.time.LocalDate
 
 @Repository
-interface LeaderDelegationRepository : JpaRepository<LeaderDelegation, Long>, LeaderDelegationRepositoryCustom 
+interface LeaderDelegationRepository : JpaRepository<LeaderDelegation, Long>, LeaderDelegationRepositoryCustom {
+} 

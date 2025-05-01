@@ -90,8 +90,7 @@
 ### Day 8 - 조직 구조 히스토리 & 위임 기능
 | ID | 작업 | 담당 | 의존성 |
 |----|------|------|--------|
-| H8-1 | Flyway V2 - 히스토리 테이블 추가 (`gbs_leader_history`, `gbs_member_history`) | **A** | D1-1 |
-| H8-2 | Flyway V2 - 위임 테이블 추가 (`leader_delegation`) | **A** | H8-1 |
+| H8-2 | 위임 테이블 추가 (`leader_delegation`) | **A** | H8-1 |
 | H8-3 | 히스토리 Entity & Repository 구현 | **B** | H8-1 |
 | H8-4 | 위임 관련 API 구현 (`/api/delegations`) | **B** | H8-2, H8-3 |
 | H8-5 | 위임 관련 단위/통합 테스트 | **B** | H8-4 |
