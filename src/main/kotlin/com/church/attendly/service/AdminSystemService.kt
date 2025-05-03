@@ -22,7 +22,7 @@ class AdminSystemService(
      * 시스템 설정 생성/수정
      */
     @Transactional
-    @CacheEvict(value = ["systemSettings"], allEntries = true)
+    // @CacheEvict(value = ["systemSettings"], allEntries = true)
     fun saveSystemSetting(request: SystemSettingRequest): SystemSettingResponse {
         val existingSetting = systemSettingRepository.findByKey(request.key)
 
@@ -70,7 +70,7 @@ class AdminSystemService(
     /**
      * 시스템 설정 조회
      */
-    @Cacheable(value = ["systemSettings"], key = "#key")
+    // @Cacheable(value = ["systemSettings"], key = "#key")
     fun getSystemSetting(key: String): SystemSettingResponse {
         val setting = systemSettingRepository.findByKey(key)
             .orElseThrow { ResourceNotFoundException("설정을 찾을 수 없습니다: 키 $key") }
@@ -88,7 +88,7 @@ class AdminSystemService(
     /**
      * 모든 시스템 설정 조회
      */
-    @Cacheable(value = ["systemSettings"], key = "'all'")
+    // @Cacheable(value = ["systemSettings"], key = "'all'")
     fun getAllSystemSettings(): SystemSettingListResponse {
         val settings = systemSettingRepository.findAll()
         
@@ -214,7 +214,7 @@ class AdminSystemService(
     /**
      * 이메일 설정 조회
      */
-    @Cacheable(value = ["systemSettings"], key = "'emailSettings'")
+    // @Cacheable(value = ["systemSettings"], key = "'emailSettings'")
     fun getEmailSettings(): EmailSettingRequest {
         val keys = listOf(
             "email.smtp.server",

@@ -33,48 +33,48 @@ class OrganizationService(
     }
 
     @Transactional(readOnly = true)
-    @Cacheable("department")
+    // @Cacheable("department")
     fun getDepartmentById(id: Long): Department {
         return departmentRepository.findById(id)
             .orElseThrow { ResourceNotFoundException("부서를 찾을 수 없습니다: $id") }
     }
 
     @Transactional(readOnly = true)
-    @Cacheable("villagesByDepartment")
+    // @Cacheable("villagesByDepartment")
     fun getVillagesByDepartment(departmentId: Long): List<Village> {
         val department = getDepartmentById(departmentId)
         return villageRepository.findByDepartment(department)
     }
 
     @Transactional(readOnly = true)
-    @Cacheable("village")
+    // @Cacheable("village")
     fun getVillageById(id: Long): Village {
         return villageRepository.findById(id)
             .orElseThrow { ResourceNotFoundException("마을을 찾을 수 없습니다: $id") }
     }
 
     @Transactional(readOnly = true)
-    @Cacheable("gbsGroups")
+    // @Cacheable("gbsGroups")
     fun getGbsGroupsByVillage(villageId: Long): List<GbsGroup> {
         val village = getVillageById(villageId)
         return gbsGroupRepository.findByVillage(village)
     }
 
     @Transactional(readOnly = true)
-    @Cacheable("activeGbsGroups")
+    // @Cacheable("activeGbsGroups")
     fun getActiveGbsGroupsByVillage(villageId: Long, date: LocalDate = LocalDate.now()): List<GbsGroup> {
         return gbsGroupRepository.findActiveGroupsByVillageId(villageId, date)
     }
 
     @Transactional(readOnly = true)
-    @Cacheable("gbsGroup")
+    // @Cacheable("gbsGroup")
     fun getGbsGroupById(id: Long): GbsGroup {
         return gbsGroupRepository.findById(id)
             .orElseThrow { ResourceNotFoundException("GBS 그룹을 찾을 수 없습니다: $id") }
     }
 
     @Transactional(readOnly = true)
-    @Cacheable("gbsLeader")
+    // @Cacheable("gbsLeader")
     fun getCurrentLeaderForGbs(gbsId: Long): String {
         val leader = gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsId)
             ?: throw ResourceNotFoundException("현재 GBS의 리더를 찾을 수 없습니다: $gbsId")
@@ -83,7 +83,7 @@ class OrganizationService(
     }
 
     @Transactional(readOnly = true)
-    @Cacheable("gbsMembers")
+    // @Cacheable("gbsMembers")
     fun getGbsMembers(gbsId: Long, date: LocalDate = LocalDate.now()): GbsMembersListResponse {
         val gbsGroup = getGbsGroupById(gbsId)
         

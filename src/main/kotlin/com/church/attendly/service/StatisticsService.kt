@@ -30,7 +30,7 @@ class StatisticsService(
      * 부서 출석 통계 조회
      */
     @Transactional(readOnly = true)
-    @Cacheable("departmentStatistics")
+    // @Cacheable("departmentStatistics")
     fun getDepartmentStatistics(departmentId: Long, startDate: LocalDate, endDate: LocalDate): DepartmentStatistics {
         val department = organizationService.getDepartmentById(departmentId)
         val villages = organizationService.getVillagesByDepartment(departmentId)
@@ -78,7 +78,7 @@ class StatisticsService(
      * 마을 출석 통계 조회
      */
     @Transactional(readOnly = true)
-    @Cacheable("villageStatistics")
+    // @Cacheable("villageStatistics")
     fun getVillageStatistics(villageId: Long, startDate: LocalDate, endDate: LocalDate): VillageStatistics {
         val village = organizationService.getVillageById(villageId)
         val gbsGroups = organizationService.getActiveGbsGroupsByVillage(villageId)
@@ -124,7 +124,7 @@ class StatisticsService(
      * GBS 출석 통계 조회
      */
     @Transactional(readOnly = true)
-    @Cacheable("gbsStatistics")
+    // @Cacheable("gbsStatistics")
     fun getGbsStatistics(gbsId: Long, startDate: LocalDate, endDate: LocalDate): GbsStatistics {
         val gbsGroup = organizationService.getGbsGroupById(gbsId)
         val leaderName = organizationService.getCurrentLeaderForGbs(gbsId)
