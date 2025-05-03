@@ -28,3 +28,6 @@ from
     village_leader vl1_0
 where
     vl1_0.user_id=3;
+
+
+select * from gbs_leader_history where gbs_id=1;

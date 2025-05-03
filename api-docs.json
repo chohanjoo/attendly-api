@@ -22,6 +22,10 @@
             "description": "회원가입, 로그인 및 토큰 갱신 API"
         },
         {
+            "name": "GBS 멤버 관리",
+            "description": "GBS 멤버 조회 API"
+        },
+        {
             "name": "출석 API",
             "description": "출석 입력 및 조회 API"
         },
@@ -1586,6 +1590,70 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/v1/gbs-members/{gbsId}": {
+            "get": {
+                "tags": [
+                    "GBS 멤버 관리"
+                ],
+                "summary": "GBS 멤버 조회",
+                "description": "특정 GBS에 속한 멤버들의 정보를 조회합니다. 리더나 위임받은 리더만 자신의 GBS를 조회할 수 있습니다.",
+                "operationId": "getGbsMembers",
+                "parameters": [
+                    {
+                        "name": "gbsId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GbsMembersListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/gbs-members/my-gbs": {
+            "get": {
+                "tags": [
+                    "GBS 멤버 관리"
+                ],
+                "summary": "로그인한 리더의 GBS 조회",
+                "description": "현재 로그인한 리더가 담당하는 GBS 정보를 조회합니다.",
+                "operationId": "getMyGbs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LeaderGbsResponse"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/gbs/{id}/report": {
@@ -3587,6 +3655,104 @@
                 },
                 "description": "마을 출석 현황 응답"
             },
+            "GbsMemberResponse": {
+                "required": [
+                    "id",
+                    "joinDate",
+                    "name"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "birthDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "joinDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "phoneNumber": {
+                        "type": "string"
+                    }
+                }
+            },
+            "GbsMembersListResponse": {
+                "required": [
+                    "gbsId",
+                    "gbsName",
+                    "memberCount",
+                    "members"
+                ],
+                "type": "object",
+                "properties": {
+                    "gbsId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "gbsName": {
+                        "type": "string"
+                    },
+                    "memberCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "members": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GbsMemberResponse"
+                        }
+                    }
+                }
+            },
+            "LeaderGbsResponse": {
+                "required": [
+                    "gbsId",
+                    "gbsName",
+                    "leaderId",
+                    "leaderName",
+                    "startDate",
+                    "villageId",
+                    "villageName"
+                ],
+                "type": "object",
+                "properties": {
+                    "gbsId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "gbsName": {
+                        "type": "string"
+                    },
+                    "villageId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "villageName": {
+                        "type": "string"
+                    },
+                    "leaderId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "leaderName": {
+                        "type": "string"
+                    },
+                    "startDate": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                }
+            },
             "DepartmentStatistics": {
                 "required": [
                     "attendanceRate",
@@ -3690,16 +3856,6 @@
                         "type": "integer",
                         "format": "int64"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "number": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3709,6 +3865,16 @@
                         "items": {
                             "$ref": "#/components/schemas/UserResponse"
                         }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3728,6 +3894,13 @@
             "PageableObject": {
                 "type": "object",
                 "properties": {
+                    "offset": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
                     "paged": {
                         "type": "boolean"
                     },
@@ -3741,26 +3914,19 @@
                     },
                     "unpaged": {
                         "type": "boolean"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
-                    "offset": {
-                        "type": "integer",
-                        "format": "int64"
                     }
                 }
             },
             "SortObject": {
                 "type": "object",
                 "properties": {
+                    "empty": {
+                        "type": "boolean"
+                    },
                     "sorted": {
                         "type": "boolean"
                     },
                     "unsorted": {
-                        "type": "boolean"
-                    },
-                    "empty": {
                         "type": "boolean"
                     }
                 }
@@ -3795,16 +3961,6 @@
                         "type": "integer",
                         "format": "int64"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "number": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3814,6 +3970,16 @@
                         "items": {
                             "$ref": "#/components/schemas/SystemLogResponseDto"
                         }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3885,16 +4051,6 @@
                         "type": "integer",
                         "format": "int64"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "number": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3904,6 +4060,16 @@
                         "items": {
                             "$ref": "#/components/schemas/BatchJobResponse"
                         }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "numberOfElements": {
                         "type": "integer",

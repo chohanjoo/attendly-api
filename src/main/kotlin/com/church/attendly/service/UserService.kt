@@ -6,6 +6,7 @@ import com.church.attendly.domain.entity.User
 import com.church.attendly.domain.repository.DepartmentRepository
 import com.church.attendly.domain.repository.UserRepository
 import com.church.attendly.exception.ResourceNotFoundException
+import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -69,5 +70,15 @@ class UserService(
      */
     fun findById(id: Long): Optional<User> {
         return userRepository.findById(id)
+    }
+
+    /**
+     * 현재 인증된 사용자 정보 조회
+     */
+    @Transactional(readOnly = true)
+    fun getCurrentUser(authentication: Authentication): User {
+        val email = authentication.name
+        return userRepository.findByEmail(email)
+            .orElseThrow { ResourceNotFoundException("사용자를 찾을 수 없습니다.") }
     }
 } 

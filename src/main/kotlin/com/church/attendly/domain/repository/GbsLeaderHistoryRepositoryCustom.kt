@@ -7,4 +7,6 @@ interface GbsLeaderHistoryRepositoryCustom {
     fun findCurrentLeaderByGbsId(gbsId: Long): User?
     fun findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsId: Long, leaderId: Long): GbsLeaderHistory?
     fun findCurrentLeaderByGbsGroupId(gbsGroupId: Long): GbsLeaderHistory?
+    fun findCurrentLeaderHistoryByGbsIdAndLeaderId(gbsId: Long, leaderId: Long): GbsLeaderHistory?
+    fun findByLeaderIdAndEndDateIsNull(leaderId: Long): GbsLeaderHistory?
 } 

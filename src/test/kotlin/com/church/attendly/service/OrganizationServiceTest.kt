@@ -7,6 +7,7 @@ import com.church.attendly.domain.entity.Village
 import com.church.attendly.domain.repository.DepartmentRepository
 import com.church.attendly.domain.repository.GbsGroupRepository
 import com.church.attendly.domain.repository.GbsLeaderHistoryRepository
+import com.church.attendly.domain.repository.GbsMemberHistoryRepository
 import com.church.attendly.domain.repository.VillageRepository
 import com.church.attendly.exception.ResourceNotFoundException
 import io.mockk.every
@@ -35,6 +36,9 @@ class OrganizationServiceTest {
 
     @MockK
     private lateinit var gbsLeaderHistoryRepository: GbsLeaderHistoryRepository
+    
+    @MockK
+    private lateinit var gbsMemberHistoryRepository: GbsMemberHistoryRepository
 
     @InjectMockKs
     private lateinit var organizationService: OrganizationService

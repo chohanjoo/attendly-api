@@ -43,4 +43,25 @@ class GbsLeaderHistoryRepositoryImpl(
             )
             .fetchOne()
     }
+
+    override fun findCurrentLeaderHistoryByGbsIdAndLeaderId(gbsId: Long, leaderId: Long): GbsLeaderHistory? {
+        return queryFactory
+            .selectFrom(gbsLeaderHistory)
+            .where(
+                gbsLeaderHistory.gbsGroup.id.eq(gbsId),
+                gbsLeaderHistory.leader.id.eq(leaderId),
+                gbsLeaderHistory.endDate.isNull
+            )
+            .fetchOne()
+    }
+    
+    override fun findByLeaderIdAndEndDateIsNull(leaderId: Long): GbsLeaderHistory? {
+        return queryFactory
+            .selectFrom(gbsLeaderHistory)
+            .where(
+                gbsLeaderHistory.leader.id.eq(leaderId),
+                gbsLeaderHistory.endDate.isNull
+            )
+            .fetchOne()
+    }
 } 

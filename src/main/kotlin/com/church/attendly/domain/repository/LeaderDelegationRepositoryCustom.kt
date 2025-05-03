@@ -9,4 +9,6 @@ interface LeaderDelegationRepositoryCustom {
     fun findActiveByGbsGroupIdAndDate(gbsGroupId: Long, date: LocalDate): LeaderDelegation?
     
     fun findActiveByDelegateIdAndDate(userId: Long, date: LocalDate): List<LeaderDelegation>
+    
+    fun findActiveByGbsIdAndDelegateeId(gbsId: Long, delegateeId: Long, date: LocalDate): LeaderDelegation?
 } 

@@ -1,11 +1,15 @@
 package com.church.attendly.service
 
+import com.church.attendly.api.dto.GbsMemberResponse
+import com.church.attendly.api.dto.GbsMembersListResponse
 import com.church.attendly.domain.entity.Department
 import com.church.attendly.domain.entity.GbsGroup
 import com.church.attendly.domain.entity.Village
+import com.church.attendly.domain.model.GbsMemberHistorySearchCondition
 import com.church.attendly.domain.repository.DepartmentRepository
 import com.church.attendly.domain.repository.GbsGroupRepository
 import com.church.attendly.domain.repository.GbsLeaderHistoryRepository
+import com.church.attendly.domain.repository.GbsMemberHistoryRepository
 import com.church.attendly.domain.repository.VillageRepository
 import com.church.attendly.exception.ResourceNotFoundException
 import org.springframework.cache.annotation.Cacheable
@@ -18,7 +22,8 @@ class OrganizationService(
     private val departmentRepository: DepartmentRepository,
     private val villageRepository: VillageRepository,
     private val gbsGroupRepository: GbsGroupRepository,
-    private val gbsLeaderHistoryRepository: GbsLeaderHistoryRepository
+    private val gbsLeaderHistoryRepository: GbsLeaderHistoryRepository,
+    private val gbsMemberHistoryRepository: GbsMemberHistoryRepository
 ) {
 
     @Transactional(readOnly = true)
@@ -75,5 +80,27 @@ class OrganizationService(
             ?: throw ResourceNotFoundException("현재 GBS의 리더를 찾을 수 없습니다: $gbsId")
         
         return leader.name
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable("gbsMembers")
+    fun getGbsMembers(gbsId: Long, date: LocalDate = LocalDate.now()): GbsMembersListResponse {
+        val gbsGroup = getGbsGroupById(gbsId)
+        
+        // 해당 GBS의 현재 활성 멤버들 조회
+        val condition = GbsMemberHistorySearchCondition(
+            gbsId = gbsId,
+            startDate = date,
+            endDate = date
+        )
+        
+        val members = gbsMemberHistoryRepository.findActiveMembers(condition)
+        
+        return GbsMembersListResponse(
+            gbsId = gbsId,
+            gbsName = gbsGroup.name,
+            memberCount = members.size,
+            members = members.map { GbsMemberResponse.from(it) }
+        )
     }
 } 

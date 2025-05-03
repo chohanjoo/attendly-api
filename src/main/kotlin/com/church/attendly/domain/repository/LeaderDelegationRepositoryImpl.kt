@@ -49,4 +49,16 @@ class LeaderDelegationRepositoryImpl(
             )
             .fetch()
     }
+    
+    override fun findActiveByGbsIdAndDelegateeId(gbsId: Long, delegateeId: Long, date: LocalDate): LeaderDelegation? {
+        return queryFactory
+            .selectFrom(leaderDelegation)
+            .where(
+                leaderDelegation.gbsGroup.id.eq(gbsId),
+                leaderDelegation.delegatee.id.eq(delegateeId),
+                leaderDelegation.startDate.loe(date),
+                leaderDelegation.endDate.isNull.or(leaderDelegation.endDate.goe(date))
+            )
+            .fetchOne()
+    }
 } 
