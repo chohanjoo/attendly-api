@@ -3,6 +3,7 @@ package com.church.attendly.service
 import com.church.attendly.api.dto.AttendanceBatchRequest
 import com.church.attendly.api.dto.AttendanceItemRequest
 import com.church.attendly.domain.entity.*
+import com.church.attendly.domain.model.GbsMemberHistorySearchCondition
 import com.church.attendly.domain.repository.*
 import com.church.attendly.exception.ResourceNotFoundException
 import com.church.attendly.security.UserDetailsAdapter
@@ -238,6 +239,23 @@ class AttendanceServiceTest {
         
         every { userRepository.findById(2L) } returns Optional.of(member)
         
+        // GBS 멤버십 확인
+        val activeMember = GbsMemberHistory(
+            id = 1L,
+            member = member,
+            gbsGroup = gbsGroup,
+            startDate = today.minusMonths(1),
+            endDate = null
+        )
+        
+        every { 
+            gbsMemberHistoryRepository.findActiveMembers(
+                match<GbsMemberHistorySearchCondition> { 
+                    it.gbsId == 1L && it.startDate == today && it.endDate == today 
+                }
+            ) 
+        } returns listOf(activeMember)
+        
         val savedAttendance = Attendance(
             id = 1L,
             member = member,
@@ -258,6 +276,15 @@ class AttendanceServiceTest {
         
         assertEquals(1, result.size)
         assertEquals(2L, result[0].memberId)
+        
+        verify { userRepository.findById(2L) }
+        verify { 
+            gbsMemberHistoryRepository.findActiveMembers(
+                match<GbsMemberHistorySearchCondition> { 
+                    it.gbsId == 1L && it.startDate == today && it.endDate == today 
+                }
+            ) 
+        }
     }
 
     @Test
@@ -316,6 +343,33 @@ class AttendanceServiceTest {
         every { userRepository.findById(2L) } returns Optional.of(member1)
         every { userRepository.findById(3L) } returns Optional.of(member2)
         
+        // GBS 멤버십 확인 - 두 조원 모두 해당 GBS 멤버임
+        val activeMember1 = GbsMemberHistory(
+            id = 1L,
+            member = member1,
+            gbsGroup = gbsGroup,
+            startDate = today.minusMonths(1),
+            endDate = null
+        )
+        
+        val activeMember2 = GbsMemberHistory(
+            id = 2L,
+            member = member2,
+            gbsGroup = gbsGroup,
+            startDate = today.minusMonths(1),
+            endDate = null
+        )
+        
+        val activeMembers = listOf(activeMember1, activeMember2)
+        
+        every { 
+            gbsMemberHistoryRepository.findActiveMembers(
+                match<GbsMemberHistorySearchCondition> { 
+                    it.gbsId == 1L && it.startDate == today && it.endDate == today 
+                }
+            ) 
+        } returns activeMembers
+        
         // 출석 정보 저장
         val savedAttendance1 = Attendance(
             id = 1L,
@@ -354,6 +408,13 @@ class AttendanceServiceTest {
         verify { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) }
         verify { userRepository.findById(2L) }
         verify { userRepository.findById(3L) }
+        verify { 
+            gbsMemberHistoryRepository.findActiveMembers(
+                match<GbsMemberHistorySearchCondition> { 
+                    it.gbsId == 1L && it.startDate == today && it.endDate == today 
+                }
+            ) 
+        }
         verify { attendanceRepository.saveAll(any<List<Attendance>>()) }
     }
     
@@ -548,5 +609,77 @@ class AttendanceServiceTest {
         assertEquals(1, gbsSummary.attendedMembers)
         assertEquals(20.0, gbsSummary.attendanceRate) // 1/5 = 20%
         assertEquals(1, gbsSummary.memberAttendances.size)
+    }
+
+    @Test
+    @DisplayName("출석 일괄 등록 - GBS에 속하지 않은 멤버 거부")
+    fun testCreateAttendances_RejectNonGbsMember() {
+        // SecurityContext 모킹 설정
+        val userDetails = UserDetailsAdapter(currentUser)
+        every { securityContext.authentication } returns authentication
+        every { authentication.principal } returns userDetails
+        SecurityContextHolder.setContext(securityContext)
+        
+        // given
+        val nonGbsMember = User(
+            id = 5L, 
+            email = "nonmember@example.com", 
+            password = "pwd", 
+            name = "타GBS 조원", 
+            role = Role.MEMBER,
+            department = department
+        )
+        
+        val batchRequest = AttendanceBatchRequest(
+            gbsId = 1L,
+            weekStart = weekStart,
+            attendances = listOf(
+                AttendanceItemRequest(memberId = 5L, worship = WorshipStatus.O, qtCount = 5, ministry = MinistryStatus.A)
+            )
+        )
+        
+        // GBS 그룹 조회
+        every { gbsGroupRepository.findById(1L) } returns Optional.of(gbsGroup)
+        
+        // 리더 권한 확인 (권한 있음)
+        val leaderHistory = GbsLeaderHistory(
+            id = 1L,
+            leader = currentUser,
+            gbsGroup = gbsGroup,
+            startDate = today.minusDays(30)
+        )
+        every { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) } returns leaderHistory
+        
+        // 기존 출석 데이터 조회
+        every { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
+        
+        // 조원 정보 조회
+        every { userRepository.findById(5L) } returns Optional.of(nonGbsMember)
+        
+        // GBS 멤버십 확인 - 속하지 않은 멤버
+        every { 
+            gbsMemberHistoryRepository.findActiveMembers(
+                match<GbsMemberHistorySearchCondition> { 
+                    it.gbsId == 1L && it.startDate == today && it.endDate == today 
+                }
+            ) 
+        } returns emptyList() // 멤버가 없음
+        
+        // when & then
+        assertThrows<AccessDeniedException> {
+            attendanceService.createAttendances(batchRequest)
+        }
+        
+        verify { gbsGroupRepository.findById(1L) }
+        verify { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) }
+        verify { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) }
+        verify { userRepository.findById(5L) }
+        verify { 
+            gbsMemberHistoryRepository.findActiveMembers(
+                match<GbsMemberHistorySearchCondition> { 
+                    it.gbsId == 1L && it.startDate == today && it.endDate == today 
+                }
+            ) 
+        }
     }
 } 

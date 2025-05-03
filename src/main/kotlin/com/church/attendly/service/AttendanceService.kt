@@ -9,6 +9,7 @@ import com.church.attendly.domain.entity.GbsGroup
 import com.church.attendly.domain.entity.Role
 import com.church.attendly.domain.entity.User
 import com.church.attendly.domain.entity.WorshipStatus
+import com.church.attendly.domain.model.GbsMemberHistorySearchCondition
 import com.church.attendly.domain.repository.AttendanceRepository
 import com.church.attendly.domain.repository.GbsGroupRepository
 import com.church.attendly.domain.repository.GbsLeaderHistoryRepository
@@ -76,20 +77,43 @@ class AttendanceService(
     @Transactional
     fun createAttendances(request: AttendanceBatchRequest): List<AttendanceResponse> {
         val currentUser = getCurrentUser()
-        val gbsGroup = gbsGroupRepository.findById(request.gbsId)
-            .orElseThrow { ResourceNotFoundException("GBS 그룹을 찾을 수 없습니다: ${request.gbsId}") }
+        val gbsGroup = getGbsGroup(request.gbsId)
         
         validateLeaderAccess(currentUser, request.gbsId)
+        deleteExistingAttendances(gbsGroup, request.weekStart)
         
-        // 기존 출석 데이터 삭제 (동일 주차의 출석 데이터가 있으면 갱신)
-        attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, request.weekStart).let { 
+        val attendances = createAttendanceEntities(request, gbsGroup, currentUser)
+        return attendanceRepository.saveAll(attendances).map { it.toAttendanceResponse() }
+    }
+    
+    /**
+     * GBS 그룹 조회
+     */
+    private fun getGbsGroup(gbsId: Long): GbsGroup {
+        return gbsGroupRepository.findById(gbsId)
+            .orElseThrow { ResourceNotFoundException("GBS 그룹을 찾을 수 없습니다: $gbsId") }
+    }
+    
+    /**
+     * 기존 출석 데이터 삭제
+     */
+    private fun deleteExistingAttendances(gbsGroup: GbsGroup, weekStart: LocalDate) {
+        attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart).let { 
             if (it.isNotEmpty()) attendanceRepository.deleteAll(it) 
         }
-        
-        // 새 출석 데이터 등록
-        val attendances = request.attendances.map { item ->
-            val member = userRepository.findById(item.memberId)
-                .orElseThrow { ResourceNotFoundException("조원을 찾을 수 없습니다: ${item.memberId}") }
+    }
+    
+    /**
+     * 출석 엔티티 생성
+     */
+    private fun createAttendanceEntities(
+        request: AttendanceBatchRequest, 
+        gbsGroup: GbsGroup, 
+        currentUser: User
+    ): List<Attendance> {
+        return request.attendances.map { item ->
+            val member = getMember(item.memberId)
+            validateMemberInGbs(member.id!!, request.gbsId)
             
             Attendance(
                 member = member,
@@ -101,8 +125,32 @@ class AttendanceService(
                 createdBy = currentUser
             )
         }
+    }
+    
+    /**
+     * 조원 조회
+     */
+    private fun getMember(memberId: Long): User {
+        return userRepository.findById(memberId)
+            .orElseThrow { ResourceNotFoundException("조원을 찾을 수 없습니다: $memberId") }
+    }
+    
+    /**
+     * 조원이 GBS에 속하는지 확인
+     */
+    private fun validateMemberInGbs(memberId: Long, gbsId: Long) {
+        val today = LocalDate.now()
+        val isMemberOfGbs = gbsMemberHistoryRepository.findActiveMembers(
+            GbsMemberHistorySearchCondition(
+                gbsId = gbsId,
+                startDate = today,
+                endDate = today
+            )
+        ).any { it.member.id == memberId }
         
-        return attendanceRepository.saveAll(attendances).map { it.toAttendanceResponse() }
+        if (!isMemberOfGbs) {
+            throw AccessDeniedException("해당 조원은 이 GBS에 속하지 않습니다: $memberId")
+        }
     }
     
     /**

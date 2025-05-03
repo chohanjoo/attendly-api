@@ -30,4 +30,11 @@ where
     vl1_0.user_id=3;
 
 
-select * from gbs_leader_history where gbs_id=1;
+-- gbs
+select * from gbs_leader_history where gbs_id=2;
+
+
+select * from gbs_group;
+select * from gbs_member_history;
+
+select * from users;
