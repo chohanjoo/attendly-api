@@ -1,4 +1,4 @@
-package com.church.attendly.api.controller
+package com.church.attendly.api.dto
 
 import com.church.attendly.domain.entity.Department
 import com.church.attendly.domain.entity.GbsGroup

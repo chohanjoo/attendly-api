@@ -75,6 +75,10 @@ Base URL: `/api/admin/organization`
 | POST | `/villages` | 마을 생성 | 관리자 |
 | PUT | `/villages/{villageId}` | 마을 수정 | 관리자 |
 | POST | `/gbs-groups` | GBS 그룹 생성 | 관리자 |
+| PUT | `/gbs-groups/{gbsGroupId}` | GBS 그룹 수정 | 관리자 |
+| POST | `/gbs-groups/{gbsGroupId}/leaders` | GBS 그룹에 리더 배정 | 관리자 |
+| POST | `/gbs-groups/{gbsGroupId}/members` | GBS 그룹에 조원 배정 | 관리자 |
+| POST | `/reorganization` | GBS 6개월 주기 재편성 실행 | 관리자 |
 
 ### 관리자-시스템 설정
 Base URL: `/api/admin/system`
@@ -86,6 +90,11 @@ Base URL: `/api/admin/system`
 | GET | `/settings/{key}` | 시스템 설정 조회 | 관리자 |
 | GET | `/settings` | 모든 시스템 설정 조회 | 관리자 |
 | POST | `/email-settings` | 이메일 설정 저장 | 관리자 |
+| GET | `/email-settings` | 이메일 설정 조회 | 관리자 |
+| POST | `/slack-settings` | Slack 설정 저장 | 관리자 |
+| POST | `/security-policies` | 보안 정책 설정 저장 | 관리자 |
+| POST | `/attendance-settings` | 출석 입력 설정 저장 | 관리자 |
+| POST | `/batch-settings` | 배치 작업 설정 저장 | 관리자 |
 
 ### 관리자-배치 작업
 Base URL: `/api/admin/batch`
@@ -105,5 +114,6 @@ Base URL: `/api/admin/logs`
 | Method | Endpoint | 설명 | 접근 권한 |
 |--------|----------|------|-----------|
 | GET | `/` | 시스템 로그 조회 | 관리자 |
+| GET | `/{id}` | 시스템 로그 단건 조회 | 관리자 |
 | GET | `/categories` | 로그 카테고리 목록 조회 | 관리자 |
 | GET | `/levels` | 로그 레벨 목록 조회 | 관리자 | 

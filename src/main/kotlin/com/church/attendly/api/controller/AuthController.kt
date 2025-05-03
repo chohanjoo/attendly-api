@@ -6,6 +6,7 @@ import com.church.attendly.api.dto.SignupRequest
 import com.church.attendly.api.dto.SignupResponse
 import com.church.attendly.api.dto.TokenRefreshRequest
 import com.church.attendly.api.dto.TokenRefreshResponse
+import com.church.attendly.api.dto.UserResponse
 import com.church.attendly.security.JwtTokenProvider
 import com.church.attendly.security.UserDetailsAdapter
 import com.church.attendly.service.UserService
@@ -16,11 +17,14 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/auth")
@@ -77,5 +81,25 @@ class AuthController(
         }
         
         return ResponseEntity.badRequest().build()
+    }
+    
+    @GetMapping("/me")
+    @Operation(summary = "현재 사용자 정보 조회", description = "현재 인증된 사용자의 정보를 조회합니다.")
+    fun getCurrentUser(@AuthenticationPrincipal userDetails: UserDetailsAdapter): ResponseEntity<UserResponse> {
+        val user = userDetails.getUser()
+        
+        val response = UserResponse(
+            id = user.id ?: 0L,
+            name = user.name,
+            email = user.email,
+            role = user.role,
+            departmentId = user.department.id ?: 0L,
+            departmentName = user.department.name,
+            birthDate = user.birthDate,
+            createdAt = user.createdAt,
+            updatedAt = user.updatedAt
+        )
+        
+        return ResponseEntity.ok(response)
     }
 } 

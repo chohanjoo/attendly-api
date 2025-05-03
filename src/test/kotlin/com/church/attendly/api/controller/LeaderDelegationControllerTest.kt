@@ -1,6 +1,6 @@
 package com.church.attendly.api.controller
 
-import com.church.attendly.api.controller.LeaderDelegationResponse
+import com.church.attendly.api.dto.LeaderDelegationResponse
 import com.church.attendly.domain.entity.*
 import com.church.attendly.service.DelegationCreateRequest
 import com.church.attendly.service.LeaderDelegationService
