@@ -1,6 +1,7 @@
 package com.church.attendly.api.controller
 
 import com.church.attendly.api.dto.GbsMembersListResponse
+import com.church.attendly.api.dto.LeaderGbsHistoryListResponse
 import com.church.attendly.api.dto.LeaderGbsResponse
 import com.church.attendly.service.GbsMemberService
 import com.church.attendly.service.UserService
@@ -45,6 +46,21 @@ class GbsMemberController(
     fun getMyGbs(authentication: Authentication): ResponseEntity<LeaderGbsResponse> {
         val currentUser = userService.getCurrentUser(authentication)
         val response = gbsMemberService.getGbsForLeader(currentUser.id!!)
+        return ResponseEntity.ok(response)
+    }
+    
+    @GetMapping("/leaders/{leaderId}/history")
+    @Operation(
+        summary = "리더의 GBS 히스토리 조회", 
+        description = "특정 리더가 지금까지 참여했던 GBS 히스토리 정보를 조회합니다. 각 GBS 히스토리에는 참여 기간과 조원 정보가 포함됩니다."
+    )
+    @PreAuthorize("hasAnyRole('ADMIN', 'MINISTER', 'VILLAGE_LEADER', 'LEADER')")
+    fun getLeaderGbsHistories(
+        @PathVariable leaderId: Long,
+        authentication: Authentication
+    ): ResponseEntity<LeaderGbsHistoryListResponse> {
+        val currentUser = userService.getCurrentUser(authentication)
+        val response = gbsMemberService.getLeaderGbsHistories(leaderId, currentUser)
         return ResponseEntity.ok(response)
     }
 } 

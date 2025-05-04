@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.Optional
 
 @ExtendWith(MockKExtension::class)
 class GbsMemberServiceTest {
@@ -33,6 +34,9 @@ class GbsMemberServiceTest {
 
     @MockK
     private lateinit var leaderDelegationRepository: LeaderDelegationRepository
+    
+    @MockK
+    private lateinit var userService: UserService
 
     @InjectMockKs
     private lateinit var gbsMemberService: GbsMemberService
@@ -46,11 +50,13 @@ class GbsMemberServiceTest {
         organizationService = mockk()
         gbsLeaderHistoryRepository = mockk()
         leaderDelegationRepository = mockk()
+        userService = mockk()
 
         gbsMemberService = GbsMemberService(
             organizationService,
             gbsLeaderHistoryRepository,
-            leaderDelegationRepository
+            leaderDelegationRepository,
+            userService
         )
     }
 
@@ -241,6 +247,132 @@ class GbsMemberServiceTest {
         
         assertEquals("현재 담당하는 GBS가 없습니다", exception.message)
         verify { gbsLeaderHistoryRepository.findByLeaderIdAndEndDateIsNull(userId) }
+    }
+
+    @Test
+    fun `getLeaderGbsHistories는 리더의 GBS 히스토리 리스트를 반환한다`() {
+        // Given
+        val leaderId = 1L
+        val leaderUser = createUser(Role.LEADER, leaderId)
+        
+        val department = Department(id = 1L, name = "대학부")
+        val village = Village(id = 10L, name = "1마을", department = department)
+
+        // 첫 번째 GBS
+        val gbsGroup1 = GbsGroup(
+            id = 1L,
+            name = "GBS1", 
+            village = village,
+            termStartDate = LocalDate.of(2022, 1, 1),
+            termEndDate = LocalDate.of(2022, 12, 31)
+        )
+        
+        // 두 번째 GBS (현재 활성화된 GBS)
+        val gbsGroup2 = GbsGroup(
+            id = 2L,
+            name = "GBS2", 
+            village = village,
+            termStartDate = LocalDate.of(2023, 1, 1),
+            termEndDate = LocalDate.of(2023, 12, 31)
+        )
+        
+        val history1 = GbsLeaderHistory(
+            id = 1L,
+            gbsGroup = gbsGroup1,
+            leader = leaderUser,
+            startDate = LocalDate.of(2022, 1, 1),
+            endDate = LocalDate.of(2022, 12, 31)
+        )
+        
+        val history2 = GbsLeaderHistory(
+            id = 2L,
+            gbsGroup = gbsGroup2,
+            leader = leaderUser,
+            startDate = LocalDate.of(2023, 1, 1),
+            endDate = null
+        )
+        
+        val members1Response = createGbsMembersListResponse(gbsGroup1.id!!)
+        val members2Response = createGbsMembersListResponse(gbsGroup2.id!!)
+        
+        leaderUser.gbsLeaderHistories.addAll(listOf(history1, history2))
+        
+        // When
+        every { organizationService.getGbsMembers(gbsGroup1.id!!, history1.endDate!!) } returns members1Response
+        every { organizationService.getGbsMembers(gbsGroup2.id!!) } returns members2Response
+        
+        val result = gbsMemberService.getLeaderGbsHistories(leaderId, leaderUser)
+        
+        // Then
+        assertEquals(2, result.historyCount)
+        assertEquals(leaderId, result.leaderId)
+        assertEquals(leaderUser.name, result.leaderName)
+        
+        // 첫 번째 히스토리 검증 (최신순 정렬이므로 인덱스 0은 더 최근 히스토리)
+        assertEquals(history2.id, result.histories[0].historyId)
+        assertEquals(gbsGroup2.id, result.histories[0].gbsId)
+        assertEquals(gbsGroup2.name, result.histories[0].gbsName)
+        assertEquals(village.id, result.histories[0].villageId)
+        assertEquals(village.name, result.histories[0].villageName)
+        assertEquals(history2.startDate, result.histories[0].startDate)
+        assertEquals(history2.endDate, result.histories[0].endDate)
+        assertEquals(true, result.histories[0].isActive)
+        assertEquals(members2Response.members, result.histories[0].members)
+        
+        // 두 번째 히스토리 검증
+        assertEquals(history1.id, result.histories[1].historyId)
+        assertEquals(gbsGroup1.id, result.histories[1].gbsId)
+        assertEquals(gbsGroup1.name, result.histories[1].gbsName)
+        assertEquals(village.id, result.histories[1].villageId)
+        assertEquals(village.name, result.histories[1].villageName)
+        assertEquals(history1.startDate, result.histories[1].startDate)
+        assertEquals(history1.endDate, result.histories[1].endDate)
+        assertEquals(false, result.histories[1].isActive)
+        assertEquals(members1Response.members, result.histories[1].members)
+    }
+    
+    @Test
+    fun `getLeaderGbsHistories는 관리자가 다른 리더의 히스토리를 조회할 수 있다`() {
+        // Given
+        val leaderId = 1L
+        val adminId = 99L
+        val adminUser = createUser(Role.ADMIN, adminId)
+        val leaderUser = createUser(Role.LEADER, leaderId)
+        
+        val history = GbsLeaderHistory(
+            id = 1L,
+            gbsGroup = createGbsGroup(10L),
+            leader = leaderUser,
+            startDate = LocalDate.of(2022, 1, 1),
+            endDate = LocalDate.of(2022, 12, 31)
+        )
+        
+        leaderUser.gbsLeaderHistories.add(history)
+        
+        val membersResponse = createGbsMembersListResponse(history.gbsGroup.id!!)
+        
+        // When
+        every { organizationService.getGbsMembers(history.gbsGroup.id!!, history.endDate!!) } returns membersResponse
+        every { userService.findById(leaderId) } returns Optional.of(leaderUser)
+        
+        val result = gbsMemberService.getLeaderGbsHistories(leaderId, adminUser)
+        
+        // Then
+        assertEquals(1, result.historyCount)
+        assertEquals(leaderId, result.leaderId)
+    }
+    
+    @Test
+    fun `getLeaderGbsHistories는 일반 리더가 다른 리더의 히스토리를 조회할 수 없다`() {
+        // Given
+        val leaderId = 1L
+        val otherLeaderId = 2L
+        val otherLeaderUser = createUser(Role.LEADER, otherLeaderId)
+        
+        // When & Then
+        assertThrows(AccessDeniedException::class.java) {
+            gbsMemberService.getLeaderGbsHistories(leaderId, otherLeaderUser)
+        }
     }
 
     // 테스트 헬퍼 메소드

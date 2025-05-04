@@ -2,6 +2,8 @@ package com.church.attendly.api.controller
 
 import com.church.attendly.api.dto.GbsMemberResponse
 import com.church.attendly.api.dto.GbsMembersListResponse
+import com.church.attendly.api.dto.LeaderGbsHistoryListResponse
+import com.church.attendly.api.dto.LeaderGbsHistoryResponse
 import com.church.attendly.api.dto.LeaderGbsResponse
 import com.church.attendly.domain.entity.*
 import com.church.attendly.domain.repository.GbsLeaderHistoryRepository
@@ -224,5 +226,143 @@ class GbsMemberControllerTest {
         
         assertEquals(HttpStatus.OK.value(), response.statusCodeValue)
         assertEquals(expectedResponse, response.body)
+    }
+
+    @Test
+    fun `리더의 GBS 히스토리 조회 API는 유효한 데이터를 반환한다`() {
+        // Given
+        val leaderId = 1L
+        val department = Department(id = 1L, name = "대학부")
+        val leader = User(
+            id = leaderId,
+            name = "홍길동",
+            role = Role.LEADER,
+            email = "leader@example.com",
+            password = "password",
+            birthDate = LocalDate.of(1990, 1, 1),
+            department = department
+        )
+        
+        val members = listOf(
+            GbsMemberResponse(
+                id = 2L,
+                name = "조원1",
+                email = "member1@example.com",
+                birthDate = LocalDate.of(2000, 1, 1),
+                joinDate = LocalDate.of(2022, 1, 1)
+            ),
+            GbsMemberResponse(
+                id = 3L,
+                name = "조원2",
+                email = "member2@example.com",
+                birthDate = LocalDate.of(2000, 2, 2),
+                joinDate = LocalDate.of(2022, 1, 1)
+            )
+        )
+        
+        val historyResponse = LeaderGbsHistoryListResponse(
+            leaderId = leaderId,
+            leaderName = "홍길동",
+            historyCount = 2,
+            histories = listOf(
+                LeaderGbsHistoryResponse(
+                    historyId = 2L,
+                    gbsId = 2L,
+                    gbsName = "GBS2",
+                    villageId = 1L,
+                    villageName = "1마을",
+                    startDate = LocalDate.of(2023, 1, 1),
+                    endDate = null,
+                    isActive = true,
+                    members = members
+                ),
+                LeaderGbsHistoryResponse(
+                    historyId = 1L,
+                    gbsId = 1L,
+                    gbsName = "GBS1",
+                    villageId = 1L,
+                    villageName = "1마을",
+                    startDate = LocalDate.of(2022, 1, 1),
+                    endDate = LocalDate.of(2022, 12, 31),
+                    isActive = false,
+                    members = members
+                )
+            )
+        )
+        
+        every { userService.getCurrentUser(authentication) } returns leader
+        every { gbsMemberService.getLeaderGbsHistories(leaderId, leader) } returns historyResponse
+        
+        // When
+        val result = controller.getLeaderGbsHistories(leaderId, authentication)
+        
+        // Then
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertEquals(leaderId, result.body?.leaderId)
+        assertEquals("홍길동", result.body?.leaderName)
+        assertEquals(2, result.body?.historyCount)
+        assertEquals(2, result.body?.histories?.size)
+        
+        // 첫 번째 히스토리 검증 (현재 활성 GBS)
+        val firstHistory = result.body?.histories?.get(0)
+        assertEquals(2L, firstHistory?.historyId)
+        assertEquals(true, firstHistory?.isActive)
+        
+        // 두 번째 히스토리 검증 (과거 GBS)
+        val secondHistory = result.body?.histories?.get(1)
+        assertEquals(1L, secondHistory?.historyId)
+        assertEquals(false, secondHistory?.isActive)
+        assertEquals(LocalDate.of(2022, 12, 31), secondHistory?.endDate)
+    }
+    
+    @Test
+    fun `관리자는 다른 리더의 GBS 히스토리를 조회할 수 있다`() {
+        // Given
+        val leaderId = 1L
+        val adminId = 99L
+        val department = Department(id = 1L, name = "대학부")
+        
+        val admin = User(
+            id = adminId,
+            name = "관리자",
+            role = Role.ADMIN,
+            email = "admin@example.com",
+            password = "password",
+            birthDate = LocalDate.of(1985, 1, 1),
+            department = department
+        )
+        
+        val historyResponse = LeaderGbsHistoryListResponse(
+            leaderId = leaderId,
+            leaderName = "홍길동",
+            historyCount = 1,
+            histories = listOf(
+                LeaderGbsHistoryResponse(
+                    historyId = 1L,
+                    gbsId = 1L,
+                    gbsName = "GBS1",
+                    villageId = 1L,
+                    villageName = "1마을",
+                    startDate = LocalDate.of(2022, 1, 1),
+                    endDate = LocalDate.of(2022, 12, 31),
+                    isActive = false,
+                    members = listOf()
+                )
+            )
+        )
+        
+        every { userService.getCurrentUser(authentication) } returns admin
+        every { gbsMemberService.getLeaderGbsHistories(leaderId, admin) } returns historyResponse
+        
+        // When
+        val result = controller.getLeaderGbsHistories(leaderId, authentication)
+        
+        // Then
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertEquals(leaderId, result.body?.leaderId)
+        assertEquals("홍길동", result.body?.leaderName)
+        assertEquals(1, result.body?.historyCount)
     }
 } 
