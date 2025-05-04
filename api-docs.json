@@ -1656,6 +1656,39 @@
                 }
             }
         },
+        "/api/v1/gbs-members/leaders/{leaderId}/history": {
+            "get": {
+                "tags": [
+                    "GBS 멤버 관리"
+                ],
+                "summary": "리더의 GBS 히스토리 조회",
+                "description": "특정 리더가 지금까지 참여했던 GBS 히스토리 정보를 조회합니다. 각 GBS 히스토리에는 참여 기간과 조원 정보가 포함됩니다.",
+                "operationId": "getLeaderGbsHistories",
+                "parameters": [
+                    {
+                        "name": "leaderId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LeaderGbsHistoryListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/gbs/{id}/report": {
             "get": {
                 "tags": [
@@ -3753,6 +3786,84 @@
                     }
                 }
             },
+            "LeaderGbsHistoryListResponse": {
+                "required": [
+                    "histories",
+                    "historyCount",
+                    "leaderId",
+                    "leaderName"
+                ],
+                "type": "object",
+                "properties": {
+                    "leaderId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "leaderName": {
+                        "type": "string"
+                    },
+                    "historyCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "histories": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LeaderGbsHistoryResponse"
+                        }
+                    }
+                }
+            },
+            "LeaderGbsHistoryResponse": {
+                "required": [
+                    "gbsId",
+                    "gbsName",
+                    "historyId",
+                    "isActive",
+                    "members",
+                    "startDate",
+                    "villageId",
+                    "villageName"
+                ],
+                "type": "object",
+                "properties": {
+                    "historyId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "gbsId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "gbsName": {
+                        "type": "string"
+                    },
+                    "villageId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "villageName": {
+                        "type": "string"
+                    },
+                    "startDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "endDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    },
+                    "members": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GbsMemberResponse"
+                        }
+                    }
+                }
+            },
             "DepartmentStatistics": {
                 "required": [
                     "attendanceRate",
@@ -3876,15 +3987,15 @@
                     "pageable": {
                         "$ref": "#/components/schemas/PageableObject"
                     },
-                    "numberOfElements": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "first": {
                         "type": "boolean"
                     },
                     "last": {
                         "type": "boolean"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3981,15 +4092,15 @@
                     "pageable": {
                         "$ref": "#/components/schemas/PageableObject"
                     },
-                    "numberOfElements": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "first": {
                         "type": "boolean"
                     },
                     "last": {
                         "type": "boolean"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4071,15 +4182,15 @@
                     "pageable": {
                         "$ref": "#/components/schemas/PageableObject"
                     },
-                    "numberOfElements": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "first": {
                         "type": "boolean"
                     },
                     "last": {
                         "type": "boolean"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "empty": {
                         "type": "boolean"
