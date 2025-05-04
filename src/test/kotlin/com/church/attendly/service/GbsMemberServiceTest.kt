@@ -300,6 +300,7 @@ class GbsMemberServiceTest {
         // When
         every { organizationService.getGbsMembers(gbsGroup1.id!!, history1.endDate!!) } returns members1Response
         every { organizationService.getGbsMembers(gbsGroup2.id!!) } returns members2Response
+        every { gbsLeaderHistoryRepository.findByLeaderIdWithDetailsOrderByStartDateDesc(leaderId) } returns listOf(history2, history1)
         
         val result = gbsMemberService.getLeaderGbsHistories(leaderId, leaderUser)
         
@@ -354,6 +355,7 @@ class GbsMemberServiceTest {
         // When
         every { organizationService.getGbsMembers(history.gbsGroup.id!!, history.endDate!!) } returns membersResponse
         every { userService.findById(leaderId) } returns Optional.of(leaderUser)
+        every { gbsLeaderHistoryRepository.findByLeaderIdWithDetailsOrderByStartDateDesc(leaderId) } returns listOf(history)
         
         val result = gbsMemberService.getLeaderGbsHistories(leaderId, adminUser)
         

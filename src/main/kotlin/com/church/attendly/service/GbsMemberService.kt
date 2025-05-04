@@ -110,11 +110,11 @@ class GbsMemberService(
             userService.findById(leaderId).orElseThrow { ResourceNotFoundException("해당 리더를 찾을 수 없습니다: $leaderId") }
         }
         
-        // 히스토리 리스트 조회
-        val leaderHistories = leader.gbsLeaderHistories.sortedByDescending { it.startDate }
+        // fetch join을 통해 연관 엔티티를 함께 로딩
+        val leaderHistories: List<GbsLeaderHistory> = gbsLeaderHistoryRepository.findByLeaderIdWithDetailsOrderByStartDateDesc(leaderId)
         
         // 각 히스토리에 대한 상세 정보 매핑
-        val historyResponses = leaderHistories.map { history ->
+        val historyResponses = leaderHistories.map { history: GbsLeaderHistory ->
             val isActive = history.endDate == null
             val membersResponse = if (isActive) {
                 // 현재 활성화된 GBS라면 현재 멤버 조회
