@@ -34,6 +34,9 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
 	implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
 	
+	implementation("ch.qos.logback:logback-classic")
+	implementation("club.minnced:discord-webhooks:0.8.4")
+	
 	implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
 	kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
 	kapt("jakarta.annotation:jakarta.annotation-api")
@@ -64,6 +67,9 @@ kotlin {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	
+	// 테스트 실행 시 항상 'test' 프로필 활성화
+	System.setProperty("spring.profiles.active", "test")
 }
 
 sourceSets {

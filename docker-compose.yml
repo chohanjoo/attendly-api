@@ -24,10 +24,12 @@ services:
     ports:
       - "8080:8080"
     environment:
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/attendly_api?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_FLYWAY_REPAIR: "true"
+      DISCORD_WEBHOOK_URL: https://discord.com/api/webhooks/1368899732864503818/2kxY39C_ZOklifqUImZpYYp_5mSpWALlnHB2GUT7bAQjpaOjGM3MU7N1YfRUWlt9B0_Q
     depends_on:
       db:
         condition: service_healthy

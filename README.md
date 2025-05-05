@@ -131,4 +131,59 @@ curl -X GET "http://localhost:8080/api/departments/1/report?startDate=2025-01-01
 
 ## 라이선스
 
-이 프로젝트는 MIT 라이선스 하에 있습니다. 
+이 프로젝트는 MIT 라이선스 하에 있습니다.
+
+## Discord 로깅 설정 및 사용법
+
+Attendly API는 중요 로그 이벤트를 Discord로 전송하는 기능을 제공합니다. 이 기능을 통해 시스템 오류, 보안 이벤트, 중요 애플리케이션 이벤트 등을 실시간으로 모니터링할 수 있습니다.
+
+### 설정 방법
+
+1. Discord 서버에서 웹훅 생성:
+   - Discord 서버 설정 → 연동 → 웹훅 → 새 웹훅 생성
+   - 웹훅의 이름과 아이콘 설정
+   - 웹훅 URL 복사
+
+2. 환경 변수 설정:
+   ```bash
+   export DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your-webhook-url
+   ```
+
+3. 또는 `application.yml` 파일에 직접 설정:
+   ```yaml
+   discord:
+     webhook:
+       url: https://discord.com/api/webhooks/your-webhook-url
+       min-level: WARN  # 최소 로그 레벨 (INFO, WARN, ERROR 중 선택)
+   ```
+
+### 코드에서 사용하기
+
+```kotlin
+import com.attendly.util.DiscordLogger
+
+// 정보 로깅 (INFO 레벨 - 기본적으로 Discord로 전송되지 않음)
+DiscordLogger.info("중요 정보 메시지")
+
+// 경고 로깅 (WARN 레벨 - Discord로 전송됨)
+DiscordLogger.warn("경고 메시지")
+
+// 오류 로깅 (ERROR 레벨 - Discord로 전송됨)
+DiscordLogger.error("오류 메시지")
+DiscordLogger.error("예외 발생", exception)
+
+// 특정 이벤트 타입으로 로깅
+DiscordLogger.securityEvent("보안 이벤트 발생")
+DiscordLogger.systemEvent("시스템 이벤트 발생")
+DiscordLogger.authEvent("인증 이벤트", "사용자ID")
+```
+
+### 테스트하기
+
+Discord 로깅이 제대로 작동하는지 테스트하려면 `test-discord-log` 프로필을 활성화하여 애플리케이션을 실행하세요:
+
+```bash
+java -jar attendly-api.jar --spring.profiles.active=test-discord-log
+```
+
+이렇게 실행하면 시작 시 테스트 로그 메시지가 Discord로 전송됩니다. 

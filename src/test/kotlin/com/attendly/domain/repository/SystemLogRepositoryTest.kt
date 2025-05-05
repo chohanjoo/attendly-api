@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.data.domain.PageRequest
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
@@ -14,6 +15,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @DataJpaTest
+@ActiveProfiles("test")
 @DisplayName("시스템 로그 리포지토리 테스트")
 @Import(TestQuerydslConfig::class, SystemLogRepositoryImpl::class)
 class SystemLogRepositoryTest {
