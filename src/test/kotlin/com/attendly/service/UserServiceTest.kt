@@ -8,7 +8,8 @@ import com.attendly.domain.entity.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.UserRepository
-import com.attendly.exception.ResourceNotFoundException
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorCode
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -115,10 +116,11 @@ class UserServiceTest {
         every { userRepository.findByEmail(signupRequest.email) } returns Optional.of(existingUser)
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             userService.signup(signupRequest)
         }
         assertEquals("이미 사용 중인 이메일입니다", exception.message)
+        assertEquals(ErrorCode.DUPLICATE_RESOURCE, exception.errorCode)
         verify { userRepository.findByEmail(signupRequest.email) }
         verify(exactly = 0) { departmentRepository.findById(any()) }
         verify(exactly = 0) { passwordEncoder.encode(any()) }
@@ -132,10 +134,11 @@ class UserServiceTest {
         every { departmentRepository.findById(signupRequest.departmentId) } returns Optional.empty()
 
         // When & Then
-        val exception = assertThrows(ResourceNotFoundException::class.java) {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             userService.signup(signupRequest)
         }
         assertEquals("찾을 수 없는 부서입니다: ID ${signupRequest.departmentId}", exception.message)
+        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
         verify { userRepository.findByEmail(signupRequest.email) }
         verify { departmentRepository.findById(signupRequest.departmentId) }
         verify(exactly = 0) { passwordEncoder.encode(any()) }
@@ -294,5 +297,51 @@ class UserServiceTest {
         
         verify { userRepository.findByRole(Role.LEADER) }
         verify { userRepository.findByRole(Role.VILLAGE_LEADER) }
+    }
+
+    @Test
+    fun `getCurrentUser should return user when authentication is valid`() {
+        // Given
+        val email = "test@example.com"
+        val user = User(
+            id = 1L,
+            name = "홍길동",
+            email = email,
+            password = "encoded_password",
+            role = Role.LEADER,
+            department = department
+        )
+        
+        val authentication = mockk<org.springframework.security.core.Authentication>()
+        every { authentication.name } returns email
+        every { userRepository.findByEmail(email) } returns Optional.of(user)
+
+        // When
+        val result = userService.getCurrentUser(authentication)
+
+        // Then
+        assertEquals(user, result)
+        verify { authentication.name }
+        verify { userRepository.findByEmail(email) }
+    }
+
+    @Test
+    fun `getCurrentUser should throw exception when user not found`() {
+        // Given
+        val email = "nonexistent@example.com"
+        
+        val authentication = mockk<org.springframework.security.core.Authentication>()
+        every { authentication.name } returns email
+        every { userRepository.findByEmail(email) } returns Optional.empty()
+
+        // When & Then
+        val exception = assertThrows(AttendlyApiException::class.java) {
+            userService.getCurrentUser(authentication)
+        }
+        
+        assertEquals("사용자를 찾을 수 없습니다.", exception.message)
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.errorCode)
+        verify { authentication.name }
+        verify { userRepository.findByEmail(email) }
     }
 } 

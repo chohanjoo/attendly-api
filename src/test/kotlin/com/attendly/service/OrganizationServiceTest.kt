@@ -9,7 +9,8 @@ import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.GbsMemberHistoryRepository
 import com.attendly.domain.repository.VillageRepository
-import com.attendly.exception.ResourceNotFoundException
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorCode
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -116,10 +117,11 @@ class OrganizationServiceTest {
         every { departmentRepository.findById(999L) } returns Optional.empty()
 
         // then
-        assertThrows(ResourceNotFoundException::class.java) {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             // when
             organizationService.getDepartmentById(999L)
         }
+        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
     }
 
     @Test
@@ -154,10 +156,11 @@ class OrganizationServiceTest {
         every { villageRepository.findById(999L) } returns Optional.empty()
 
         // then
-        assertThrows(ResourceNotFoundException::class.java) {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             // when
             organizationService.getVillageById(999L)
         }
+        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
     }
 
     @Test
@@ -206,10 +209,11 @@ class OrganizationServiceTest {
         every { gbsGroupRepository.findById(999L) } returns Optional.empty()
 
         // then
-        assertThrows(ResourceNotFoundException::class.java) {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             // when
             organizationService.getGbsGroupById(999L)
         }
+        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
     }
 
     @Test
@@ -230,9 +234,10 @@ class OrganizationServiceTest {
         every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(999L) } returns null
 
         // then
-        assertThrows(ResourceNotFoundException::class.java) {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             // when
             organizationService.getCurrentLeaderForGbs(999L)
         }
+        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
     }
 } 

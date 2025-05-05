@@ -4,6 +4,8 @@ import com.attendly.domain.entity.*
 import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.LeaderDelegationRepository
 import com.attendly.domain.repository.UserRepository
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorCode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -122,7 +124,7 @@ class LeaderDelegationServiceTest {
     }
     
     @Test
-    fun `createDelegation should throw IllegalArgumentException when delegator not found`() {
+    fun `createDelegation should throw AttendlyApiException when delegator not found`() {
         // Given
         val request = DelegationCreateRequest(
             delegatorId = 999L,
@@ -135,15 +137,16 @@ class LeaderDelegationServiceTest {
         every { userRepository.findById(999L) } returns Optional.empty()
         
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             leaderDelegationService.createDelegation(request)
         }
         
-        assertEquals("Delegator not found", exception.message)
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.errorCode)
+        assertEquals("위임자를 찾을 수 없습니다", exception.message)
     }
     
     @Test
-    fun `createDelegation should throw IllegalArgumentException when delegatee not found`() {
+    fun `createDelegation should throw AttendlyApiException when delegatee not found`() {
         // Given
         val request = DelegationCreateRequest(
             delegatorId = delegator.id!!,
@@ -157,15 +160,16 @@ class LeaderDelegationServiceTest {
         every { userRepository.findById(999L) } returns Optional.empty()
         
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             leaderDelegationService.createDelegation(request)
         }
         
-        assertEquals("Delegate not found", exception.message)
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.errorCode)
+        assertEquals("수임자를 찾을 수 없습니다", exception.message)
     }
     
     @Test
-    fun `createDelegation should throw IllegalArgumentException when gbsGroup not found`() {
+    fun `createDelegation should throw AttendlyApiException when gbsGroup not found`() {
         // Given
         val request = DelegationCreateRequest(
             delegatorId = delegator.id!!,
@@ -180,15 +184,16 @@ class LeaderDelegationServiceTest {
         every { gbsGroupRepository.findById(999L) } returns Optional.empty()
         
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             leaderDelegationService.createDelegation(request)
         }
         
-        assertEquals("GBS Group not found", exception.message)
+        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
+        assertEquals("GBS 그룹을 찾을 수 없습니다", exception.message)
     }
     
     @Test
-    fun `createDelegation should throw IllegalArgumentException when startDate is not in the future`() {
+    fun `createDelegation should throw AttendlyApiException when startDate is not in the future`() {
         // Given
         val pastDate = LocalDate.now().minusDays(1)
         val endDate = LocalDate.now().plusDays(7)
@@ -206,15 +211,16 @@ class LeaderDelegationServiceTest {
         every { gbsGroupRepository.findById(gbsGroup.id!!) } returns Optional.of(gbsGroup)
         
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             leaderDelegationService.createDelegation(request)
         }
         
-        assertEquals("Start date must be in the future", exception.message)
+        assertEquals(ErrorCode.INVALID_INPUT, exception.errorCode)
+        assertEquals("시작일은 현재 날짜 이후여야 합니다", exception.message)
     }
     
     @Test
-    fun `createDelegation should throw IllegalArgumentException when there is already an active delegation`() {
+    fun `createDelegation should throw AttendlyApiException when there is already an active delegation`() {
         // Given
         val startDate = LocalDate.now().plusDays(1)
         val endDate = LocalDate.now().plusDays(7)
@@ -242,11 +248,39 @@ class LeaderDelegationServiceTest {
         every { leaderDelegationRepository.findActiveByGbsGroupIdAndDate(gbsGroup.id!!, startDate) } returns existingDelegation
         
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             leaderDelegationService.createDelegation(request)
         }
         
-        assertEquals("There is already an active delegation for this GBS group", exception.message)
+        assertEquals(ErrorCode.DUPLICATE_RESOURCE, exception.errorCode)
+        assertEquals("이 GBS 그룹에 이미 활성 위임이 존재합니다", exception.message)
+    }
+    
+    @Test
+    fun `createDelegation should throw AttendlyApiException when startDate is after endDate`() {
+        // Given
+        val startDate = LocalDate.now().plusDays(7)
+        val endDate = LocalDate.now().plusDays(1)  // 종료일이 시작일보다 앞에 있음
+        
+        val request = DelegationCreateRequest(
+            delegatorId = delegator.id!!,
+            delegateId = delegatee.id!!,
+            gbsGroupId = gbsGroup.id!!,
+            startDate = startDate,
+            endDate = endDate
+        )
+        
+        every { userRepository.findById(delegator.id!!) } returns Optional.of(delegator)
+        every { userRepository.findById(delegatee.id!!) } returns Optional.of(delegatee)
+        every { gbsGroupRepository.findById(gbsGroup.id!!) } returns Optional.of(gbsGroup)
+        
+        // When & Then
+        val exception = assertThrows(AttendlyApiException::class.java) {
+            leaderDelegationService.createDelegation(request)
+        }
+        
+        assertEquals(ErrorCode.INVALID_INPUT, exception.errorCode)
+        assertEquals("시작일은 종료일보다 이전이거나 같아야 합니다", exception.message)
     }
     
     @Test

@@ -17,10 +17,9 @@ import com.attendly.domain.repository.GbsMemberHistoryRepository
 import com.attendly.domain.repository.LeaderDelegationRepository
 import com.attendly.domain.repository.UserRepository
 import com.attendly.domain.repository.VillageRepository
-import com.attendly.exception.ResourceNotFoundException
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorCode
 import com.attendly.security.UserDetailsAdapter
-import jakarta.persistence.EntityNotFoundException
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -67,7 +66,7 @@ class AttendanceService(
 
         val hasGbsAccess = hasLeaderAccess(gbsId, currentUser.id!!)
         if (!hasGbsAccess) {
-            throw AccessDeniedException("이 GBS에 대한 출석 입력 권한이 없습니다")
+            throw AttendlyApiException(ErrorCode.FORBIDDEN, "이 GBS에 대한 출석 입력 권한이 없습니다")
         }
     }
     
@@ -91,7 +90,7 @@ class AttendanceService(
      */
     private fun getGbsGroup(gbsId: Long): GbsGroup {
         return gbsGroupRepository.findById(gbsId)
-            .orElseThrow { ResourceNotFoundException("GBS 그룹을 찾을 수 없습니다: $gbsId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "GBS 그룹을 찾을 수 없습니다: $gbsId") }
     }
     
     /**
@@ -132,7 +131,7 @@ class AttendanceService(
      */
     private fun getMember(memberId: Long): User {
         return userRepository.findById(memberId)
-            .orElseThrow { ResourceNotFoundException("조원을 찾을 수 없습니다: $memberId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "조원을 찾을 수 없습니다: $memberId") }
     }
     
     /**
@@ -149,7 +148,7 @@ class AttendanceService(
         ).any { it.member.id == memberId }
         
         if (!isMemberOfGbs) {
-            throw AccessDeniedException("해당 조원은 이 GBS에 속하지 않습니다: $memberId")
+            throw AttendlyApiException(ErrorCode.FORBIDDEN, "해당 조원은 이 GBS에 속하지 않습니다: $memberId")
         }
     }
     
@@ -159,7 +158,7 @@ class AttendanceService(
     @Transactional(readOnly = true)
     fun getAttendancesByGbs(gbsId: Long, weekStart: LocalDate): List<AttendanceResponse> {
         val gbsGroup = gbsGroupRepository.findById(gbsId)
-            .orElseThrow { ResourceNotFoundException("GBS 그룹을 찾을 수 없습니다: $gbsId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "GBS 그룹을 찾을 수 없습니다: $gbsId") }
         
         return attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart)
             .map { it.toAttendanceResponse() }
@@ -171,7 +170,7 @@ class AttendanceService(
     @Transactional(readOnly = true)
     fun getVillageAttendance(villageId: Long, weekStart: LocalDate): VillageAttendanceResponse {
         val village = villageRepository.findById(villageId)
-            .orElseThrow { ResourceNotFoundException("마을을 찾을 수 없습니다: $villageId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "마을을 찾을 수 없습니다: $villageId") }
         
         val today = LocalDate.now()
         val gbsGroups = gbsGroupRepository.findActiveGroupsByVillageId(villageId, today)
@@ -196,7 +195,7 @@ class AttendanceService(
         val attendances = attendanceRepository.findDetailsByGbsIdAndWeek(gbsId, weekStart)
         
         val leader = gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsId)
-            ?: throw EntityNotFoundException("현재 GBS의 리더를 찾을 수 없습니다: $gbsId")
+            ?: throw AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "현재 GBS의 리더를 찾을 수 없습니다: $gbsId")
         
         val totalMembers = gbsMemberHistoryRepository.countActiveMembers(gbsId, today).toInt()
         val attendedMembers = attendances.count { it.worship == WorshipStatus.O }

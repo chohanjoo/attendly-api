@@ -9,8 +9,8 @@ import com.attendly.domain.entity.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.LeaderDelegationRepository
-import com.attendly.exception.AccessDeniedException
-import com.attendly.exception.ResourceNotFoundException
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorCode
 import com.attendly.service.OrganizationService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -64,7 +64,7 @@ class GbsMemberService(
             }
         }
         
-        throw AccessDeniedException("이 GBS의 멤버 정보를 조회할 권한이 없습니다.")
+        throw AttendlyApiException(ErrorCode.FORBIDDEN, "이 GBS의 멤버 정보를 조회할 권한이 없습니다.")
     }
     
     /**
@@ -74,7 +74,7 @@ class GbsMemberService(
     fun getGbsForLeader(userId: Long): LeaderGbsResponse {
         // 리더가 현재 담당하는 GBS 조회
         val leaderHistory = gbsLeaderHistoryRepository.findByLeaderIdAndEndDateIsNull(userId)
-            ?: throw ResourceNotFoundException("현재 담당하는 GBS가 없습니다")
+            ?: throw AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "현재 담당하는 GBS가 없습니다")
         
         val gbs = leaderHistory.gbsGroup
         
@@ -100,14 +100,16 @@ class GbsMemberService(
             currentUser.role != Role.ADMIN && 
             currentUser.role != Role.MINISTER && 
             (currentUser.role != Role.VILLAGE_LEADER || currentUser.villageLeader == null)) {
-                throw AccessDeniedException("다른 리더의 히스토리를 조회할 권한이 없습니다.")
+                throw AttendlyApiException(ErrorCode.FORBIDDEN, "다른 리더의 히스토리를 조회할 권한이 없습니다.")
         }
         
         // 사용자 정보 조회
         val leader = if (currentUser.id == leaderId) {
             currentUser
         } else {
-            userService.findById(leaderId).orElseThrow { ResourceNotFoundException("해당 리더를 찾을 수 없습니다: $leaderId") }
+            userService.findById(leaderId).orElseThrow { 
+                AttendlyApiException(ErrorCode.USER_NOT_FOUND, "해당 리더를 찾을 수 없습니다: $leaderId") 
+            }
         }
         
         // fetch join을 통해 연관 엔티티를 함께 로딩

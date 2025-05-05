@@ -26,7 +26,7 @@ docker logs -f -t --tail 100 [컨테이너_이름/ID]
 예시:
 ```bash
 # church-attendly-app 컨테이너의 실시간 로그 확인
-docker logs -f church-attendly-app
+docker logs -f attendly-api-app
 
 # MySQL 컨테이너의 최근 50줄 로그와 타임스탬프 확인
 docker logs -t --tail 50 church-attendly-mysql

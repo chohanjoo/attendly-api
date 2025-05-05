@@ -8,7 +8,8 @@ import com.attendly.domain.entity.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.UserRepository
-import com.attendly.exception.ResourceNotFoundException
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorCode
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -32,12 +33,12 @@ class UserService(
         // 이메일 중복 확인
         val existingUser = userRepository.findByEmail(request.email)
         if (existingUser.isPresent) {
-            throw IllegalArgumentException("이미 사용 중인 이메일입니다")
+            throw AttendlyApiException(ErrorCode.DUPLICATE_RESOURCE, "이미 사용 중인 이메일입니다")
         }
 
         // 부서 찾기
         val department = departmentRepository.findById(request.departmentId)
-            .orElseThrow { ResourceNotFoundException("찾을 수 없는 부서입니다: ID ${request.departmentId}") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "찾을 수 없는 부서입니다: ID ${request.departmentId}") }
 
         // 비밀번호 암호화
         val encodedPassword = passwordEncoder.encode(request.password)
@@ -84,7 +85,7 @@ class UserService(
     fun getCurrentUser(authentication: Authentication): User {
         val email = authentication.name
         return userRepository.findByEmail(email)
-            .orElseThrow { ResourceNotFoundException("사용자를 찾을 수 없습니다.") }
+            .orElseThrow { AttendlyApiException(ErrorCode.USER_NOT_FOUND, "사용자를 찾을 수 없습니다.") }
     }
     
     /**
