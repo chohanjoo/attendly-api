@@ -2,6 +2,9 @@ package com.church.attendly.service
 
 import com.church.attendly.api.dto.SignupRequest
 import com.church.attendly.api.dto.SignupResponse
+import com.church.attendly.api.dto.UserResponse
+import com.church.attendly.api.dto.UserListByRolesRequest
+import com.church.attendly.domain.entity.Role
 import com.church.attendly.domain.entity.User
 import com.church.attendly.domain.repository.DepartmentRepository
 import com.church.attendly.domain.repository.UserRepository
@@ -10,6 +13,8 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Optional
 
 @Service
@@ -80,5 +85,32 @@ class UserService(
         val email = authentication.name
         return userRepository.findByEmail(email)
             .orElseThrow { ResourceNotFoundException("사용자를 찾을 수 없습니다.") }
+    }
+    
+    /**
+     * 역할 목록으로 사용자 조회
+     */
+    @Transactional(readOnly = true)
+    fun getUsersByRoles(request: UserListByRolesRequest): List<UserResponse> {
+        if (request.roles.isEmpty()) {
+            return emptyList()
+        }
+        
+        val roles = request.roles.map { roleStr -> Role.valueOf(roleStr) }
+        val users = roles.flatMap { role -> userRepository.findByRole(role) }.distinct()
+        
+        return users.map { user ->
+            UserResponse(
+                id = user.id ?: 0L,
+                name = user.name,
+                email = user.email,
+                role = user.role,
+                departmentId = user.department.id ?: 0L,
+                departmentName = user.department.name,
+                birthDate = user.birthDate,
+                createdAt = user.createdAt,
+                updatedAt = user.updatedAt
+            )
+        }
     }
 } 

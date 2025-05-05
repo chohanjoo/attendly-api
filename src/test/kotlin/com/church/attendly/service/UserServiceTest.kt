@@ -1,6 +1,8 @@
 package com.church.attendly.service
 
 import com.church.attendly.api.dto.SignupRequest
+import com.church.attendly.api.dto.UserListByRolesRequest
+import com.church.attendly.api.dto.UserResponse
 import com.church.attendly.domain.entity.Department
 import com.church.attendly.domain.entity.Role
 import com.church.attendly.domain.entity.User
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.security.crypto.password.PasswordEncoder
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -183,5 +186,113 @@ class UserServiceTest {
         assertTrue(result.isPresent)
         assertEquals(user, result.get())
         verify { userRepository.findById(userId) }
+    }
+
+    @Test
+    fun `getUsersByRoles should return users with specified roles`() {
+        // Given
+        val department = Department(id = 1L, name = "IT 부서")
+        val now = LocalDateTime.now()
+        
+        val leaderUser = User(
+            id = 1L,
+            name = "Leader User",
+            email = "leader@example.com",
+            password = "encoded_password",
+            role = Role.LEADER,
+            birthDate = LocalDate.of(1990, 1, 1),
+            department = department,
+            createdAt = now,
+            updatedAt = now
+        )
+        
+        val memberUser = User(
+            id = 2L,
+            name = "Member User",
+            email = "member@example.com",
+            password = "encoded_password",
+            role = Role.MEMBER,
+            birthDate = LocalDate.of(1995, 5, 5),
+            department = department,
+            createdAt = now,
+            updatedAt = now
+        )
+        
+        val adminUser = User(
+            id = 3L,
+            name = "Admin User",
+            email = "admin@example.com",
+            password = "encoded_password",
+            role = Role.ADMIN,
+            birthDate = LocalDate.of(1985, 10, 10),
+            department = department,
+            createdAt = now,
+            updatedAt = now
+        )
+        
+        every { userRepository.findByRole(Role.LEADER) } returns listOf(leaderUser)
+        every { userRepository.findByRole(Role.MEMBER) } returns listOf(memberUser)
+        
+        val request = UserListByRolesRequest(roles = listOf("LEADER", "MEMBER"))
+        
+        // When
+        val result = userService.getUsersByRoles(request)
+        
+        // Then
+        assertEquals(2, result.size)
+        assertEquals("Leader User", result[0].name)
+        assertEquals(Role.LEADER, result[0].role)
+        assertEquals("Member User", result[1].name)
+        assertEquals(Role.MEMBER, result[1].role)
+        
+        verify { userRepository.findByRole(Role.LEADER) }
+        verify { userRepository.findByRole(Role.MEMBER) }
+    }
+    
+    @Test
+    fun `getUsersByRoles should return empty list when roles list is empty`() {
+        // Given
+        val request = UserListByRolesRequest(roles = emptyList())
+        
+        // When
+        val result = userService.getUsersByRoles(request)
+        
+        // Then
+        assertEquals(0, result.size)
+    }
+    
+    @Test
+    fun `getUsersByRoles should filter out duplicate users`() {
+        // Given
+        val department = Department(id = 1L, name = "IT 부서")
+        val now = LocalDateTime.now()
+        
+        val leaderUser = User(
+            id = 1L,
+            name = "Leader User",
+            email = "leader@example.com",
+            password = "encoded_password",
+            role = Role.LEADER,
+            birthDate = LocalDate.of(1990, 1, 1),
+            department = department,
+            createdAt = now,
+            updatedAt = now
+        )
+        
+        // User appears in both role queries (this is a test case, though it shouldn't happen in real data)
+        every { userRepository.findByRole(Role.LEADER) } returns listOf(leaderUser)
+        every { userRepository.findByRole(Role.VILLAGE_LEADER) } returns listOf(leaderUser)
+        
+        val request = UserListByRolesRequest(roles = listOf("LEADER", "VILLAGE_LEADER"))
+        
+        // When
+        val result = userService.getUsersByRoles(request)
+        
+        // Then
+        assertEquals(1, result.size) // Only one user despite being in two roles
+        assertEquals("Leader User", result[0].name)
+        
+        verify { userRepository.findByRole(Role.LEADER) }
+        verify { userRepository.findByRole(Role.VILLAGE_LEADER) }
     }
 } 
