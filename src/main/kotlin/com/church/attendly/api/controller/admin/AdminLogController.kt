@@ -52,43 +52,6 @@ class AdminLogController(
         
         return ResponseEntity.ok(responseDto)
     }
-    
-    @GetMapping("/api-calls")
-    @Operation(
-        summary = "API 호출 로그 조회", 
-        description = "API 호출 관련 로그만 조회합니다 (관리자 전용)",
-        security = [SecurityRequirement(name = "bearerAuth")]
-    )
-    fun getApiCallLogs(
-        @RequestParam(required = false) level: String?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) startTime: LocalDateTime?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) endTime: LocalDateTime?,
-        @RequestParam(required = false) userId: Long?,
-        @RequestParam(required = false) apiPath: String?,
-        @RequestParam(required = false) method: String?,
-        @RequestParam(required = false) status: Int?,
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "20") size: Int,
-        @RequestParam(defaultValue = "timestamp,desc") sort: String
-    ): ResponseEntity<Page<SystemLogResponseDto>> {
-        val sortParams = sort.split(",")
-        val direction = if (sortParams.size > 1 && sortParams[1] == "asc") Sort.Direction.ASC else Sort.Direction.DESC
-        val sortProperty = sortParams[0]
-        val pageable = PageRequest.of(page, size, Sort.by(direction, sortProperty))
-
-        // apiPath, method, status는 키워드 검색에 포함시킴
-        val keywordParts = mutableListOf<String>()
-        apiPath?.let { keywordParts.add("apiPath:$it") }
-        method?.let { keywordParts.add("method:$it") }
-        status?.let { keywordParts.add("status:$it") }
-        
-        val keyword = if (keywordParts.isNotEmpty()) keywordParts.joinToString(" ") else null
-        
-        val logs = systemLogService.getLogs(level, "API_CALL", startTime, endTime, userId, keyword, pageable)
-        val responseDto = logs.map { SystemLogResponseDto.from(it) }
-        
-        return ResponseEntity.ok(responseDto)
-    }
 
     @GetMapping("/{id}")
     @Operation(

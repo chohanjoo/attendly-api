@@ -43,9 +43,6 @@ class UserControllerTest {
     private lateinit var userService: UserService
     
     @MockkBean
-    private lateinit var systemLogService: SystemLogService
-    
-    @MockkBean
     private lateinit var jwtTokenProvider: JwtTokenProvider
     
     @MockkBean
@@ -54,12 +51,6 @@ class UserControllerTest {
     @MockkBean
     private lateinit var userDetailsService: UserDetailsService
     
-    @BeforeEach
-    fun setUp() {
-        // SystemLogService의 모든 createLog 메서드 호출에 대해 mock 설정
-        justRun { systemLogService.createLog(any(), any(), any(), any(), any()) }
-    }
-
     @Test
     @WithMockUser
     fun `should return users filtered by roles`() {

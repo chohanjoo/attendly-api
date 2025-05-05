@@ -1,6 +1,5 @@
 package com.church.attendly.api.interceptor
 
-import com.church.attendly.service.SystemLogService
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -14,7 +13,6 @@ import java.util.*
 
 @Component
 class ApiLogInterceptor(
-    private val systemLogService: SystemLogService,
     private val objectMapper: ObjectMapper
 ) : HandlerInterceptor {
 
@@ -79,20 +77,16 @@ class ApiLogInterceptor(
                 
                 val message = "$method $apiPath - $status ($duration ms)"
                 
-                // 시스템 로그 저장
-                systemLogService.createLog(
-                    level = logLevel,
-                    category = "API_CALL",
-                    message = message,
-                    additionalInfo = additionalInfo,
-                    request = request
-                )
-                
-                // 콘솔에도 로그 출력
+                // 콘솔에만 로그 출력
                 when (logLevel) {
                     "ERROR" -> logger.error(message)
                     "WARN" -> logger.warn(message)
                     else -> logger.info(message)
+                }
+                
+                // 상세 정보 디버그 로그로 출력
+                if (logger.isDebugEnabled) {
+                    logger.debug("API 상세 정보: {}", objectMapper.writeValueAsString(additionalInfo))
                 }
             }
         } catch (e: Exception) {

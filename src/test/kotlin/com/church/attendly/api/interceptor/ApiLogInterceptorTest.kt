@@ -1,38 +1,37 @@
 package com.church.attendly.api.interceptor
 
-import com.church.attendly.service.SystemLogService
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.contains
+import org.slf4j.LoggerFactory
+import org.springframework.boot.test.system.CapturedOutput
+import org.springframework.boot.test.system.OutputCaptureExtension
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.web.util.ContentCachingRequestWrapper
 import org.springframework.web.util.ContentCachingResponseWrapper
-import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
+@ExtendWith(OutputCaptureExtension::class)
 class ApiLogInterceptorTest {
 
     private lateinit var apiLogInterceptor: ApiLogInterceptor
-    private lateinit var systemLogService: SystemLogService
     private lateinit var objectMapper: ObjectMapper
     private lateinit var mockRequest: MockHttpServletRequest
     private lateinit var mockResponse: MockHttpServletResponse
 
     @BeforeEach
     fun setUp() {
-        systemLogService = mockk(relaxed = true)
         objectMapper = ObjectMapper()
-        apiLogInterceptor = ApiLogInterceptor(systemLogService, objectMapper)
+        apiLogInterceptor = ApiLogInterceptor(objectMapper)
         mockRequest = MockHttpServletRequest()
         mockResponse = MockHttpServletResponse()
     }
 
     @Test
-    fun `afterCompletion should log API call details`() {
+    fun `afterCompletion should log API call details`(output: CapturedOutput) {
         // Given
         val handler = Any()
         val requestWrapper = ContentCachingRequestWrapper(mockRequest)
@@ -57,26 +56,11 @@ class ApiLogInterceptorTest {
         apiLogInterceptor.afterCompletion(requestWrapper, responseWrapper, handler, null)
         
         // Then
-        val categorySlot = slot<String>()
-        val messageSlot = slot<String>()
-        
-        verify { 
-            systemLogService.createLog(
-                eq("INFO"),
-                capture(categorySlot),
-                capture(messageSlot),
-                any(),
-                any()
-            )
-        }
-        
-        assertEquals("API_CALL", categorySlot.captured)
-        assert(messageSlot.captured.contains("POST /api/users"))
-        assert(messageSlot.captured.contains("201"))
+        assertTrue(output.toString().contains("POST /api/users - 201"))
     }
     
     @Test
-    fun `afterCompletion should handle error responses correctly`() {
+    fun `afterCompletion should handle error responses correctly`(output: CapturedOutput) {
         // Given
         val handler = Any()
         val requestWrapper = ContentCachingRequestWrapper(mockRequest)
@@ -99,18 +83,6 @@ class ApiLogInterceptorTest {
         apiLogInterceptor.afterCompletion(requestWrapper, responseWrapper, handler, null)
         
         // Then
-        val levelSlot = slot<String>()
-        
-        verify { 
-            systemLogService.createLog(
-                capture(levelSlot),
-                eq("API_CALL"),
-                any(),
-                any(),
-                any()
-            )
-        }
-        
-        assertEquals("WARN", levelSlot.captured)
+        assertTrue(output.toString().contains("GET /api/users/999 - 404"))
     }
 } 

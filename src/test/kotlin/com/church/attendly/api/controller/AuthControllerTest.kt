@@ -57,9 +57,6 @@ class AuthControllerTest {
     @MockkBean
     private lateinit var userDetailsService: UserDetailsService
 
-    @MockkBean
-    private lateinit var systemLogService: SystemLogService
-
     @Test
     fun `회원가입 성공 테스트`() {
         // Given
