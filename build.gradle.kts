@@ -37,6 +37,8 @@ dependencies {
 	implementation("ch.qos.logback:logback-classic")
 	implementation("club.minnced:discord-webhooks:0.8.4")
 	
+	implementation("p6spy:p6spy:3.9.1")
+	
 	implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
 	kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
 	kapt("jakarta.annotation:jakarta.annotation-api")

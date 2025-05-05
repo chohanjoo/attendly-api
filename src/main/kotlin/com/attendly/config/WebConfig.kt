@@ -28,7 +28,7 @@ class WebConfig(
     fun contentCachingFilterRegistration(): FilterRegistrationBean<ContentCachingFilter> {
         val registration = FilterRegistrationBean<ContentCachingFilter>()
         registration.filter = ContentCachingFilter()
-        registration.addUrlPatterns("/api/*")
+        registration.addUrlPatterns("/api/**")
         registration.setName("contentCachingFilter")
         registration.order = 1
         return registration
