@@ -120,7 +120,8 @@ class SystemLogService(
             "AUDIT",
             "ATTENDANCE",
             "USER_MANAGEMENT",
-            "ORGANIZATION"
+            "ORGANIZATION",
+            "API_CALL"
         )
     }
 } 

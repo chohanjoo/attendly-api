@@ -53,6 +53,7 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testImplementation("io.mockk:mockk:1.13.10")
 	testImplementation("com.ninja-squad:springmockk:4.0.2")
+	testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
 }
 
 kotlin {

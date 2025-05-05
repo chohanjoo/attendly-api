@@ -186,8 +186,14 @@ class SystemLogServiceTest {
         val categories = systemLogService.getLogCategories()
         
         // then
-        assertEquals(7, categories.size)
+        assertEquals(8, categories.size)
         assert(categories.contains("APPLICATION"))
         assert(categories.contains("SECURITY"))
+        assert(categories.contains("BATCH"))
+        assert(categories.contains("AUDIT"))
+        assert(categories.contains("ATTENDANCE"))
+        assert(categories.contains("USER_MANAGEMENT"))
+        assert(categories.contains("ORGANIZATION"))
+        assert(categories.contains("API_CALL"))
     }
 } 

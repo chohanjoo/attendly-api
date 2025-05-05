@@ -10,6 +10,7 @@ import com.church.attendly.security.JwtTokenProvider
 import com.church.attendly.security.TestSecurityConfig
 import com.church.attendly.security.UserDetailsAdapter
 import com.church.attendly.service.UserService
+import com.church.attendly.service.SystemLogService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
@@ -55,6 +56,9 @@ class AuthControllerTest {
 
     @MockkBean
     private lateinit var userDetailsService: UserDetailsService
+
+    @MockkBean
+    private lateinit var systemLogService: SystemLogService
 
     @Test
     fun `회원가입 성공 테스트`() {
