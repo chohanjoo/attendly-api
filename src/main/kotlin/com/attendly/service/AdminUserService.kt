@@ -4,7 +4,8 @@ import com.attendly.api.dto.*
 import com.attendly.domain.entity.User
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.UserRepository
-import com.attendly.exception.ResourceNotFoundException
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorCode
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -27,12 +28,12 @@ class AdminUserService(
         // 이메일 중복 확인
         val existingUser = userRepository.findByEmail(request.email)
         if (existingUser.isPresent) {
-            throw IllegalArgumentException("이미 사용 중인 이메일입니다")
+            throw AttendlyApiException(ErrorCode.DUPLICATE_RESOURCE, "이미 사용 중인 이메일입니다")
         }
 
         // 부서 찾기
         val department = departmentRepository.findById(request.departmentId)
-            .orElseThrow { ResourceNotFoundException("찾을 수 없는 부서입니다: ID ${request.departmentId}") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "찾을 수 없는 부서입니다: ID ${request.departmentId}") }
 
         // 비밀번호 암호화
         val encodedPassword = passwordEncoder.encode(request.password)
@@ -71,20 +72,20 @@ class AdminUserService(
     fun updateUser(userId: Long, request: UserUpdateRequest): UserResponse {
         // 사용자 찾기
         val user = userRepository.findById(userId)
-            .orElseThrow { ResourceNotFoundException("사용자를 찾을 수 없습니다: ID $userId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다: ID $userId") }
 
         // 이메일 변경 시 중복 확인
         if (request.email != null && request.email != user.email) {
             val existingUser = userRepository.findByEmail(request.email)
             if (existingUser.isPresent) {
-                throw IllegalArgumentException("이미 사용 중인 이메일입니다")
+                throw AttendlyApiException(ErrorCode.DUPLICATE_RESOURCE, "이미 사용 중인 이메일입니다")
             }
         }
 
         // 부서 변경 시 확인
         val department = if (request.departmentId != null && request.departmentId != user.department.id) {
             departmentRepository.findById(request.departmentId)
-                .orElseThrow { ResourceNotFoundException("찾을 수 없는 부서입니다: ID ${request.departmentId}") }
+                .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "찾을 수 없는 부서입니다: ID ${request.departmentId}") }
         } else {
             user.department
         }
@@ -124,7 +125,7 @@ class AdminUserService(
     @Transactional
     fun resetPassword(userId: Long, request: UserPasswordResetRequest) {
         val user = userRepository.findById(userId)
-            .orElseThrow { ResourceNotFoundException("사용자를 찾을 수 없습니다: ID $userId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다: ID $userId") }
 
         val encodedPassword = passwordEncoder.encode(request.newPassword)
 
@@ -149,7 +150,7 @@ class AdminUserService(
     @Transactional
     fun deleteUser(userId: Long) {
         if (!userRepository.existsById(userId)) {
-            throw ResourceNotFoundException("사용자를 찾을 수 없습니다: ID $userId")
+            throw AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다: ID $userId")
         }
         userRepository.deleteById(userId)
     }
@@ -159,7 +160,7 @@ class AdminUserService(
      */
     fun getUser(userId: Long): UserResponse {
         val user = userRepository.findById(userId)
-            .orElseThrow { ResourceNotFoundException("사용자를 찾을 수 없습니다: ID $userId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다: ID $userId") }
 
         return UserResponse(
             id = user.id ?: 0L,

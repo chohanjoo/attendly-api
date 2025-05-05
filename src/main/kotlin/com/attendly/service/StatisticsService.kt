@@ -9,7 +9,8 @@ import com.attendly.domain.repository.AttendanceRepository
 import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.GbsMemberHistoryRepository
-import com.attendly.exception.ResourceNotFoundException
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorCode
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -36,7 +37,7 @@ class StatisticsService(
         val villages = organizationService.getVillagesByDepartment(departmentId)
         
         if (villages.isEmpty()) {
-            throw ResourceNotFoundException("부서에 마을이 없습니다: $departmentId")
+            throw AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "부서에 마을이 없습니다: $departmentId")
         }
         
         // 마을별 통계 수집
@@ -84,7 +85,7 @@ class StatisticsService(
         val gbsGroups = organizationService.getActiveGbsGroupsByVillage(villageId)
         
         if (gbsGroups.isEmpty()) {
-            throw ResourceNotFoundException("마을에 활성 GBS가 없습니다: $villageId")
+            throw AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "마을에 활성 GBS가 없습니다: $villageId")
         }
         
         // GBS별 통계 수집

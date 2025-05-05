@@ -8,7 +8,8 @@ import com.attendly.domain.entity.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.UserRepository
-import com.attendly.exception.ResourceNotFoundException
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorCode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -106,9 +107,10 @@ class AdminUserServiceTest {
         every { userRepository.findByEmail("hong@example.com") } returns Optional.of(existingUser)
 
         // when & then
-        val exception = assertThrows<IllegalArgumentException> {
+        val exception = assertThrows<AttendlyApiException> {
             adminUserService.createUser(userCreateRequest)
         }
+        assertEquals(ErrorCode.DUPLICATE_RESOURCE, exception.errorCode)
         assertEquals("이미 사용 중인 이메일입니다", exception.message)
         
         verify { userRepository.findByEmail("hong@example.com") }
@@ -230,10 +232,11 @@ class AdminUserServiceTest {
         every { userRepository.existsById(userId) } returns false
         
         // when & then
-        val exception = assertThrows<ResourceNotFoundException> {
+        val exception = assertThrows<AttendlyApiException> {
             adminUserService.deleteUser(userId)
         }
         
+        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
         assertEquals("사용자를 찾을 수 없습니다: ID $userId", exception.message)
         verify { userRepository.existsById(userId) }
         verify(exactly = 0) { userRepository.deleteById(any()) }

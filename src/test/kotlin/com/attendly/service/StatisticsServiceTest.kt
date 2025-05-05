@@ -15,7 +15,8 @@ import com.attendly.domain.repository.AttendanceRepository
 import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.GbsMemberHistoryRepository
-import com.attendly.exception.ResourceNotFoundException
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorCode
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.InjectMockKs
@@ -160,9 +161,13 @@ class StatisticsServiceTest {
         every { organizationService.getVillagesByDepartment(1L) } returns emptyList()
         
         // when & then
-        assertThrows<ResourceNotFoundException> {
+        val exception = assertThrows<AttendlyApiException> {
             statisticsService.getDepartmentStatistics(1L, startDate, endDate)
         }
+        
+        // 올바른 에러 코드 확인
+        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
+        assertTrue(exception.message!!.contains("부서에 마을이 없습니다: 1"))
     }
 
     @Test
@@ -209,9 +214,13 @@ class StatisticsServiceTest {
         every { organizationService.getActiveGbsGroupsByVillage(1L) } returns emptyList()
         
         // when & then
-        assertThrows<ResourceNotFoundException> {
+        val exception = assertThrows<AttendlyApiException> {
             statisticsService.getVillageStatistics(1L, startDate, endDate)
         }
+        
+        // 올바른 에러 코드 확인
+        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
+        assertTrue(exception.message!!.contains("마을에 활성 GBS가 없습니다: 1"))
     }
 
     @Test

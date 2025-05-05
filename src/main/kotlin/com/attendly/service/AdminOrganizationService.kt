@@ -3,7 +3,8 @@ package com.attendly.service
 import com.attendly.api.dto.*
 import com.attendly.domain.entity.*
 import com.attendly.domain.repository.*
-import com.attendly.exception.ResourceNotFoundException
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorCode
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -46,7 +47,7 @@ class AdminOrganizationService(
     @Transactional
     fun updateDepartment(departmentId: Long, request: DepartmentUpdateRequest): DepartmentResponse {
         val department = departmentRepository.findById(departmentId)
-            .orElseThrow { ResourceNotFoundException("부서를 찾을 수 없습니다: ID $departmentId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "부서를 찾을 수 없습니다: ID $departmentId") }
 
         val updatedDepartment = Department(
             id = department.id,
@@ -70,7 +71,7 @@ class AdminOrganizationService(
     @Transactional
     fun deleteDepartment(departmentId: Long) {
         if (!departmentRepository.existsById(departmentId)) {
-            throw ResourceNotFoundException("부서를 찾을 수 없습니다: ID $departmentId")
+            throw AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "부서를 찾을 수 없습니다: ID $departmentId")
         }
         departmentRepository.deleteById(departmentId)
     }
@@ -80,7 +81,7 @@ class AdminOrganizationService(
      */
     fun getDepartment(departmentId: Long): DepartmentResponse {
         val department = departmentRepository.findById(departmentId)
-            .orElseThrow { ResourceNotFoundException("부서를 찾을 수 없습니다: ID $departmentId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "부서를 찾을 수 없습니다: ID $departmentId") }
 
         return DepartmentResponse(
             id = department.id ?: 0L,
@@ -110,7 +111,7 @@ class AdminOrganizationService(
     @Transactional
     fun createVillage(request: VillageCreateRequest): VillageResponse {
         val department = departmentRepository.findById(request.departmentId)
-            .orElseThrow { ResourceNotFoundException("부서를 찾을 수 없습니다: ID ${request.departmentId}") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "부서를 찾을 수 없습니다: ID ${request.departmentId}") }
 
         val village = Village(
             name = request.name,
@@ -125,7 +126,7 @@ class AdminOrganizationService(
 
         if (request.villageLeaderId != null) {
             val leader = userRepository.findById(request.villageLeaderId)
-                .orElseThrow { ResourceNotFoundException("사용자를 찾을 수 없습니다: ID ${request.villageLeaderId}") }
+                .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다: ID ${request.villageLeaderId}") }
 
             val villageLeader = VillageLeader(
                 village = savedVillage,
@@ -157,11 +158,11 @@ class AdminOrganizationService(
     @Transactional
     fun updateVillage(villageId: Long, request: VillageUpdateRequest): VillageResponse {
         val village = villageRepository.findById(villageId)
-            .orElseThrow { ResourceNotFoundException("마을을 찾을 수 없습니다: ID $villageId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "마을을 찾을 수 없습니다: ID $villageId") }
 
         val department = if (request.departmentId != null && request.departmentId != village.department.id) {
             departmentRepository.findById(request.departmentId)
-                .orElseThrow { ResourceNotFoundException("부서를 찾을 수 없습니다: ID ${request.departmentId}") }
+                .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "부서를 찾을 수 없습니다: ID ${request.departmentId}") }
         } else {
             village.department
         }
@@ -199,7 +200,7 @@ class AdminOrganizationService(
     @Transactional
     fun createGbsGroup(request: GbsGroupCreateRequest): GbsGroupResponse {
         val village = villageRepository.findById(request.villageId)
-            .orElseThrow { ResourceNotFoundException("마을을 찾을 수 없습니다: ID ${request.villageId}") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "마을을 찾을 수 없습니다: ID ${request.villageId}") }
 
         val gbsGroup = GbsGroup(
             name = request.name,
@@ -221,7 +222,7 @@ class AdminOrganizationService(
             ))
 
             val leader = userRepository.findById(request.leaderId)
-                .orElseThrow { ResourceNotFoundException("사용자를 찾을 수 없습니다: ID ${request.leaderId}") }
+                .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다: ID ${request.leaderId}") }
 
             leaderName = leader.name
             leaderId = leader.id
@@ -247,11 +248,11 @@ class AdminOrganizationService(
     @Transactional
     fun updateGbsGroup(gbsGroupId: Long, request: GbsGroupUpdateRequest): GbsGroupResponse {
         val gbsGroup = gbsGroupRepository.findById(gbsGroupId)
-            .orElseThrow { ResourceNotFoundException("GBS 그룹을 찾을 수 없습니다: ID $gbsGroupId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "GBS 그룹을 찾을 수 없습니다: ID $gbsGroupId") }
 
         val village = if (request.villageId != null && request.villageId != gbsGroup.village.id) {
             villageRepository.findById(request.villageId)
-                .orElseThrow { ResourceNotFoundException("마을을 찾을 수 없습니다: ID ${request.villageId}") }
+                .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "마을을 찾을 수 없습니다: ID ${request.villageId}") }
         } else {
             gbsGroup.village
         }
@@ -292,10 +293,10 @@ class AdminOrganizationService(
     @Transactional
     fun assignLeaderToGbs(gbsGroupId: Long, request: GbsLeaderAssignRequest) {
         val gbsGroup = gbsGroupRepository.findById(gbsGroupId)
-            .orElseThrow { ResourceNotFoundException("GBS 그룹을 찾을 수 없습니다: ID $gbsGroupId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "GBS 그룹을 찾을 수 없습니다: ID $gbsGroupId") }
 
         val leader = userRepository.findById(request.leaderId)
-            .orElseThrow { ResourceNotFoundException("사용자를 찾을 수 없습니다: ID ${request.leaderId}") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다: ID ${request.leaderId}") }
 
         // 현재 리더가 있다면 종료 처리
         val currentLeaderHistory = gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(gbsGroupId, request.leaderId)
@@ -331,10 +332,10 @@ class AdminOrganizationService(
     @Transactional
     fun assignMemberToGbs(gbsGroupId: Long, request: GbsMemberAssignRequest) {
         val gbsGroup = gbsGroupRepository.findById(gbsGroupId)
-            .orElseThrow { ResourceNotFoundException("GBS 그룹을 찾을 수 없습니다: ID $gbsGroupId") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "GBS 그룹을 찾을 수 없습니다: ID $gbsGroupId") }
 
         val member = userRepository.findById(request.memberId)
-            .orElseThrow { ResourceNotFoundException("사용자를 찾을 수 없습니다: ID ${request.memberId}") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "사용자를 찾을 수 없습니다: ID ${request.memberId}") }
 
         // 현재 다른 GBS 그룹에 속해 있는지 확인
         val currentMemberHistory = gbsMemberHistoryRepository.findCurrentMemberHistoryByMemberId(request.memberId)
@@ -370,7 +371,7 @@ class AdminOrganizationService(
     @Transactional
     fun executeGbsReorganization(request: GbsReorganizationRequest): GbsReorganizationResponse {
         val department = departmentRepository.findById(request.departmentId)
-            .orElseThrow { ResourceNotFoundException("부서를 찾을 수 없습니다: ID ${request.departmentId}") }
+            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "부서를 찾을 수 없습니다: ID ${request.departmentId}") }
 
         // 부서 내 모든 GBS 그룹 조회
         // TODO: 부서 내 모든 GBS 그룹 조회 로직 구현
