@@ -1,6 +1,6 @@
 # Docker 환경 실행 가이드
 
-이 문서는 Church.Attendly 애플리케이션을 Docker 환경에서 실행하는 방법을 설명합니다. 신규 입사자가 로컬 개발 환경을 쉽게 설정하고 애플리케이션을 실행할 수 있도록 작성되었습니다.
+이 문서는 attendly-api 애플리케이션을 Docker 환경에서 실행하는 방법을 설명합니다. 신규 입사자가 로컬 개발 환경을 쉽게 설정하고 애플리케이션을 실행할 수 있도록 작성되었습니다.
 
 ## 사전 요구사항
 
@@ -10,7 +10,7 @@
 
 ## 프로젝트 구조 이해하기
 
-Church.Attendly 애플리케이션은 다음과 같은 Docker 구성을 사용합니다:
+attendly-api 애플리케이션은 다음과 같은 Docker 구성을 사용합니다:
 
 - `app`: Java/Kotlin 기반 Spring Boot 애플리케이션
 - `db`: MySQL 8.0 데이터베이스
@@ -25,7 +25,7 @@ Church.Attendly 애플리케이션은 다음과 같은 Docker 구성을 사용�
 
 ```bash
 # 1. 프로젝트 디렉토리로 이동
-cd /path/to/church.attendly
+cd /path/to/attendly
 
 # 2. 기존 컨테이너와 볼륨을 모두 중지 및 삭제 (데이터베이스 데이터 초기화)
 docker-compose down -v
@@ -48,7 +48,7 @@ docker-compose up --build
 
 ```bash
 # 1. 프로젝트 디렉토리로 이동
-cd /path/to/church.attendly
+cd /path/to/attendly
 
 # 2. 컨테이너만 중지 (볼륨은 유지)
 docker-compose down

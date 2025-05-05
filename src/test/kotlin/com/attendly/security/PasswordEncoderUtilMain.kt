@@ -5,7 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 
 /**
  * 암호화된 비밀번호를 확인하기 위한 유틸리티 메인 클래스
- * 실행 방법: ./gradlew -PmainClass=com.church.attendly.security.PasswordEncoderUtilMain execute
+ * 실행 방법: ./gradlew -PmainClass=com.attendly.security.PasswordEncoderUtilMain execute
  */
 object PasswordEncoderUtilMain {
     @JvmStatic

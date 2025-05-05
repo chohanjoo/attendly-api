@@ -28,7 +28,7 @@ class GlobalExceptionHandler {
         e: AttendlyApiException,
         request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
-        log.error("AttendlyApiException: {}", e.message)
+        log.error("AttendlyApiException: {}", e)
         val errorResponse = ErrorResponse(
             status = e.errorCode.status.value(),
             code = e.errorCode.code,
@@ -46,7 +46,7 @@ class GlobalExceptionHandler {
         e: ResourceNotFoundException,
         request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
-        log.error("ResourceNotFoundException: {}", e.message)
+        log.error("ResourceNotFoundException: {}", e)
         val errorResponse = ErrorResponse(
             status = ErrorCode.RESOURCE_NOT_FOUND.status.value(),
             code = ErrorCode.RESOURCE_NOT_FOUND.code,
@@ -64,7 +64,7 @@ class GlobalExceptionHandler {
         e: AccessDeniedException,
         request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
-        log.error("AccessDeniedException: {}", e.message)
+        log.error("AccessDeniedException: {}", e)
         val errorResponse = ErrorResponse(
             status = ErrorCode.FORBIDDEN.status.value(),
             code = ErrorCode.FORBIDDEN.code,
@@ -82,7 +82,7 @@ class GlobalExceptionHandler {
         e: MethodArgumentNotValidException,
         request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
-        log.error("MethodArgumentNotValidException: {}", e.message)
+        log.error("MethodArgumentNotValidException: {}", e)
         val fieldErrors = e.bindingResult.fieldErrors.map { fieldError ->
             ErrorResponse.FieldError(
                 field = fieldError.field,
@@ -110,7 +110,7 @@ class GlobalExceptionHandler {
         e: BindException,
         request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
-        log.error("BindException: {}", e.message)
+        log.error("BindException: {}", e)
         val fieldErrors = e.bindingResult.fieldErrors.map { fieldError ->
             ErrorResponse.FieldError(
                 field = fieldError.field,
@@ -138,7 +138,7 @@ class GlobalExceptionHandler {
         e: MethodArgumentTypeMismatchException,
         request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
-        log.error("MethodArgumentTypeMismatchException: {}", e.message)
+        log.error("MethodArgumentTypeMismatchException: {}", e)
         val errorResponse = ErrorResponse(
             status = ErrorCode.BAD_REQUEST.status.value(),
             code = ErrorCode.BAD_REQUEST.code,
@@ -156,7 +156,7 @@ class GlobalExceptionHandler {
         e: NoHandlerFoundException,
         request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
-        log.error("NoHandlerFoundException: {}", e.message)
+        log.error("NoHandlerFoundException: {}", e)
         val errorResponse = ErrorResponse(
             status = ErrorCode.RESOURCE_NOT_FOUND.status.value(),
             code = ErrorCode.RESOURCE_NOT_FOUND.code,

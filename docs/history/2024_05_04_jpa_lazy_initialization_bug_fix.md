@@ -7,7 +7,7 @@
 `/api/v1/gbs-members/leaders/{leaderId}/history` API 호출 시 다음과 같은 JPA 지연 로딩 관련 예외 발생:
 
 ```
-org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role: com.church.attendly.domain.entity.User.gbsLeaderHistories: could not initialize proxy - no Session
+org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role: com.attendly.domain.entity.User.gbsLeaderHistories: could not initialize proxy - no Session
 ```
 
 ## 장애 원인 분석

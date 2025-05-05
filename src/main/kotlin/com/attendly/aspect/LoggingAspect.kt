@@ -24,16 +24,16 @@ class LoggingAspect(
     /**
      * 중요 컨트롤러 메서드에 대한 포인트컷
      */
-    @Pointcut("within(com.church.attendly.api.controller..*) && @annotation(org.springframework.web.bind.annotation.PostMapping)")
+    @Pointcut("within(com.attendly.api.controller..*) && @annotation(org.springframework.web.bind.annotation.PostMapping)")
     fun postMappingMethods() {}
 
-    @Pointcut("within(com.church.attendly.api.controller..*) && @annotation(org.springframework.web.bind.annotation.PutMapping)")
+    @Pointcut("within(com.attendly.api.controller..*) && @annotation(org.springframework.web.bind.annotation.PutMapping)")
     fun putMappingMethods() {}
 
-    @Pointcut("within(com.church.attendly.api.controller..*) && @annotation(org.springframework.web.bind.annotation.DeleteMapping)")
+    @Pointcut("within(com.attendly.api.controller..*) && @annotation(org.springframework.web.bind.annotation.DeleteMapping)")
     fun deleteMappingMethods() {}
 
-    @Pointcut("within(com.church.attendly.api.controller.admin..*)")
+    @Pointcut("within(com.attendly.api.controller.admin..*)")
     fun adminControllerMethods() {}
 
     /**
