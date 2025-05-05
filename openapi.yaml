@@ -11,6 +11,8 @@ security:
 tags:
   - name: 인증 API
     description: 회원가입, 로그인 및 토큰 갱신 API
+  - name: GBS 멤버 관리
+    description: GBS 멤버 조회 API
   - name: 출석 API
     description: 출석 입력 및 조회 API
   - name: 관리자-조직구조
@@ -963,6 +965,68 @@ paths:
                 $ref: '#/components/schemas/VillageAttendanceResponse'
       security:
         - bearerAuth: []
+  /api/v1/gbs-members/{gbsId}:
+    get:
+      tags:
+        - GBS 멤버 관리
+      summary: GBS 멤버 조회
+      description: 특정 GBS에 속한 멤버들의 정보를 조회합니다. 리더나 위임받은 리더만 자신의 GBS를 조회할 수 있습니다.
+      operationId: getGbsMembers
+      parameters:
+        - name: gbsId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/GbsMembersListResponse'
+  /api/v1/gbs-members/my-gbs:
+    get:
+      tags:
+        - GBS 멤버 관리
+      summary: 로그인한 리더의 GBS 조회
+      description: 현재 로그인한 리더가 담당하는 GBS 정보를 조회합니다.
+      operationId: getMyGbs
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LeaderGbsResponse'
+  /api/v1/gbs-members/leaders/{leaderId}/history:
+    get:
+      tags:
+        - GBS 멤버 관리
+      summary: 리더의 GBS 히스토리 조회
+      description: 특정 리더가 지금까지 참여했던 GBS 히스토리 정보를 조회합니다. 각 GBS 히스토리에는 참여 기간과 조원 정보가 포함됩니다.
+      operationId: getLeaderGbsHistories
+      parameters:
+        - name: leaderId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LeaderGbsHistoryListResponse'
   /api/gbs/{id}/report:
     get:
       tags:
@@ -1226,6 +1290,82 @@ paths:
                 type: array
                 items:
                   type: string
+      security:
+        - bearerAuth: []
+  /api/admin/logs/api-calls:
+    get:
+      tags:
+        - 관리자 로그 API
+      summary: API 호출 로그 조회
+      description: API 호출 관련 로그만 조회합니다 (관리자 전용)
+      operationId: getApiCallLogs
+      parameters:
+        - name: level
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: startTime
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: apiPath
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: method
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 20
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: timestamp,desc
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageSystemLogResponseDto'
       security:
         - bearerAuth: []
   /api/admin/batch/jobs/{jobId}:
@@ -2397,6 +2537,134 @@ components:
           items:
             $ref: '#/components/schemas/GbsAttendanceSummary'
       description: 마을 출석 현황 응답
+    GbsMemberResponse:
+      required:
+        - id
+        - joinDate
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        email:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        joinDate:
+          type: string
+          format: date
+        phoneNumber:
+          type: string
+    GbsMembersListResponse:
+      required:
+        - gbsId
+        - gbsName
+        - memberCount
+        - members
+      type: object
+      properties:
+        gbsId:
+          type: integer
+          format: int64
+        gbsName:
+          type: string
+        memberCount:
+          type: integer
+          format: int32
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/GbsMemberResponse'
+    LeaderGbsResponse:
+      required:
+        - gbsId
+        - gbsName
+        - leaderId
+        - leaderName
+        - startDate
+        - villageId
+        - villageName
+      type: object
+      properties:
+        gbsId:
+          type: integer
+          format: int64
+        gbsName:
+          type: string
+        villageId:
+          type: integer
+          format: int64
+        villageName:
+          type: string
+        leaderId:
+          type: integer
+          format: int64
+        leaderName:
+          type: string
+        startDate:
+          type: string
+          format: date
+    LeaderGbsHistoryListResponse:
+      required:
+        - histories
+        - historyCount
+        - leaderId
+        - leaderName
+      type: object
+      properties:
+        leaderId:
+          type: integer
+          format: int64
+        leaderName:
+          type: string
+        historyCount:
+          type: integer
+          format: int32
+        histories:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeaderGbsHistoryResponse'
+    LeaderGbsHistoryResponse:
+      required:
+        - gbsId
+        - gbsName
+        - historyId
+        - isActive
+        - members
+        - startDate
+        - villageId
+        - villageName
+      type: object
+      properties:
+        historyId:
+          type: integer
+          format: int64
+        gbsId:
+          type: integer
+          format: int64
+        gbsName:
+          type: string
+        villageId:
+          type: integer
+          format: int64
+        villageName:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        isActive:
+          type: boolean
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/GbsMemberResponse'
     DepartmentStatistics:
       required:
         - attendanceRate
@@ -2479,13 +2747,6 @@ components:
         totalElements:
           type: integer
           format: int64
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
-        number:
-          type: integer
-          format: int32
-        sort:
-          $ref: '#/components/schemas/SortObject'
         size:
           type: integer
           format: int32
@@ -2493,6 +2754,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserResponse'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -2505,6 +2773,11 @@ components:
     PageableObject:
       type: object
       properties:
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: '#/components/schemas/SortObject'
         paged:
           type: boolean
         pageNumber:
@@ -2515,19 +2788,14 @@ components:
           format: int32
         unpaged:
           type: boolean
-        sort:
-          $ref: '#/components/schemas/SortObject'
-        offset:
-          type: integer
-          format: int64
     SortObject:
       type: object
       properties:
+        empty:
+          type: boolean
         sorted:
           type: boolean
         unsorted:
-          type: boolean
-        empty:
           type: boolean
     SystemSettingListResponse:
       required:
@@ -2542,6 +2810,94 @@ components:
         total:
           type: integer
           format: int64
+    ApiCallInfoDto:
+      type: object
+      properties:
+        requestId:
+          type: string
+        apiPath:
+          type: string
+        method:
+          type: string
+        status:
+          type: string
+          enum:
+            - 100 CONTINUE
+            - 101 SWITCHING_PROTOCOLS
+            - 102 PROCESSING
+            - 103 EARLY_HINTS
+            - 103 CHECKPOINT
+            - 200 OK
+            - 201 CREATED
+            - 202 ACCEPTED
+            - 203 NON_AUTHORITATIVE_INFORMATION
+            - 204 NO_CONTENT
+            - 205 RESET_CONTENT
+            - 206 PARTIAL_CONTENT
+            - 207 MULTI_STATUS
+            - 208 ALREADY_REPORTED
+            - 226 IM_USED
+            - 300 MULTIPLE_CHOICES
+            - 301 MOVED_PERMANENTLY
+            - 302 FOUND
+            - 302 MOVED_TEMPORARILY
+            - 303 SEE_OTHER
+            - 304 NOT_MODIFIED
+            - 305 USE_PROXY
+            - 307 TEMPORARY_REDIRECT
+            - 308 PERMANENT_REDIRECT
+            - 400 BAD_REQUEST
+            - 401 UNAUTHORIZED
+            - 402 PAYMENT_REQUIRED
+            - 403 FORBIDDEN
+            - 404 NOT_FOUND
+            - 405 METHOD_NOT_ALLOWED
+            - 406 NOT_ACCEPTABLE
+            - 407 PROXY_AUTHENTICATION_REQUIRED
+            - 408 REQUEST_TIMEOUT
+            - 409 CONFLICT
+            - 410 GONE
+            - 411 LENGTH_REQUIRED
+            - 412 PRECONDITION_FAILED
+            - 413 PAYLOAD_TOO_LARGE
+            - 413 REQUEST_ENTITY_TOO_LARGE
+            - 414 URI_TOO_LONG
+            - 414 REQUEST_URI_TOO_LONG
+            - 415 UNSUPPORTED_MEDIA_TYPE
+            - 416 REQUESTED_RANGE_NOT_SATISFIABLE
+            - 417 EXPECTATION_FAILED
+            - 418 I_AM_A_TEAPOT
+            - 419 INSUFFICIENT_SPACE_ON_RESOURCE
+            - 420 METHOD_FAILURE
+            - 421 DESTINATION_LOCKED
+            - 422 UNPROCESSABLE_ENTITY
+            - 423 LOCKED
+            - 424 FAILED_DEPENDENCY
+            - 425 TOO_EARLY
+            - 426 UPGRADE_REQUIRED
+            - 428 PRECONDITION_REQUIRED
+            - 429 TOO_MANY_REQUESTS
+            - 431 REQUEST_HEADER_FIELDS_TOO_LARGE
+            - 451 UNAVAILABLE_FOR_LEGAL_REASONS
+            - 500 INTERNAL_SERVER_ERROR
+            - 501 NOT_IMPLEMENTED
+            - 502 BAD_GATEWAY
+            - 503 SERVICE_UNAVAILABLE
+            - 504 GATEWAY_TIMEOUT
+            - 505 HTTP_VERSION_NOT_SUPPORTED
+            - 506 VARIANT_ALSO_NEGOTIATES
+            - 507 INSUFFICIENT_STORAGE
+            - 508 LOOP_DETECTED
+            - 509 BANDWIDTH_LIMIT_EXCEEDED
+            - 510 NOT_EXTENDED
+            - 511 NETWORK_AUTHENTICATION_REQUIRED
+        duration:
+          type: integer
+          format: int64
+        requestBody:
+          type: string
+        responseBody:
+          type: string
     PageSystemLogResponseDto:
       type: object
       properties:
@@ -2551,13 +2907,6 @@ components:
         totalElements:
           type: integer
           format: int64
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
-        number:
-          type: integer
-          format: int32
-        sort:
-          $ref: '#/components/schemas/SortObject'
         size:
           type: integer
           format: int32
@@ -2565,6 +2914,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SystemLogResponseDto'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -2605,6 +2961,8 @@ components:
           type: string
         serverInstance:
           type: string
+        apiInfo:
+          $ref: '#/components/schemas/ApiCallInfoDto'
     PageBatchJobResponse:
       type: object
       properties:
@@ -2614,13 +2972,6 @@ components:
         totalElements:
           type: integer
           format: int64
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
-        number:
-          type: integer
-          format: int32
-        sort:
-          $ref: '#/components/schemas/SortObject'
         size:
           type: integer
           format: int32
@@ -2628,6 +2979,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BatchJobResponse'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
