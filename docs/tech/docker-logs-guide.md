@@ -75,10 +75,10 @@ docker logs -f [컨테이너_이름/ID] | grep [키워드]
 예시:
 ```bash
 # ERROR 로그만 필터링
-docker logs church-attendly-app | grep ERROR
+docker logs attendly-api-app | grep ERROR
 
 # 실시간 로그에서 INFO 레벨 메시지만 확인
-docker logs -f church-attendly-app | grep INFO
+docker logs -f attendly-api-app | grep INFO
 ```
 
 ### 2. 로그 저장
@@ -94,10 +94,10 @@ docker logs --since=[시간] [컨테이너_이름/ID] > [파일명].log
 예시:
 ```bash
 # 모든 로그를 파일로 저장
-docker logs church-attendly-app > app_logs.log
+docker logs attendly-api-app > app_logs.log
 
 # 최근 1시간의 로그만 저장
-docker logs --since=1h church-attendly-app > recent_logs.log
+docker logs --since=1h attendly-api-app > recent_logs.log
 ```
 
 ## 로그 드라이버 설정

@@ -1,4 +1,4 @@
-# Church Attendly (교회 출석부 웹 서비스)
+# Attendly API (교회 출석부 웹 서비스)
 
 교회 대학부 리더들이 매주 조원(학생) 출석을 기록하고, 마을장·교역자가 데이터를 관리할 수 있는 웹 기반 출석 관리 시스템입니다.
 
@@ -25,8 +25,8 @@
 
 1. 저장소 클론
    ```bash
-   git clone https://github.com/your-org/church.attendly.git
-   cd church.attendly
+   git clone https://github.com/your-org/attendly-api.git
+   cd attendly-api
    ```
 
 2. 로컬 개발 서버 실행

@@ -115,7 +115,7 @@ docker ps
 
 ```bash
 # Docker 컨테이너 내의 MySQL에 접속
-docker exec -it church-attendly-mysql mysql -u root -proot
+docker exec -it attendly-api-mysql mysql -u root -proot
 
 # 데이터베이스 선택
 USE church_attendly;

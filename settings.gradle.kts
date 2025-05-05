@@ -1,1 +1,1 @@
-rootProject.name = "church.attendly"
+rootProject.name = "attendly-api"
