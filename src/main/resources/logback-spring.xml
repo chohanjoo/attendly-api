@@ -26,6 +26,10 @@
             <applicationName>Attendly API</applicationName>
             <environment>${SPRING_PROFILES_ACTIVE:-local}</environment>
             <minLevel>DEBUG</minLevel>
+            <enableFileAttachment>true</enableFileAttachment>
+            <maxMessageLength>1000</maxMessageLength>
+            <retryCount>10</retryCount>
+            <waitBetweenMessages>2000</waitBetweenMessages>
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
                 <level>DEBUG</level>
             </filter>
@@ -34,9 +38,10 @@
         <!-- 비동기 Discord 앱엔더 -->
         <appender name="ASYNC_DISCORD" class="ch.qos.logback.classic.AsyncAppender">
             <appender-ref ref="DISCORD" />
-            <queueSize>512</queueSize>
+            <queueSize>2048</queueSize>
             <discardingThreshold>0</discardingThreshold>
             <includeCallerData>true</includeCallerData>
+            <neverBlock>false</neverBlock>
         </appender>
     </springProfile>
 
@@ -52,8 +57,8 @@
     <springProfile name="dev">
         <root level="DEBUG">
             <appender-ref ref="CONSOLE" />
-            <!-- <appender-ref ref="FILE" /> -->
-            <!-- <appender-ref ref="ASYNC_DISCORD" /> -->
+            <appender-ref ref="FILE" />
+            <appender-ref ref="ASYNC_DISCORD" />
         </root>
     </springProfile>
 
@@ -74,9 +79,15 @@
 
     <logger name="org.hibernate" level="WARN"/>
 
+    <logger name="org.hibernate.SQL" level="WARN" />
+    <logger name="org.hibernate.type.descriptor.sql" level="WARN" />
+
     <logger name="org.flywaydb" level="WARN"/>
 
     <logger name="io.swagger" level="WARN"/>
 
     <logger name="com.attendly" level="DEBUG" />
+    
+    <!-- 예외 처리 로그 강화 -->
+    <logger name="com.attendly.exception" level="ERROR" />
 </configuration> 
