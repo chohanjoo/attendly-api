@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 @RestController
 @RequestMapping("/api/admin/logs")
 @Tag(name = "관리자 로그 API", description = "시스템 로그 조회 관련 API")
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 @SecurityRequirement(name = "bearerAuth")
 class AdminLogController(
     private val systemLogService: SystemLogService
