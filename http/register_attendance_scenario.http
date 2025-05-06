@@ -21,7 +21,9 @@ Content-Type: application/json
   "password": "test123!@#",
   "name": "한주",
   "role": "ADMIN",
-  "departmentId": 1
+  "departmentId": 1,
+  "phoneNumber": "010-1234-5678",
+  "birthDate": "1990-01-01"
 }
 
 ### 2. 로그인 및 토큰 발급
@@ -59,7 +61,9 @@ Authorization: Bearer {{accessToken}}
   "email": "village_leader@example.com",
   "password": "test123!@#",
   "role": "LEADER",
-  "departmentId": {{departmentId}}
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-2222-3333",
+  "birthDate": "1985-05-15"
 }
 
 @villageLeaderId = {{createVillageLeader.response.body.id}}
@@ -89,7 +93,9 @@ Authorization: Bearer {{accessToken}}
   "email": "minister1@example.com",
   "password": "test123!@#",
   "role": "MINISTER",
-  "departmentId": {{departmentId}}
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-3333-4444",
+  "birthDate": "1980-03-20"
 }
 
 @ministerId = {{createMinister.response.body.id}}
@@ -105,7 +111,9 @@ Authorization: Bearer {{accessToken}}
   "email": "leader1@example.com",
   "password": "test123!@#",
   "role": "LEADER",
-  "departmentId": {{departmentId}}
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-4444-5555",
+  "birthDate": "1992-07-10"
 }
 
 @leader1Id = {{createLeader1.response.body.id}}
@@ -121,7 +129,9 @@ Authorization: Bearer {{accessToken}}
   "email": "leader2@example.com",
   "password": "test123!@#",
   "role": "LEADER",
-  "departmentId": {{departmentId}}
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-5555-6666",
+  "birthDate": "1993-09-25"
 }
 
 @leader2Id = {{createLeader2.response.body.id}}
@@ -137,7 +147,9 @@ Authorization: Bearer {{accessToken}}
   "email": "member1@example.com",
   "password": "test123!@#",
   "role": "MEMBER",
-  "departmentId": {{departmentId}}
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-6666-7777",
+  "birthDate": "1995-11-05"
 }
 
 @member1Id = {{createMember1.response.body.id}}
@@ -153,7 +165,9 @@ Authorization: Bearer {{accessToken}}
   "email": "member2@example.com",
   "password": "test123!@#",
   "role": "MEMBER",
-  "departmentId": {{departmentId}}
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-7777-8888",
+  "birthDate": "1996-02-15"
 }
 
 @member2Id = {{createMember2.response.body.id}}
@@ -169,7 +183,9 @@ Authorization: Bearer {{accessToken}}
   "email": "member3@example.com",
   "password": "test123!@#",
   "role": "MEMBER",
-  "departmentId": {{departmentId}}
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-8888-9999",
+  "birthDate": "1997-04-22"
 }
 
 @member3Id = {{createMember3.response.body.id}}
@@ -185,7 +201,9 @@ Authorization: Bearer {{accessToken}}
   "email": "member4@example.com",
   "password": "test123!@#",
   "role": "MEMBER",
-  "departmentId": {{departmentId}}
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-9999-0000",
+  "birthDate": "1998-08-30"
 }
 
 @member4Id = {{createMember4.response.body.id}}
