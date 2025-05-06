@@ -78,6 +78,7 @@ class AdminUserControllerTest {
             id = 1L,
             name = "홍길동",
             email = "hong@example.com",
+            phoneNumber = "010-1234-5678",
             role = Role.LEADER,
             departmentId = 1L,
             departmentName = "청년부",
@@ -100,6 +101,7 @@ class AdminUserControllerTest {
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.name").value("홍길동"))
             .andExpect(jsonPath("$.email").value("hong@example.com"))
+            .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"))
             .andExpect(jsonPath("$.role").value("LEADER"))
             .andExpect(jsonPath("$.departmentId").value(1))
             .andExpect(jsonPath("$.departmentName").value("청년부"))
@@ -121,6 +123,7 @@ class AdminUserControllerTest {
             id = userId,
             name = "홍길동(수정)",
             email = "hong_updated@example.com",
+            phoneNumber = "010-1234-5678",
             role = Role.ADMIN,
             departmentId = 1L,
             departmentName = "청년부",
@@ -143,6 +146,7 @@ class AdminUserControllerTest {
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.name").value("홍길동(수정)"))
             .andExpect(jsonPath("$.email").value("hong_updated@example.com"))
+            .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"))
             .andExpect(jsonPath("$.role").value("ADMIN"))
         
         verify { adminUserService.updateUser(userId, any()) }
@@ -175,6 +179,7 @@ class AdminUserControllerTest {
             id = userId,
             name = "홍길동",
             email = "hong@example.com",
+            phoneNumber = "010-1234-5678",
             role = Role.LEADER,
             departmentId = 1L,
             departmentName = "청년부",
@@ -195,6 +200,7 @@ class AdminUserControllerTest {
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.name").value("홍길동"))
             .andExpect(jsonPath("$.email").value("hong@example.com"))
+            .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"))
             .andExpect(jsonPath("$.role").value("LEADER"))
         
         verify { adminUserService.getUser(userId) }
@@ -209,6 +215,7 @@ class AdminUserControllerTest {
                 id = 1L,
                 name = "홍길동",
                 email = "hong@example.com",
+                phoneNumber = "010-1234-5678",
                 role = Role.LEADER,
                 departmentId = 1L,
                 departmentName = "청년부",
@@ -220,6 +227,7 @@ class AdminUserControllerTest {
                 id = 2L,
                 name = "김철수",
                 email = "kim@example.com",
+                phoneNumber = "010-9876-5432",
                 role = Role.MEMBER,
                 departmentId = 1L,
                 departmentName = "청년부",
@@ -245,8 +253,12 @@ class AdminUserControllerTest {
             .andExpect(jsonPath("$.content.length()").value(2))
             .andExpect(jsonPath("$.content[0].id").value(1))
             .andExpect(jsonPath("$.content[0].name").value("홍길동"))
+            .andExpect(jsonPath("$.content[0].email").value("hong@example.com"))
+            .andExpect(jsonPath("$.content[0].phoneNumber").value("010-1234-5678"))
             .andExpect(jsonPath("$.content[1].id").value(2))
             .andExpect(jsonPath("$.content[1].name").value("김철수"))
+            .andExpect(jsonPath("$.content[1].email").value("kim@example.com"))
+            .andExpect(jsonPath("$.content[1].phoneNumber").value("010-9876-5432"))
             .andExpect(jsonPath("$.totalElements").value(2))
         
         verify { adminUserService.getAllUsers(any()) }

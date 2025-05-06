@@ -1429,6 +1429,11 @@ components:
           type: string
         email:
           type: string
+          format: email
+        phoneNumber:
+          type: string
+          description: 사용자 전화번호
+          pattern: "^\\d{3}-?\\d{3,4}-?\\d{4}$"
         birthDate:
           type: string
           format: date
@@ -1461,6 +1466,9 @@ components:
           type: string
         email:
           type: string
+        phoneNumber:
+          type: string
+          description: 사용자 전화번호
         role:
           type: string
           enum:
@@ -1625,8 +1633,14 @@ components:
       properties:
         email:
           type: string
+          format: email
+        phoneNumber:
+          type: string
+          description: 사용자 전화번호
+          pattern: "^\\d{3}-?\\d{3,4}-?\\d{4}$"
         password:
           type: string
+          format: password
         name:
           type: string
         role:
@@ -1655,6 +1669,9 @@ components:
           type: string
         email:
           type: string
+        phoneNumber:
+          type: string
+          description: 사용자 전화번호
         role:
           type: string
     TokenRefreshRequest:
@@ -1894,9 +1911,14 @@ components:
           type: string
         email:
           type: string
-        password:
-          pattern: ^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$
+          format: email
+        phoneNumber:
           type: string
+          description: 사용자 전화번호
+          pattern: "^\\d{3}-?\\d{3,4}-?\\d{4}$"
+        password:
+          type: string
+          format: password
         role:
           type: string
           enum:

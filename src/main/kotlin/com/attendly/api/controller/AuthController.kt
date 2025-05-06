@@ -92,6 +92,7 @@ class AuthController(
             id = user.id ?: 0L,
             name = user.name,
             email = user.email,
+            phoneNumber = user.phoneNumber,
             role = user.role,
             departmentId = user.department.id ?: 0L,
             departmentName = user.department.name,

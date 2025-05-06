@@ -53,6 +53,7 @@ class UserService(
         val user = User(
             name = request.name,
             email = request.email,
+            phoneNumber = request.phoneNumber,
             password = encodedPassword,
             role = request.role,
             department = department
@@ -66,6 +67,7 @@ class UserService(
             userId = savedUser.id ?: 0L,
             name = savedUser.name,
             email = savedUser.email ?: "",
+            phoneNumber = savedUser.phoneNumber,
             role = savedUser.role.name
         )
     }
@@ -111,6 +113,7 @@ class UserService(
                 id = user.id ?: 0L,
                 name = user.name,
                 email = user.email,
+                phoneNumber = user.phoneNumber,
                 role = user.role,
                 departmentId = user.department.id ?: 0L,
                 departmentName = user.department.name,

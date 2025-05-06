@@ -397,14 +397,16 @@ class GbsMemberServiceTest {
                     name = "조원1",
                     email = "member1@example.com",
                     birthDate = LocalDate.of(2000, 1, 1),
-                    joinDate = LocalDate.now()
+                    joinDate = LocalDate.now(),
+                    phoneNumber = "010-1234-5678"
                 ),
                 GbsMemberResponse(
                     id = 2L,
                     name = "조원2",
                     email = "member2@example.com",
                     birthDate = LocalDate.of(2000, 2, 2),
-                    joinDate = LocalDate.now()
+                    joinDate = LocalDate.now(),
+                    phoneNumber = "010-1234-5678"
                 )
             )
         )

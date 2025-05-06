@@ -34,6 +34,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
 import java.time.LocalDateTime
+import org.springframework.security.test.context.support.WithMockUser
 
 @WebMvcTest(AuthController::class)
 @Import(TestSecurityConfig::class)
@@ -64,6 +65,7 @@ class AuthControllerTest {
             email = "test@example.com",
             password = "password123",
             name = "홍길동",
+            phoneNumber = "010-1234-5678",
             role = Role.LEADER,
             departmentId = 1L
         )
@@ -72,6 +74,7 @@ class AuthControllerTest {
             userId = 1L,
             name = "홍길동",
             email = "test@example.com",
+            phoneNumber = "010-1234-5678",
             role = "LEADER"
         )
 
@@ -123,10 +126,18 @@ class AuthControllerTest {
         val user = mockk<User>()
         every { user.id } returns 1L
         every { user.name } returns "홍길동"
+        every { user.phoneNumber } returns "010-1234-5678"
         every { user.role } returns Role.LEADER
 
         val userDetailsAdapter = mockk<UserDetailsAdapter>()
         every { userDetailsAdapter.getUser() } returns user
+        every { userDetailsAdapter.getPassword() } returns "password"
+        every { userDetailsAdapter.getUsername() } returns "test@example.com"
+        every { userDetailsAdapter.isAccountNonExpired() } returns true
+        every { userDetailsAdapter.isAccountNonLocked() } returns true
+        every { userDetailsAdapter.isCredentialsNonExpired() } returns true
+        every { userDetailsAdapter.isEnabled() } returns true
+        every { userDetailsAdapter.getAuthorities() } returns listOf(org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_MEMBER"))
 
         val authentication = mockk<Authentication>()
         every { authentication.principal } returns userDetailsAdapter
@@ -152,7 +163,6 @@ class AuthControllerTest {
     }
 
     @Test
-    @Disabled("현재 UserResponse 변경으로 인해 테스트 수정 필요")
     fun `현재 사용자 정보 조회 테스트`() {
         // Given
         val department = mockk<Department>()
@@ -164,18 +174,34 @@ class AuthControllerTest {
         every { user.id } returns 1L
         every { user.name } returns "테스트 사용자"
         every { user.email } returns "test@example.com"
+        every { user.phoneNumber } returns "010-1234-5678"
         every { user.role } returns Role.MEMBER
         every { user.department } returns department
         every { user.birthDate } returns LocalDate.of(1990, 1, 1)
         every { user.createdAt } returns now
         every { user.updatedAt } returns now
+        every { user.password } returns "password123"
         
         val userDetailsAdapter = mockk<UserDetailsAdapter>()
         every { userDetailsAdapter.getUser() } returns user
+        every { userDetailsAdapter.getPassword() } returns "password123"
+        every { userDetailsAdapter.getUsername() } returns "test@example.com"
+        every { userDetailsAdapter.isAccountNonExpired() } returns true
+        every { userDetailsAdapter.isAccountNonLocked() } returns true
+        every { userDetailsAdapter.isCredentialsNonExpired() } returns true
+        every { userDetailsAdapter.isEnabled() } returns true
+        every { userDetailsAdapter.getAuthorities() } returns listOf(org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_MEMBER"))
         
         // When & Then
         mockMvc.perform(get("/auth/me")
             .with(user(userDetailsAdapter)))
             .andExpect(status().isOk)
+            .andExpect(jsonPath("$.id").value(1L))
+            .andExpect(jsonPath("$.name").value("테스트 사용자"))
+            .andExpect(jsonPath("$.email").value("test@example.com"))
+            .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"))
+            .andExpect(jsonPath("$.role").value("MEMBER"))
+            .andExpect(jsonPath("$.departmentId").value(1L))
+            .andExpect(jsonPath("$.departmentName").value("테스트 부서"))
     }
 } 

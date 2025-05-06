@@ -10,7 +10,7 @@ data class GbsMemberResponse(
     val email: String?,
     val birthDate: LocalDate?,
     val joinDate: LocalDate,
-    val phoneNumber: String? = null
+    val phoneNumber: String?
 ) {
     companion object {
         fun from(memberHistory: GbsMemberHistory): GbsMemberResponse {
@@ -20,7 +20,8 @@ data class GbsMemberResponse(
                 name = member.name,
                 email = member.email,
                 birthDate = member.birthDate,
-                joinDate = memberHistory.startDate
+                joinDate = memberHistory.startDate,
+                phoneNumber = member.phoneNumber
             )
         }
     }

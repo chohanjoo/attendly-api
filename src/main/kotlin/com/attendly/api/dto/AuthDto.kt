@@ -4,6 +4,7 @@ import com.attendly.domain.entity.Role
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Pattern
 
 // 로그인 요청 DTO
 data class LoginRequest(
@@ -36,6 +37,9 @@ data class SignupRequest(
     @field:NotBlank(message = "이름은 필수입니다")
     val name: String,
     
+    @field:Pattern(regexp = "^\\d{3}-?\\d{3,4}-?\\d{4}$", message = "유효한 전화번호 형식이 아닙니다")
+    val phoneNumber: String? = null,
+    
     @field:NotNull(message = "역할은 필수입니다")
     val role: Role,
     
@@ -48,6 +52,7 @@ data class SignupResponse(
     val userId: Long,
     val name: String,
     val email: String,
+    val phoneNumber: String?,
     val role: String
 )
 

@@ -68,6 +68,7 @@ class UserServiceTest {
             name = signupRequest.name,
             email = signupRequest.email,
             password = encodedPassword,
+            phoneNumber = null,
             role = signupRequest.role,
             department = department
         )
@@ -109,6 +110,7 @@ class UserServiceTest {
             name = "기존 사용자",
             email = signupRequest.email,
             password = "existing_password",
+            phoneNumber = null,
             role = Role.MEMBER,
             department = department
         )
@@ -154,6 +156,7 @@ class UserServiceTest {
             name = "홍길동",
             email = email,
             password = "encoded_password",
+            phoneNumber = null,
             role = Role.LEADER,
             department = department
         )
@@ -177,6 +180,7 @@ class UserServiceTest {
             name = "홍길동",
             email = "test@example.com",
             password = "encoded_password",
+            phoneNumber = null,
             role = Role.LEADER,
             department = department
         )
@@ -202,6 +206,7 @@ class UserServiceTest {
             name = "Leader User",
             email = "leader@example.com",
             password = "encoded_password",
+            phoneNumber = "010-1234-5678",
             role = Role.LEADER,
             birthDate = LocalDate.of(1990, 1, 1),
             department = department,
@@ -214,6 +219,7 @@ class UserServiceTest {
             name = "Member User",
             email = "member@example.com",
             password = "encoded_password",
+            phoneNumber = "010-9876-5432",
             role = Role.MEMBER,
             birthDate = LocalDate.of(1995, 5, 5),
             department = department,
@@ -226,6 +232,7 @@ class UserServiceTest {
             name = "Admin User",
             email = "admin@example.com",
             password = "encoded_password",
+            phoneNumber = "010-5555-5555",
             role = Role.ADMIN,
             birthDate = LocalDate.of(1985, 10, 10),
             department = department,
@@ -275,6 +282,7 @@ class UserServiceTest {
             name = "Leader User",
             email = "leader@example.com",
             password = "encoded_password",
+            phoneNumber = "010-1234-5678",
             role = Role.LEADER,
             birthDate = LocalDate.of(1990, 1, 1),
             department = department,
@@ -308,6 +316,7 @@ class UserServiceTest {
             name = "홍길동",
             email = email,
             password = "encoded_password",
+            phoneNumber = null,
             role = Role.LEADER,
             department = department
         )

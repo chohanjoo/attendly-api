@@ -24,6 +24,9 @@ class User(
     @Column(unique = true, length = 100)
     val email: String? = null,
 
+    @Column(name = "phone_number", length = 20)
+    val phoneNumber: String? = null,
+
     @Column(length = 100)
     val password: String? = null,
 

@@ -70,14 +70,16 @@ class GbsMemberControllerTest {
                     name = "조원1",
                     email = "member1@example.com",
                     birthDate = LocalDate.of(2000, 1, 1),
-                    joinDate = LocalDate.of(2023, 1, 1)
+                    joinDate = LocalDate.of(2023, 1, 1),
+                    phoneNumber = "010-1234-5678"
                 ),
                 GbsMemberResponse(
                     id = 2L,
                     name = "조원2",
                     email = "member2@example.com",
                     birthDate = LocalDate.of(2000, 2, 2),
-                    joinDate = LocalDate.of(2023, 1, 1)
+                    joinDate = LocalDate.of(2023, 1, 1),
+                    phoneNumber = "010-1234-5678"
                 )
             )
         )
@@ -119,14 +121,16 @@ class GbsMemberControllerTest {
                     name = "조원1",
                     email = "member1@example.com",
                     birthDate = LocalDate.of(2000, 1, 1),
-                    joinDate = LocalDate.of(2023, 1, 1)
+                    joinDate = LocalDate.of(2023, 1, 1),
+                    phoneNumber = "010-1234-5678"
                 ),
                 GbsMemberResponse(
                     id = 3L,
                     name = "조원2",
                     email = "member2@example.com",
                     birthDate = LocalDate.of(2000, 2, 2),
-                    joinDate = LocalDate.of(2023, 1, 1)
+                    joinDate = LocalDate.of(2023, 1, 1),
+                    phoneNumber = "010-1234-5678"
                 )
             )
         )
@@ -168,14 +172,16 @@ class GbsMemberControllerTest {
                     name = "조원1",
                     email = "member1@example.com",
                     birthDate = LocalDate.of(2000, 1, 1),
-                    joinDate = LocalDate.of(2023, 1, 1)
+                    joinDate = LocalDate.of(2023, 1, 1),
+                    phoneNumber = "010-1234-5678"
                 ),
                 GbsMemberResponse(
                     id = 4L,
                     name = "조원2",
                     email = "member2@example.com",
                     birthDate = LocalDate.of(2000, 2, 2),
-                    joinDate = LocalDate.of(2023, 1, 1)
+                    joinDate = LocalDate.of(2023, 1, 1),
+                    phoneNumber = "010-1234-5678"
                 )
             )
         )
@@ -249,14 +255,16 @@ class GbsMemberControllerTest {
                 name = "조원1",
                 email = "member1@example.com",
                 birthDate = LocalDate.of(2000, 1, 1),
-                joinDate = LocalDate.of(2022, 1, 1)
+                joinDate = LocalDate.of(2022, 1, 1),
+                phoneNumber = "010-1234-5678"
             ),
             GbsMemberResponse(
                 id = 3L,
                 name = "조원2",
                 email = "member2@example.com",
                 birthDate = LocalDate.of(2000, 2, 2),
-                joinDate = LocalDate.of(2022, 1, 1)
+                joinDate = LocalDate.of(2022, 1, 1),
+                phoneNumber = "010-1234-5678"
             )
         )
         

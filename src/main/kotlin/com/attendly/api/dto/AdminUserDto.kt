@@ -18,6 +18,9 @@ data class UserCreateRequest(
     @field:NotBlank(message = "이메일은 필수입니다")
     val email: String,
 
+    @field:Pattern(regexp = "^\\d{3}-?\\d{3,4}-?\\d{4}$", message = "유효한 전화번호 형식이 아닙니다")
+    val phoneNumber: String? = null,
+
     @field:NotBlank(message = "비밀번호는 필수입니다")
     @field:Pattern(
         regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$",
@@ -42,6 +45,9 @@ data class UserUpdateRequest(
     @field:Email(message = "유효한 이메일 형식이 아닙니다")
     val email: String? = null,
 
+    @field:Pattern(regexp = "^\\d{3}-?\\d{3,4}-?\\d{4}$", message = "유효한 전화번호 형식이 아닙니다")
+    val phoneNumber: String? = null,
+
     val birthDate: LocalDate? = null,
 
     val role: Role? = null,
@@ -62,6 +68,7 @@ data class UserResponse(
     val id: Long,
     val name: String,
     val email: String?,
+    val phoneNumber: String?,
     val role: Role,
     val departmentId: Long,
     val departmentName: String,
