@@ -532,10 +532,10 @@ class AttendanceServiceTest {
         )
         
         every { villageRepository.findById(villageId) } returns Optional.of(village)
-        every { gbsGroupRepository.findActiveGroupsByVillageId(villageId, today) } returns listOf(gbsGroup)
+        every { gbsGroupRepository.findActiveGroupsByVillageId(villageId, weekStart) } returns listOf(gbsGroup)
         every { attendanceRepository.findDetailsByGbsIdAndWeek(1L, weekStart) } returns listOf(attendance)
-        every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L) } returns leader
-        every { gbsMemberHistoryRepository.countActiveMembers(1L, today) } returns 10L
+        every { gbsLeaderHistoryRepository.findLeaderByGbsIdAndDate(1L, weekStart) } returns leader
+        every { gbsMemberHistoryRepository.countActiveMembers(1L, weekStart) } returns 10L
         
         // when
         val result = attendanceService.getVillageAttendance(villageId, weekStart)
@@ -552,10 +552,10 @@ class AttendanceServiceTest {
         assertEquals(10.0, result.gbsAttendances[0].attendanceRate)
         
         verify { villageRepository.findById(villageId) }
-        verify { gbsGroupRepository.findActiveGroupsByVillageId(villageId, today) }
+        verify { gbsGroupRepository.findActiveGroupsByVillageId(villageId, weekStart) }
         verify { attendanceRepository.findDetailsByGbsIdAndWeek(1L, weekStart) }
-        verify { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L) }
-        verify { gbsMemberHistoryRepository.countActiveMembers(1L, today) }
+        verify { gbsLeaderHistoryRepository.findLeaderByGbsIdAndDate(1L, weekStart) }
+        verify { gbsMemberHistoryRepository.countActiveMembers(1L, weekStart) }
     }
     
     @Test
@@ -594,10 +594,10 @@ class AttendanceServiceTest {
         // createGbsAttendanceSummary는 private 메소드이므로 getVillageAttendance를 통해 간접적으로 테스트
         
         every { villageRepository.findById(1L) } returns Optional.of(village)
-        every { gbsGroupRepository.findActiveGroupsByVillageId(1L, today) } returns listOf(gbsGroup)
+        every { gbsGroupRepository.findActiveGroupsByVillageId(1L, weekStart) } returns listOf(gbsGroup)
         every { attendanceRepository.findDetailsByGbsIdAndWeek(1L, weekStart) } returns listOf(attendance)
-        every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L) } returns leader
-        every { gbsMemberHistoryRepository.countActiveMembers(1L, today) } returns 5L
+        every { gbsLeaderHistoryRepository.findLeaderByGbsIdAndDate(1L, weekStart) } returns leader
+        every { gbsMemberHistoryRepository.countActiveMembers(1L, weekStart) } returns 5L
         
         // when
         val result = attendanceService.getVillageAttendance(1L, weekStart)
