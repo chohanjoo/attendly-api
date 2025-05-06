@@ -480,4 +480,82 @@ class LeaderDelegationRepositoryTest {
         // Then
         assertTrue(result.isEmpty())
     }
+
+    @Test
+    fun `findActiveByUserIdAndDate should return delegations when active delegations exist for the user as delegator`() {
+        // Given
+        val delegation = LeaderDelegation(
+            delegator = delegator,
+            delegatee = delegatee,
+            gbsGroup = gbsGroup,
+            startDate = startDate,
+            endDate = endDate
+        )
+        
+        entityManager.persist(delegation)
+        entityManager.flush()
+        
+        // When
+        val result = leaderDelegationRepository.findActiveByUserIdAndDate(
+            userId = delegator.id!!,
+            date = startDate.plusDays(1),
+            isDelegator = true
+        )
+        
+        // Then
+        assertEquals(1, result.size)
+        assertEquals(delegation.id, result[0].id)
+    }
+
+    @Test
+    fun `findActiveByUserIdAndDate should return delegations when active delegations exist for the user as delegatee`() {
+        // Given
+        val delegation = LeaderDelegation(
+            delegator = delegator,
+            delegatee = delegatee,
+            gbsGroup = gbsGroup,
+            startDate = startDate,
+            endDate = endDate
+        )
+        
+        entityManager.persist(delegation)
+        entityManager.flush()
+        
+        // When
+        val result = leaderDelegationRepository.findActiveByUserIdAndDate(
+            userId = delegatee.id!!,
+            date = startDate.plusDays(1),
+            isDelegator = false
+        )
+        
+        // Then
+        assertEquals(1, result.size)
+        assertEquals(delegation.id, result[0].id)
+    }
+
+    @Test
+    fun `findActiveByUserIdAndDate should return empty list when no active delegations exist for user`() {
+        // Given
+        val pastEndDate = LocalDate.now().minusDays(1)
+        val delegation = LeaderDelegation(
+            delegator = delegator,
+            delegatee = delegatee,
+            gbsGroup = gbsGroup,
+            startDate = startDate.minusDays(10),
+            endDate = pastEndDate
+        )
+        
+        entityManager.persist(delegation)
+        entityManager.flush()
+        
+        // When
+        val result = leaderDelegationRepository.findActiveByUserIdAndDate(
+            userId = delegator.id!!,
+            date = startDate.plusDays(1),
+            isDelegator = true
+        )
+        
+        // Then
+        assertTrue(result.isEmpty())
+    }
 } 

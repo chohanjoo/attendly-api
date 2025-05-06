@@ -45,7 +45,14 @@ class LeaderDelegationService(
 
     @Transactional(readOnly = true)
     fun findActiveDelegations(userId: Long, date: LocalDate = LocalDate.now()): List<LeaderDelegation> {
-        return leaderDelegationRepository.findActiveByDelegateIdAndDate(userId, date)
+        // 수임자로서의 권한 위임 이력
+        val asDelegatee = leaderDelegationRepository.findActiveByDelegateIdAndDate(userId, date)
+        
+        // 위임자로서의 권한 위임 이력
+        val asDelegator = leaderDelegationRepository.findActiveByUserIdAndDate(userId, date, true)
+        
+        // 두 결과를 합쳐서 반환
+        return asDelegatee + asDelegator
     }
 
     private fun validateDelegation(

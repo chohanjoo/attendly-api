@@ -284,12 +284,12 @@ class LeaderDelegationServiceTest {
     }
     
     @Test
-    fun `findActiveDelegations should return active delegations for the given user and date`() {
+    fun `findActiveDelegations should return active delegations for both delegator and delegatee`() {
         // Given
         val userId = 2L
         val date = LocalDate.now()
         
-        val delegation = LeaderDelegation(
+        val delegationAsDelegatee = LeaderDelegation(
             id = 1L,
             delegator = delegator,
             delegatee = delegatee,
@@ -297,16 +297,47 @@ class LeaderDelegationServiceTest {
             startDate = date.minusDays(1),
             endDate = date.plusDays(5)
         )
+
+        val delegationAsDelegator = LeaderDelegation(
+            id = 2L,
+            delegator = delegatee,  // 여기서는 delegatee가 위임자가 됨
+            delegatee = User(id = 3L, name = "다른 사용자", role = Role.MEMBER, department = department),
+            gbsGroup = gbsGroup,
+            startDate = date.minusDays(2),
+            endDate = date.plusDays(3)
+        )
         
-        every { leaderDelegationRepository.findActiveByDelegateIdAndDate(userId, date) } returns listOf(delegation)
+        every { leaderDelegationRepository.findActiveByDelegateIdAndDate(userId, date) } returns listOf(delegationAsDelegatee)
+        every { leaderDelegationRepository.findActiveByUserIdAndDate(userId, date, true) } returns listOf(delegationAsDelegator)
         
         // When
         val result = leaderDelegationService.findActiveDelegations(userId, date)
         
         // Then
-        assertEquals(1, result.size)
-        assertEquals(delegation, result.first())
+        assertEquals(2, result.size)
+        assertEquals(delegationAsDelegatee, result[0])
+        assertEquals(delegationAsDelegator, result[1])
         
         verify(exactly = 1) { leaderDelegationRepository.findActiveByDelegateIdAndDate(userId, date) }
+        verify(exactly = 1) { leaderDelegationRepository.findActiveByUserIdAndDate(userId, date, true) }
+    }
+    
+    @Test
+    fun `findActiveDelegations should return empty list when no active delegations exist`() {
+        // Given
+        val userId = 2L
+        val date = LocalDate.now()
+        
+        every { leaderDelegationRepository.findActiveByDelegateIdAndDate(userId, date) } returns emptyList()
+        every { leaderDelegationRepository.findActiveByUserIdAndDate(userId, date, true) } returns emptyList()
+        
+        // When
+        val result = leaderDelegationService.findActiveDelegations(userId, date)
+        
+        // Then
+        assertEquals(0, result.size)
+        
+        verify(exactly = 1) { leaderDelegationRepository.findActiveByDelegateIdAndDate(userId, date) }
+        verify(exactly = 1) { leaderDelegationRepository.findActiveByUserIdAndDate(userId, date, true) }
     }
 }

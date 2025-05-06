@@ -61,4 +61,18 @@ class LeaderDelegationRepositoryImpl(
             )
             .fetchOne()
     }
+    
+    override fun findActiveByUserIdAndDate(userId: Long, date: LocalDate, isDelegator: Boolean): List<LeaderDelegation> {
+        val query = queryFactory.selectFrom(leaderDelegation).where(
+            if (isDelegator) {
+                leaderDelegation.delegator.id.eq(userId)
+            } else {
+                leaderDelegation.delegatee.id.eq(userId)
+            },
+            leaderDelegation.startDate.loe(date),
+            leaderDelegation.endDate.isNull.or(leaderDelegation.endDate.goe(date))
+        )
+        
+        return query.fetch()
+    }
 } 
