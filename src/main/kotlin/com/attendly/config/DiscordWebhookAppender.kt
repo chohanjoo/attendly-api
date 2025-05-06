@@ -84,6 +84,74 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     }
     
     /**
+     * 메시지 내용을 포맷팅합니다. SQL 쿼리가 포함된 경우 코드 블록으로 감싸 인덱스가 깨지지 않도록 합니다.
+     */
+    private fun formatMessageContent(message: String): String {
+        // SQL 쿼리 패턴 확인 (select, insert, update, delete 등으로 시작하는 문장)
+        val sqlPatterns = listOf(
+            "select\\s+.*from\\s+.*".toRegex(RegexOption.IGNORE_CASE),
+            "insert\\s+into\\s+.*".toRegex(RegexOption.IGNORE_CASE),
+            "update\\s+.*set\\s+.*".toRegex(RegexOption.IGNORE_CASE),
+            "delete\\s+from\\s+.*".toRegex(RegexOption.IGNORE_CASE),
+            "^\\s*from\\s+.*".toRegex(RegexOption.IGNORE_CASE),
+            "^\\s*where\\s+.*".toRegex(RegexOption.IGNORE_CASE),
+            "^\\s*join\\s+.*".toRegex(RegexOption.IGNORE_CASE),
+            "^\\s*group\\s+by\\s+.*".toRegex(RegexOption.IGNORE_CASE),
+            "^\\s*order\\s+by\\s+.*".toRegex(RegexOption.IGNORE_CASE),
+            "^\\s*having\\s+.*".toRegex(RegexOption.IGNORE_CASE)
+        )
+
+        // JSON 패턴 확인
+        val jsonPattern = "^\\s*\\{.*\\}\\s*$".toRegex(RegexOption.DOT_MATCHES_ALL)
+        
+        return when {
+            // SQL 쿼리인 경우 SQL 코드 블록으로 감싸기
+            sqlPatterns.any { it.containsMatchIn(message) } -> {
+                "```sql\n$message\n```"
+            }
+            // JSON인 경우 JSON 코드 블록으로 감싸기
+            jsonPattern.matches(message) -> {
+                "```json\n$message\n```"
+            }
+            // 일반 텍스트인 경우 그대로 반환
+            else -> message
+        }
+    }
+    
+    /**
+     * 로그 레벨에 따른 색상을 반환합니다
+     */
+    private fun getColorForLevel(level: String): Int {
+        return when (level) {
+            "ERROR" -> Color.RED.rgb
+            "WARN" -> Color.ORANGE.rgb
+            "INFO" -> Color.GREEN.rgb
+            "DEBUG" -> Color.BLUE.rgb
+            "TRACE" -> Color.LIGHT_GRAY.rgb
+            else -> Color.GRAY.rgb
+        }
+    }
+
+    /**
+     * 현재 로그 이벤트가 설정된 최소 로그 레벨 이상인지 확인합니다
+     */
+    private fun isLevelEligible(event: ILoggingEvent): Boolean {
+        val eventLevel = event.level.toString()
+        val levelOrder = mapOf(
+            "ERROR" to 0,
+            "WARN" to 1,
+            "INFO" to 2,
+            "DEBUG" to 3,
+            "TRACE" to 4
+        )
+        
+        val eventLevelValue = levelOrder[eventLevel] ?: 4
+        val minLevelValue = levelOrder[minLevel] ?: 1
+        
+        return eventLevelValue <= minLevelValue
+    }
+    
+    /**
      * 어펜더가 시작될 때 호출되는 메서드
      * 웹훅 클라이언트를 초기화합니다
      */
@@ -500,7 +568,10 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
         sb.appendLine("요청 ID: $requestId")
         
         sb.appendLine("===== 메시지 =====")
-        sb.appendLine(event.formattedMessage)
+        
+        // SQL 쿼리나 JSON인 경우 코드 블록으로 포맷팅 (파일 내용에서도 적용)
+        val formattedMessage = formatMessageContent(event.formattedMessage)
+        sb.appendLine(formattedMessage)
         
         // 예외가 있는 경우 스택트레이스 추가
         if (event.throwableProxy != null) {
@@ -561,49 +632,19 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
         // MDC에서 requestId 가져오기
         val requestId = event.mdcPropertyMap["requestId"] ?: "NONE"
         
+        // SQL 문 포맷팅 (코드 블록으로 감싸기)
+        val formattedMessage = formatMessageContent(event.formattedMessage)
+        
         return WebhookEmbedBuilder()
             .setColor(color)
             .setTitle(WebhookEmbed.EmbedTitle("[$environment] $level: ${event.loggerName}", null))
-            .setDescription(event.formattedMessage)
+            .setDescription(formattedMessage)
             .addField(WebhookEmbed.EmbedField(true, "Application", applicationName))
             .addField(WebhookEmbed.EmbedField(true, "Thread", event.threadName))
             .addField(WebhookEmbed.EmbedField(true, "RequestId", requestId))
             .setFooter(WebhookEmbed.EmbedFooter("Logback Discord Appender", null))
             .setTimestamp(timestamp)
             .build()
-    }
-
-    /**
-     * 로그 레벨에 따른 색상을 반환합니다
-     */
-    private fun getColorForLevel(level: String): Int {
-        return when (level) {
-            "ERROR" -> Color.RED.rgb
-            "WARN" -> Color.ORANGE.rgb
-            "INFO" -> Color.GREEN.rgb
-            "DEBUG" -> Color.BLUE.rgb
-            "TRACE" -> Color.LIGHT_GRAY.rgb
-            else -> Color.GRAY.rgb
-        }
-    }
-
-    /**
-     * 현재 로그 이벤트가 설정된 최소 로그 레벨 이상인지 확인합니다
-     */
-    private fun isLevelEligible(event: ILoggingEvent): Boolean {
-        val eventLevel = event.level.toString()
-        val levelOrder = mapOf(
-            "ERROR" to 0,
-            "WARN" to 1,
-            "INFO" to 2,
-            "DEBUG" to 3,
-            "TRACE" to 4
-        )
-        
-        val eventLevelValue = levelOrder[eventLevel] ?: 4
-        val minLevelValue = levelOrder[minLevel] ?: 1
-        
-        return eventLevelValue <= minLevelValue
     }
 
     // Setter 메서드들 (XML 설정에서 사용됨)

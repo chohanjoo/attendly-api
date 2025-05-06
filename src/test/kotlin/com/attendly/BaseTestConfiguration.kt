@@ -1,7 +1,6 @@
 package com.attendly
 
 import com.attendly.config.P6spyConfig
-import com.attendly.config.P6spyLogMessageFormatConfiguration
 import com.attendly.config.TestP6spyConfig
 import com.attendly.security.JwtAuthenticationFilter
 import com.attendly.security.JwtTokenProvider
@@ -32,7 +31,4 @@ abstract class BaseTestConfiguration {
     
     @MockkBean
     protected lateinit var p6spyConfig: P6spyConfig
-    
-    @MockkBean
-    protected lateinit var p6spyLogMessageFormatConfiguration: P6spyLogMessageFormatConfiguration
 } 

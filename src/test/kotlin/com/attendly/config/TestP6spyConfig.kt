@@ -1,5 +1,6 @@
 package com.attendly.config
 
+import com.attendly.config.P6spyConfig
 import com.p6spy.engine.spy.P6SpyOptions
 import io.mockk.every
 import io.mockk.mockk
@@ -23,11 +24,5 @@ class TestP6spyConfig {
         
         // P6spyConfig 반환
         return mockk<P6spyConfig>(relaxed = true)
-    }
-    
-    @Bean
-    @Primary
-    fun p6spyLogMessageFormatConfiguration(): P6spyLogMessageFormatConfiguration {
-        return mockk<P6spyLogMessageFormatConfiguration>(relaxed = true)
     }
 } 
