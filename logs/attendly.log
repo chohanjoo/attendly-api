@@ -5914,3 +5914,1698 @@ You may wish to exclude one of them to ensure predictable runtime behavior
     drop table if exists village cascade 
 2025-05-06 10:59:57 [SpringApplicationShutdownHook] [NONE] DEBUG org.hibernate.SQL - 
     drop table if exists village_leader cascade 
+2025-05-06 11:56:31 [background-preinit] [NONE] DEBUG org.jboss.logging - Logging Provider: org.jboss.logging.Slf4jLoggerProvider found via system property
+2025-05-06 11:56:31 [main] [NONE] INFO  com.attendly.ApplicationKt - Starting ApplicationKt using Java 21.0.1 with PID 89698 (/Users/user/study/attendly-api/build/classes/kotlin/main started by user in /Users/user/study/attendly-api)
+2025-05-06 11:56:31 [main] [NONE] DEBUG com.attendly.ApplicationKt - Running with Spring Boot v3.4.5, Spring v6.2.6
+2025-05-06 11:56:31 [main] [NONE] INFO  com.attendly.ApplicationKt - The following 1 profile is active: "dev"
+2025-05-06 11:56:32 [main] [NONE] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-05-06 11:56:32 [main] [NONE] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-05-06 11:56:32 [main] [NONE] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]
+2025-05-06 11:56:32 [main] [NONE] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT version()
+실행시간: 5ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: select VARIABLE_VALUE from performance_schema.global_variables where variable_name = 'pxc_strict_mode'
+실행시간: 3ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT @@GLOBAL.ENFORCE_GTID_CONSISTENCY
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT DATABASE()
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT version()
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT variable_name FROM performance_schema.user_variables_by_thread WHERE variable_value IS NOT NULL
+실행시간: 1ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT @@foreign_key_checks
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT @@sql_safe_updates
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SHOW DATABASES LIKE 'RDSAdmin';
+실행시간: 2ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT DATABASE()
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT DATABASE()
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT SUBSTRING_INDEX(USER(),'@',1)
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT COUNT(1) FROM information_schema.schemata WHERE schema_name=? LIMIT 1
+바인딩된 SQL: SELECT COUNT(1) FROM information_schema.schemata WHERE schema_name='attendly_api' LIMIT 1
+실행시간: 1ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT variable_name FROM performance_schema.user_variables_by_thread WHERE variable_value IS NOT NULL
+실행시간: 1ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SET foreign_key_checks=?, sql_safe_updates=?
+바인딩된 SQL: SET foreign_key_checks=1, sql_safe_updates=0
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT `installed_rank`,`version`,`description`,`type`,`script`,`checksum`,`installed_on`,`installed_by`,`execution_time`,`success` FROM `attendly_api`.`flyway_schema_history` WHERE `installed_rank` > ? ORDER BY `installed_rank`
+바인딩된 SQL: SELECT `installed_rank`,`version`,`description`,`type`,`script`,`checksum`,`installed_on`,`installed_by`,`execution_time`,`success` FROM `attendly_api`.`flyway_schema_history` WHERE `installed_rank` > -1 ORDER BY `installed_rank`
+실행시간: 1ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT COUNT(1) FROM information_schema.schemata WHERE schema_name=? LIMIT 1
+바인딩된 SQL: SELECT COUNT(1) FROM information_schema.schemata WHERE schema_name='attendly_api' LIMIT 1
+실행시간: 1ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT variable_name FROM performance_schema.user_variables_by_thread WHERE variable_value IS NOT NULL
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SET foreign_key_checks=?, sql_safe_updates=?
+바인딩된 SQL: SET foreign_key_checks=1, sql_safe_updates=0
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT variable_name FROM performance_schema.user_variables_by_thread WHERE variable_value IS NOT NULL
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SET foreign_key_checks=?, sql_safe_updates=?
+바인딩된 SQL: SET foreign_key_checks=1, sql_safe_updates=0
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT GET_LOCK(?,10)
+바인딩된 SQL: SELECT GET_LOCK('Flyway-1979063735',10)
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT variable_name FROM performance_schema.user_variables_by_thread WHERE variable_value IS NOT NULL
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SET foreign_key_checks=?, sql_safe_updates=?
+바인딩된 SQL: SET foreign_key_checks=1, sql_safe_updates=0
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT `installed_rank`,`version`,`description`,`type`,`script`,`checksum`,`installed_on`,`installed_by`,`execution_time`,`success` FROM `attendly_api`.`flyway_schema_history` WHERE `installed_rank` > ? ORDER BY `installed_rank`
+바인딩된 SQL: SELECT `installed_rank`,`version`,`description`,`type`,`script`,`checksum`,`installed_on`,`installed_by`,`execution_time`,`success` FROM `attendly_api`.`flyway_schema_history` WHERE `installed_rank` > 4 ORDER BY `installed_rank`
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT RELEASE_LOCK('Flyway-1979063735')
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT variable_name FROM performance_schema.user_variables_by_thread WHERE variable_value IS NOT NULL
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SET foreign_key_checks=?, sql_safe_updates=?
+바인딩된 SQL: SET foreign_key_checks=1, sql_safe_updates=0
+실행시간: 0ms
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 
+2025-05-06 11:56:33 [main] [NONE] INFO  p6spy - 실행 SQL: SELECT @@character_set_database, @@sql_mode
+실행시간: 1ms
+2025-05-06 11:56:33 [main] [NONE] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-05-06 11:56:34 [main] [NONE] INFO  o.a.catalina.core.StandardContext - Suspicious URL pattern: [/api/**] in context [], see sections 12.1 and 12.2 of the Servlet specification
+2025-05-06 11:56:34 [main] [NONE] DEBUG c.a.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2025-05-06 11:56:34 [main] [NONE] DEBUG com.attendly.config.RequestIdFilter - Filter 'requestIdFilter' configured for use
+2025-05-06 11:56:34 [main] [NONE] DEBUG c.a.config.ContentCachingFilter - Filter 'contentCachingFilter' configured for use
+2025-05-06 11:56:35 [main] [NONE] WARN  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.LogTestController:
+	{GET [/api/test/logging/info/{message}]}: testInfoLog(String)
+	{GET [/api/test/logging/warn/{message}]}: testWarnLog(String)
+	{GET [/api/test/logging/error/{message}]}: testErrorLog(String)
+	{GET [/api/test/logging/exception/{message}]}: testException(String)
+	{GET [/api/test/logging/security/{message}]}: testSecurityEvent(String)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.c.AttendanceController:
+	{POST [/api/attendance]}: createAttendances(AttendanceBatchRequest)
+	{GET [/api/attendance]}: getAttendancesByGbs(long,LocalDate)
+	{GET [/api/village/{id}/attendance]}: getVillageAttendance(long,LocalDate)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.c.AuthController:
+	{POST [/auth/signup]}: signup(SignupRequest)
+	{POST [/auth/login]}: login(LoginRequest)
+	{POST [/auth/refresh]}: refreshToken(TokenRefreshRequest)
+	{GET [/auth/me]}: getCurrentUser(UserDetailsAdapter)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.c.GbsMemberController:
+	{GET [/api/v1/gbs-members/{gbsId}]}: getGbsMembers(long,LocalDate,Authentication)
+	{GET [/api/v1/gbs-members/my-gbs]}: getMyGbs(Authentication)
+	{GET [/api/v1/gbs-members/leaders/{leaderId}/history]}: getLeaderGbsHistories(long,Authentication)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.c.LeaderDelegationController:
+	{POST [/api/delegations]}: createDelegation(DelegationCreateRequest)
+	{GET [/api/delegations/active]}: getActiveDelegations(long,LocalDate)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.c.StatisticsController:
+	{GET [/api/departments/{id}/report]}: getDepartmentStatistics(long,LocalDate,LocalDate)
+	{GET [/api/villages/{id}/report]}: getVillageStatistics(long,LocalDate,LocalDate)
+	{GET [/api/gbs/{id}/report]}: getGbsStatistics(long,LocalDate,LocalDate)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.c.UserController:
+	{POST [/api/users/by-roles]}: getUsersByRoles(UserListByRolesRequest)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.c.a.AdminBatchController:
+	{POST [/api/admin/batch/jobs]}: createBatchJob(BatchJobRequest)
+	{POST [/api/admin/batch/jobs/{jobId}/cancel]}: cancelBatchJob(long,BatchJobCancelRequest)
+	{POST [/api/admin/batch/jobs/{jobId}/restart]}: restartBatchJob(long,BatchJobRestartRequest)
+	{GET [/api/admin/batch/jobs/{jobId}]}: getBatchJob(long)
+	{GET [/api/admin/batch/jobs]}: getBatchJobs(BatchJobType,BatchJobStatus,LocalDateTime,LocalDateTime,LocalDateTime,LocalDateTime,Pageable)
+	{GET [/api/admin/batch/jobs/{jobId}/logs]}: getBatchJobLogs(long)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.c.a.AdminLogController:
+	{GET [/api/admin/logs]}: getLogs(String,String,LocalDateTime,LocalDateTime,Long,String,int,int,String)
+	{GET [/api/admin/logs/{id}]}: getLogById(long)
+	{GET [/api/admin/logs/categories]}: getLogCategories()
+	{GET [/api/admin/logs/levels]}: getLogLevels()
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.c.a.AdminOrganizationController:
+	{POST [/api/admin/organization/departments]}: createDepartment(DepartmentCreateRequest)
+	{PUT [/api/admin/organization/departments/{departmentId}]}: updateDepartment(long,DepartmentUpdateRequest)
+	{DELETE [/api/admin/organization/departments/{departmentId}]}: deleteDepartment(long)
+	{GET [/api/admin/organization/departments]}: getAllDepartments()
+	{POST [/api/admin/organization/villages]}: createVillage(VillageCreateRequest)
+	{PUT [/api/admin/organization/villages/{villageId}]}: updateVillage(long,VillageUpdateRequest)
+	{POST [/api/admin/organization/gbs-groups]}: createGbsGroup(GbsGroupCreateRequest)
+	{PUT [/api/admin/organization/gbs-groups/{gbsGroupId}]}: updateGbsGroup(long,GbsGroupUpdateRequest)
+	{POST [/api/admin/organization/gbs-groups/{gbsGroupId}/leaders]}: assignLeaderToGbs(long,GbsLeaderAssignRequest)
+	{POST [/api/admin/organization/gbs-groups/{gbsGroupId}/members]}: assignMemberToGbs(long,GbsMemberAssignRequest)
+	{POST [/api/admin/organization/reorganization]}: executeGbsReorganization(GbsReorganizationRequest)
+	{GET [/api/admin/organization/departments/{departmentId}]}: getDepartment(long)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.c.a.AdminSystemController:
+	{POST [/api/admin/system/settings]}: saveSystemSetting(SystemSettingRequest)
+	{DELETE [/api/admin/system/settings/{key}]}: deleteSystemSetting(String)
+	{GET [/api/admin/system/settings/{key}]}: getSystemSetting(String)
+	{GET [/api/admin/system/settings]}: getAllSystemSettings()
+	{POST [/api/admin/system/email-settings]}: saveEmailSettings(EmailSettingRequest)
+	{GET [/api/admin/system/email-settings]}: getEmailSettings()
+	{POST [/api/admin/system/slack-settings]}: saveSlackSettings(SlackSettingRequest)
+	{POST [/api/admin/system/security-policies]}: saveSecurityPolicies(SecurityPolicyRequest)
+	{POST [/api/admin/system/attendance-settings]}: saveAttendanceSettings(AttendanceSettingRequest)
+	{POST [/api/admin/system/batch-settings]}: saveBatchSettings(BatchSettingRequest)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	c.a.a.c.a.AdminUserController:
+	{POST [/api/admin/users]}: createUser(UserCreateRequest)
+	{PUT [/api/admin/users/{userId}]}: updateUser(long,UserUpdateRequest)
+	{DELETE [/api/admin/users/{userId}]}: deleteUser(long)
+	{GET [/api/admin/users]}: getAllUsers(Pageable)
+	{POST [/api/admin/users/{userId}/reset-password]}: resetPassword(long,UserPasswordResetRequest)
+	{POST [/api/admin/users/bulk]}: bulkCreateUsers(UserBulkCreateRequest)
+	{GET [/api/admin/users/{userId}]}: getUser(long)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	o.s.b.a.w.s.e.BasicErrorController:
+	{ [/error]}: error(HttpServletRequest)
+	{ [/error], produces [text/html]}: errorHtml(HttpServletRequest,HttpServletResponse)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	o.s.w.a.MultipleOpenApiWebMvcResource:
+	{GET [/api-docs/{group}], produces [application/json]}: openapiJson(HttpServletRequest,String,String,Locale)
+	{GET [/api-docs.yaml/{group}], produces [application/vnd.oai.openapi]}: openapiYaml(HttpServletRequest,String,String,Locale)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	o.s.w.a.OpenApiWebMvcResource:
+	{GET [/api-docs], produces [application/json]}: openapiJson(HttpServletRequest,String,Locale)
+	{GET [/api-docs.yaml], produces [application/vnd.oai.openapi]}: openapiYaml(HttpServletRequest,String,Locale)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	o.s.w.u.SwaggerWelcomeWebMvc:
+	{GET [/swagger-ui.html]}: redirectToUi(HttpServletRequest)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 
+	o.s.w.u.SwaggerConfigResource:
+	{GET [/api-docs/swagger-config], produces [application/json]}: openapiJson(HttpServletRequest)
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 'beanNameHandlerMapping' {}
+2025-05-06 11:56:35 [main] [NONE] DEBUG _.s.w.s.HandlerMapping.Mappings - 'resourceHandlerMapping' {/webjars/**=ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]], /**=ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]], /swagger-ui*/*swagger-initializer.js=ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]], /swagger-ui*/**=ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]]}
+2025-05-06 11:56:36 [main] [NONE] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-05-06 11:56:36 [main] [NONE] INFO  com.attendly.ApplicationKt - Started ApplicationKt in 4.338 seconds (process running for 4.49)
+2025-05-06 11:56:36 [main] [NONE] WARN  DiscordLogger - [시스템이벤트] 애플리케이션 시작: attendly-api (프로필: dev)
+2025-05-06 11:56:59 [http-nio-8080-exec-1] [NONE] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-06 11:56:59 [http-nio-8080-exec-1] [0e9e2b43-380c-4c56-8744-b8408f0e9fd6] INFO  p6spy - 
+
+2025-05-06 11:56:59 | 6ms | statement | connection 0
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email='hanjoo@naver.com'
+
+2025-05-06 11:57:00 [http-nio-8080-exec-1] [0e9e2b43-380c-4c56-8744-b8408f0e9fd6] INFO  p6spy - 
+
+2025-05-06 11:57:00 | 3ms | statement | connection 0
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=1
+
+2025-05-06 11:57:00 [http-nio-8080-exec-1] [0e9e2b43-380c-4c56-8744-b8408f0e9fd6] INFO  p6spy - 
+
+2025-05-06 11:57:00 | 10ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=8
+
+2025-05-06 11:57:00 [http-nio-8080-exec-1] [0e9e2b43-380c-4c56-8744-b8408f0e9fd6] INFO  p6spy - 
+
+2025-05-06 11:57:00 | 2ms | commit | connection 0
+
+
+2025-05-06 11:57:00 [http-nio-8080-exec-1] [0e9e2b43-380c-4c56-8744-b8408f0e9fd6] INFO  DiscordLogger - [Discord] 사용자 로그인 성공: hanjoo@naver.com
+2025-05-06 11:57:00 [http-nio-8080-exec-1] [0e9e2b43-380c-4c56-8744-b8408f0e9fd6] WARN  DiscordLogger - [인증이벤트] 관리자 로그인 (사용자 ID: hanjoo@naver.com)
+2025-05-06 11:57:00 [http-nio-8080-exec-1] [0e9e2b43-380c-4c56-8744-b8408f0e9fd6] INFO  p6spy - 
+
+2025-05-06 11:57:00 | 7ms | statement | connection 0
+
+    insert 
+    into
+        system_log
+        (additional_info, category, ip_address, level, message, server_instance, timestamp, user_agent, user_id) 
+    values
+        ('{"method":"login","class":"AuthController","args":["LoginRequest(email=hanjoo@naver.com, password=test123!@#)"],"result":"<200 OK OK,LoginResponse(userId=8, name=한주, role=ADMIN, accessToken=eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjgsInN1YiI6Imhhbmpvb0BuYXZlci5jb20iLCJpYXQiOjE3NDY1MDAyMjAsImV4cCI6MTc0NjUwMzgyMH0.luAnTzz4rLsFY-uIYea-_neEagKiS7XmOKNMvvsoFFE, refreshToken=eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjgsInN1YiI6Imhhbmpvb0BuYXZlci5jb20iLCJpYXQiOjE3NDY1MDAyMjAsImV4cCI6MTc0OTA5MjIyMH0.smMI2C77fveXbcSyv8UoYQeBywjz8irsuk9ws12zi6A),[]>"}', 'SECURITY', '0:0:0:0:0:0:0:1', 'INFO', '성공: AuthController.login()', 'Mac', '2025-05-06T11:57:00.253+0900', 'curl/8.7.1', NULL)
+
+2025-05-06 11:57:00 [http-nio-8080-exec-1] [0e9e2b43-380c-4c56-8744-b8408f0e9fd6] INFO  p6spy - 
+
+2025-05-06 11:57:00 | 8ms | commit | connection 0
+
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [e2c64731-1c20-491f-917c-400ea553e533] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 1ms | statement | connection 0
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email='hanjoo@naver.com'
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [e2c64731-1c20-491f-917c-400ea553e533] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 0ms | statement | connection 0
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=1
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [e2c64731-1c20-491f-917c-400ea553e533] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 0ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=8
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [e2c64731-1c20-491f-917c-400ea553e533] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 1ms | commit | connection 0
+
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 5ms | statement | connection 0
+
+    select
+        v1_0.id,
+        v1_0.created_at,
+        v1_0.department_id,
+        v1_0.name,
+        v1_0.updated_at,
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village v1_0 
+    left join
+        village_leader vl1_0 
+            on v1_0.id=vl1_0.village_id 
+    where
+        v1_0.id=2
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 3ms | statement | connection 0
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 2ms | statement | connection 0
+
+    select
+        gg1_0.id,
+        gg1_0.created_at,
+        gg1_0.name,
+        gg1_0.term_end_dt,
+        gg1_0.term_start_dt,
+        gg1_0.updated_at,
+        gg1_0.village_id,
+        v1_0.id,
+        v1_0.created_at,
+        v1_0.department_id,
+        v1_0.name,
+        v1_0.updated_at 
+    from
+        gbs_group gg1_0 
+    join
+        village v1_0 
+            on v1_0.id=gg1_0.village_id 
+    where
+        v1_0.id=2 
+        and gg1_0.term_start_dt<='2023-01-08T00:00:00.000+0900' 
+        and gg1_0.term_end_dt>='2023-01-08T00:00:00.000+0900'
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 1ms | statement | connection 0
+
+    select
+        a1_0.id,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.gbs_id,
+        a1_0.member_id,
+        m1_0.id,
+        m1_0.birth_date,
+        m1_0.created_at,
+        m1_0.department_id,
+        m1_0.email,
+        m1_0.name,
+        m1_0.password,
+        m1_0.role,
+        m1_0.updated_at,
+        a1_0.ministry,
+        a1_0.qt_count,
+        a1_0.updated_at,
+        a1_0.week_start,
+        a1_0.worship 
+    from
+        attendance a1_0 
+    join
+        users m1_0 
+            on m1_0.id=a1_0.member_id 
+    where
+        a1_0.gbs_id=2 
+        and a1_0.week_start='2023-01-08T00:00:00.000+0900'
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 0ms | statement | connection 0
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at,
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        users u1_0 
+    left join
+        village_leader vl1_0 
+            on u1_0.id=vl1_0.user_id 
+    where
+        u1_0.id=11
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 0ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=13
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 0ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=14
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 7ms | statement | connection 0
+
+    select
+        l1_0.id,
+        l1_0.birth_date,
+        l1_0.created_at,
+        l1_0.department_id,
+        l1_0.email,
+        l1_0.name,
+        l1_0.password,
+        l1_0.role,
+        l1_0.updated_at 
+    from
+        gbs_leader_history glh1_0 
+    join
+        users l1_0 
+            on l1_0.id=glh1_0.leader_id 
+    where
+        glh1_0.gbs_id=2 
+        and glh1_0.start_dt<='2023-01-08T00:00:00.000+0900' 
+        and (
+            glh1_0.end_dt is null 
+            or glh1_0.end_dt>='2023-01-08T00:00:00.000+0900'
+        )
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 2ms | statement | connection 0
+
+    select
+        count(gmh1_0.id) 
+    from
+        gbs_member_history gmh1_0 
+    where
+        gmh1_0.gbs_id=2 
+        and gmh1_0.start_dt<='2023-01-08T00:00:00.000+0900' 
+        and (
+            gmh1_0.end_dt is null 
+            or gmh1_0.end_dt>='2023-01-08T00:00:00.000+0900'
+        )
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 1ms | statement | connection 0
+
+    select
+        a1_0.id,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.gbs_id,
+        a1_0.member_id,
+        m1_0.id,
+        m1_0.birth_date,
+        m1_0.created_at,
+        m1_0.department_id,
+        m1_0.email,
+        m1_0.name,
+        m1_0.password,
+        m1_0.role,
+        m1_0.updated_at,
+        a1_0.ministry,
+        a1_0.qt_count,
+        a1_0.updated_at,
+        a1_0.week_start,
+        a1_0.worship 
+    from
+        attendance a1_0 
+    join
+        users m1_0 
+            on m1_0.id=a1_0.member_id 
+    where
+        a1_0.gbs_id=3 
+        and a1_0.week_start='2023-01-08T00:00:00.000+0900'
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 1ms | statement | connection 0
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at,
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        users u1_0 
+    left join
+        village_leader vl1_0 
+            on u1_0.id=vl1_0.user_id 
+    where
+        u1_0.id=12
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 1ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=15
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 1ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=16
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 1ms | statement | connection 0
+
+    select
+        l1_0.id,
+        l1_0.birth_date,
+        l1_0.created_at,
+        l1_0.department_id,
+        l1_0.email,
+        l1_0.name,
+        l1_0.password,
+        l1_0.role,
+        l1_0.updated_at 
+    from
+        gbs_leader_history glh1_0 
+    join
+        users l1_0 
+            on l1_0.id=glh1_0.leader_id 
+    where
+        glh1_0.gbs_id=3 
+        and glh1_0.start_dt<='2023-01-08T00:00:00.000+0900' 
+        and (
+            glh1_0.end_dt is null 
+            or glh1_0.end_dt>='2023-01-08T00:00:00.000+0900'
+        )
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 3ms | statement | connection 0
+
+    select
+        count(gmh1_0.id) 
+    from
+        gbs_member_history gmh1_0 
+    where
+        gmh1_0.gbs_id=3 
+        and gmh1_0.start_dt<='2023-01-08T00:00:00.000+0900' 
+        and (
+            gmh1_0.end_dt is null 
+            or gmh1_0.end_dt>='2023-01-08T00:00:00.000+0900'
+        )
+
+2025-05-06 11:57:06 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  p6spy - 
+
+2025-05-06 11:57:06 | 1ms | commit | connection 0
+
+
+2025-05-06 11:57:07 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] INFO  c.a.a.interceptor.ApiLogInterceptor - GET /api/village/2/attendance - 200 (391 ms)
+2025-05-06 11:57:07 [http-nio-8080-exec-3] [db5917c3-a8c4-4b54-afee-cd62dfa11df2] DEBUG c.a.a.interceptor.ApiLogInterceptor - API 상세 정보: {"requestId":"db5917c3-a8c4-4b54-afee-cd62dfa11df2","apiPath":"/api/village/2/attendance","method":"GET","status":200,"duration":391,"requestHeaders":{"host":"localhost:8080","user-agent":"curl/8.7.1","accept":"*/*"},"responseHeaders":{"Vary":"Origin","X-Request-ID":"db5917c3-a8c4-4b54-afee-cd62dfa11df2","X-Content-Type-Options":"nosniff","X-XSS-Protection":"0","Cache-Control":"no-cache, no-store, max-age=0, must-revalidate","Pragma":"no-cache","Expires":"0","X-Frame-Options":"DENY","Content-Type":"application/json","Transfer-Encoding":"chunked","Date":"Tue, 06 May 2025 02:57:07 GMT"},"requestBody":null,"responseBody":null,"queryParams":"weekStart=2023-01-08"}
+2025-05-06 11:57:44 [http-nio-8080-exec-7] [fe8bca52-f8a6-46d7-8120-4b997b5d8b30] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 2ms | statement | connection 0
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email='leader1@example.com'
+
+2025-05-06 11:57:44 [http-nio-8080-exec-7] [fe8bca52-f8a6-46d7-8120-4b997b5d8b30] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 0
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:44 [http-nio-8080-exec-7] [fe8bca52-f8a6-46d7-8120-4b997b5d8b30] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=11
+
+2025-05-06 11:57:44 [http-nio-8080-exec-7] [fe8bca52-f8a6-46d7-8120-4b997b5d8b30] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | commit | connection 0
+
+
+2025-05-06 11:57:44 [http-nio-8080-exec-7] [82b42f13-5b70-4dde-ae05-d9ca5910dd5b] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 0
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email='leader1@example.com'
+
+2025-05-06 11:57:44 [http-nio-8080-exec-7] [82b42f13-5b70-4dde-ae05-d9ca5910dd5b] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 0
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:44 [http-nio-8080-exec-7] [82b42f13-5b70-4dde-ae05-d9ca5910dd5b] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=11
+
+2025-05-06 11:57:44 [http-nio-8080-exec-7] [82b42f13-5b70-4dde-ae05-d9ca5910dd5b] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | commit | connection 0
+
+
+2025-05-06 11:57:44 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 25ms | statement | connection 0
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email='leader1@example.com'
+
+2025-05-06 11:57:44 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 2ms | statement | connection 0
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:44 [http-nio-8080-exec-2] [dfa71fc4-6520-4925-824d-46f5548ed886] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 3ms | statement | connection 1
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email='leader1@example.com'
+
+2025-05-06 11:57:44 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 2ms | statement | connection 2
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email='leader1@example.com'
+
+2025-05-06 11:57:44 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 3ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=11
+
+2025-05-06 11:57:44 [http-nio-8080-exec-2] [dfa71fc4-6520-4925-824d-46f5548ed886] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 3ms | statement | connection 1
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:44 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 4ms | statement | connection 2
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:44 [http-nio-8080-exec-2] [dfa71fc4-6520-4925-824d-46f5548ed886] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 1
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=11
+
+2025-05-06 11:57:44 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | commit | connection 0
+
+
+2025-05-06 11:57:44 [http-nio-8080-exec-2] [dfa71fc4-6520-4925-824d-46f5548ed886] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | commit | connection 1
+
+
+2025-05-06 11:57:44 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 2ms | statement | connection 3
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email='leader1@example.com'
+
+2025-05-06 11:57:44 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 2
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=11
+
+2025-05-06 11:57:44 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 2ms | commit | connection 2
+
+
+2025-05-06 11:57:44 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 3ms | statement | connection 3
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:44 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 3
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=11
+
+2025-05-06 11:57:44 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | commit | connection 3
+
+
+2025-05-06 11:57:44 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 0ms | statement | connection 2
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email='leader1@example.com'
+
+2025-05-06 11:57:44 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 3
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.role='LEADER'
+
+2025-05-06 11:57:44 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 0
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.role='LEADER'
+
+2025-05-06 11:57:44 [http-nio-8080-exec-2] [dfa71fc4-6520-4925-824d-46f5548ed886] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 1
+
+    select
+        ld1_0.id,
+        ld1_0.created_at,
+        ld1_0.delegatee_id,
+        ld1_0.delegator_id,
+        ld1_0.end_dt,
+        ld1_0.gbs_id,
+        ld1_0.start_dt,
+        ld1_0.updated_at 
+    from
+        leader_delegation ld1_0 
+    where
+        ld1_0.delegatee_id=11 
+        and ld1_0.start_dt<='2025-05-06T00:00:00.000+0900' 
+        and (
+            ld1_0.end_dt is null 
+            or ld1_0.end_dt>='2025-05-06T00:00:00.000+0900'
+        )
+
+2025-05-06 11:57:44 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 2
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:44 [http-nio-8080-exec-2] [dfa71fc4-6520-4925-824d-46f5548ed886] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 0ms | commit | connection 1
+
+
+2025-05-06 11:57:44 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 3
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=1
+
+2025-05-06 11:57:44 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 0
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=1
+
+2025-05-06 11:57:44 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 2
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=11
+
+2025-05-06 11:57:44 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 0ms | statement | connection 3
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=4
+
+2025-05-06 11:57:44 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=4
+
+2025-05-06 11:57:44 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 1ms | commit | connection 2
+
+
+2025-05-06 11:57:44 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 0ms | statement | connection 3
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:44 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:44 | 0ms | statement | connection 0
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:45 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=9
+
+2025-05-06 11:57:45 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | statement | connection 3
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=9
+
+2025-05-06 11:57:45 [http-nio-8080-exec-2] [dfa71fc4-6520-4925-824d-46f5548ed886] INFO  c.a.a.interceptor.ApiLogInterceptor - GET /api/delegations/active - 200 (29 ms)
+2025-05-06 11:57:45 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 2ms | statement | connection 3
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=11
+
+2025-05-06 11:57:45 [http-nio-8080-exec-2] [dfa71fc4-6520-4925-824d-46f5548ed886] DEBUG c.a.a.interceptor.ApiLogInterceptor - API 상세 정보: {"requestId":"dfa71fc4-6520-4925-824d-46f5548ed886","apiPath":"/api/delegations/active","method":"GET","status":200,"duration":29,"requestHeaders":{"host":"localhost:8080","connection":"keep-alive","x-request-id":"dfa71fc4-6520-4925-824d-46f5548ed886","sec-ch-ua-platform":"\"macOS\"","user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36","accept":"application/json, text/plain, */*","sec-ch-ua":"\"Google Chrome\";v=\"135\", \"Not-A.Brand\";v=\"8\", \"Chromium\";v=\"135\"","sec-ch-ua-mobile":"?0","origin":"http://localhost:3000","sec-fetch-site":"same-site","sec-fetch-mode":"cors","sec-fetch-dest":"empty","referer":"http://localhost:3000/","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7"},"responseHeaders":{"Vary":"Origin","Access-Control-Allow-Origin":"*","Access-Control-Expose-Headers":"Authorization","X-Request-ID":"dfa71fc4-6520-4925-824d-46f5548ed886","X-Content-Type-Options":"nosniff","X-XSS-Protection":"0","Cache-Control":"no-cache, no-store, max-age=0, must-revalidate","Pragma":"no-cache","Expires":"0","X-Frame-Options":"DENY","Content-Type":"application/json","Transfer-Encoding":"chunked","Date":"Tue, 06 May 2025 02:57:45 GMT","Keep-Alive":"timeout=60","Connection":"keep-alive"},"requestBody":null,"responseBody":null,"queryParams":"userId=11"}
+2025-05-06 11:57:45 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=11
+
+2025-05-06 11:57:45 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | statement | connection 3
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=12
+
+2025-05-06 11:57:45 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 2ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=12
+
+2025-05-06 11:57:45 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 2ms | commit | connection 3
+
+
+2025-05-06 11:57:45 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | commit | connection 0
+
+
+2025-05-06 11:57:45 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 2ms | statement | connection 2
+
+    select
+        glh1_0.id,
+        glh1_0.created_at,
+        glh1_0.end_dt,
+        glh1_0.gbs_id,
+        gg1_0.id,
+        gg1_0.created_at,
+        gg1_0.name,
+        gg1_0.term_end_dt,
+        gg1_0.term_start_dt,
+        gg1_0.updated_at,
+        gg1_0.village_id,
+        v1_0.id,
+        v1_0.created_at,
+        v1_0.department_id,
+        v1_0.name,
+        v1_0.updated_at,
+        glh1_0.leader_id,
+        glh1_0.start_dt,
+        glh1_0.updated_at 
+    from
+        gbs_leader_history glh1_0 
+    join
+        gbs_group gg1_0 
+            on gg1_0.id=glh1_0.gbs_id 
+    join
+        village v1_0 
+            on v1_0.id=gg1_0.village_id 
+    where
+        glh1_0.leader_id=11 
+    order by
+        glh1_0.start_dt desc
+
+2025-05-06 11:57:45 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 2ms | statement | connection 2
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:45 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 4ms | statement | connection 2
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.village_id=2
+
+2025-05-06 11:57:45 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 6ms | statement | connection 0
+
+    insert 
+    into
+        system_log
+        (additional_info, category, ip_address, level, message, server_instance, timestamp, user_agent, user_id) 
+    values
+        ('{"method":"getUsersByRoles","class":"UserController","args":["UserListByRolesRequest(roles=[LEADER])"],"result":"<200 OK OK,UserListByRolesResponse(users=[UserResponse(id=4, name=이리더, email=leader@church.com, role=LEADER, departmentId=1, departmentName=대학부, birthDate=null, createdAt=2025-05-06T11:38:49, updatedAt=2025-05-06T11:38:49), UserResponse(id=9, name=마을장, email=village_leader@example.com, role=LEADER, departmentId=2, departmentName=univ4, birthDate=null, createdAt=2025-05-06T11:50:07, updatedAt=2025-05-06T11:50:07), UserResponse(id=11, name=리더1, email=leader1@example.com, role=LEADER, departmentId=2, departmentName=univ4, birthDate=null, createdAt=2025-05-06T11:50:12, updatedAt=2025-05-06T11:50:12), UserResponse(id=12, name=리더2, email=leader2@example.com, role=LEADER, departmentId=2, departmentName=univ4, birthDate=null, createdAt=2025-05-06T11:50:14, updatedAt=2025-05-06T11:50:14)]),[]>"}', 'USER_MANAGEMENT', '0:0:0:0:0:0:0:1', 'INFO', '성공: UserController.getUsersByRoles()', 'Mac', '2025-05-06T11:57:45.017+0900', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36', NULL)
+
+2025-05-06 11:57:45 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 2ms | statement | connection 2
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at,
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        users u1_0 
+    left join
+        village_leader vl1_0 
+            on u1_0.id=vl1_0.user_id 
+    where
+        u1_0.id=11
+
+2025-05-06 11:57:45 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 6ms | statement | connection 3
+
+    insert 
+    into
+        system_log
+        (additional_info, category, ip_address, level, message, server_instance, timestamp, user_agent, user_id) 
+    values
+        ('{"method":"getUsersByRoles","class":"UserController","args":["UserListByRolesRequest(roles=[LEADER])"],"result":"<200 OK OK,UserListByRolesResponse(users=[UserResponse(id=4, name=이리더, email=leader@church.com, role=LEADER, departmentId=1, departmentName=대학부, birthDate=null, createdAt=2025-05-06T11:38:49, updatedAt=2025-05-06T11:38:49), UserResponse(id=9, name=마을장, email=village_leader@example.com, role=LEADER, departmentId=2, departmentName=univ4, birthDate=null, createdAt=2025-05-06T11:50:07, updatedAt=2025-05-06T11:50:07), UserResponse(id=11, name=리더1, email=leader1@example.com, role=LEADER, departmentId=2, departmentName=univ4, birthDate=null, createdAt=2025-05-06T11:50:12, updatedAt=2025-05-06T11:50:12), UserResponse(id=12, name=리더2, email=leader2@example.com, role=LEADER, departmentId=2, departmentName=univ4, birthDate=null, createdAt=2025-05-06T11:50:14, updatedAt=2025-05-06T11:50:14)]),[]>"}', 'USER_MANAGEMENT', '0:0:0:0:0:0:0:1', 'INFO', '성공: UserController.getUsersByRoles()', 'Mac', '2025-05-06T11:57:45.016+0900', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36', NULL)
+
+2025-05-06 11:57:45 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | statement | connection 2
+
+    select
+        gmh1_0.id,
+        gmh1_0.created_at,
+        gmh1_0.end_dt,
+        gmh1_0.gbs_id,
+        gmh1_0.member_id,
+        m1_0.id,
+        m1_0.birth_date,
+        m1_0.created_at,
+        m1_0.department_id,
+        m1_0.email,
+        m1_0.name,
+        m1_0.password,
+        m1_0.role,
+        m1_0.updated_at,
+        gmh1_0.start_dt,
+        gmh1_0.updated_at 
+    from
+        gbs_member_history gmh1_0 
+    join
+        users m1_0 
+            on m1_0.id=gmh1_0.member_id 
+    where
+        gmh1_0.gbs_id=2 
+        and gmh1_0.start_dt<='2025-05-06T00:00:00.000+0900' 
+        and (
+            gmh1_0.end_dt is null 
+            or gmh1_0.end_dt>='2025-05-06T00:00:00.000+0900'
+        )
+
+2025-05-06 11:57:45 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | statement | connection 2
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=13
+
+2025-05-06 11:57:45 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 9ms | commit | connection 3
+
+
+2025-05-06 11:57:45 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 9ms | commit | connection 0
+
+
+2025-05-06 11:57:45 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 0ms | statement | connection 2
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=14
+
+2025-05-06 11:57:45 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] INFO  c.a.a.interceptor.ApiLogInterceptor - POST /api/users/by-roles - 200 (73 ms)
+2025-05-06 11:57:45 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] INFO  c.a.a.interceptor.ApiLogInterceptor - POST /api/users/by-roles - 200 (55 ms)
+2025-05-06 11:57:45 [http-nio-8080-exec-5] [63277d86-3b96-4839-8452-c5846ef831b5] DEBUG c.a.a.interceptor.ApiLogInterceptor - API 상세 정보: {"requestId":"63277d86-3b96-4839-8452-c5846ef831b5","apiPath":"/api/users/by-roles","method":"POST","status":200,"duration":55,"requestHeaders":{"host":"localhost:8080","connection":"keep-alive","content-length":"20","x-request-id":"63277d86-3b96-4839-8452-c5846ef831b5","sec-ch-ua-platform":"\"macOS\"","sec-ch-ua":"\"Google Chrome\";v=\"135\", \"Not-A.Brand\";v=\"8\", \"Chromium\";v=\"135\"","sec-ch-ua-mobile":"?0","user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36","accept":"application/json, text/plain, */*","content-type":"application/json","origin":"http://localhost:3000","sec-fetch-site":"same-site","sec-fetch-mode":"cors","sec-fetch-dest":"empty","referer":"http://localhost:3000/","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7"},"responseHeaders":{"Vary":"Origin","Access-Control-Allow-Origin":"*","Access-Control-Expose-Headers":"Authorization","X-Request-ID":"63277d86-3b96-4839-8452-c5846ef831b5","X-Content-Type-Options":"nosniff","X-XSS-Protection":"0","Cache-Control":"no-cache, no-store, max-age=0, must-revalidate","Pragma":"no-cache","Expires":"0","X-Frame-Options":"DENY","Content-Type":"application/json","Transfer-Encoding":"chunked","Date":"Tue, 06 May 2025 02:57:45 GMT","Keep-Alive":"timeout=60","Connection":"keep-alive"},"requestBody":null,"responseBody":null,"queryParams":null}
+2025-05-06 11:57:45 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | commit | connection 2
+
+
+2025-05-06 11:57:45 [http-nio-8080-exec-3] [4a49949a-67b2-4c99-81e6-f25bdd9b0ccb] DEBUG c.a.a.interceptor.ApiLogInterceptor - API 상세 정보: {"requestId":"4a49949a-67b2-4c99-81e6-f25bdd9b0ccb","apiPath":"/api/users/by-roles","method":"POST","status":200,"duration":73,"requestHeaders":{"host":"localhost:8080","connection":"keep-alive","content-length":"20","x-request-id":"4a49949a-67b2-4c99-81e6-f25bdd9b0ccb","sec-ch-ua-platform":"\"macOS\"","sec-ch-ua":"\"Google Chrome\";v=\"135\", \"Not-A.Brand\";v=\"8\", \"Chromium\";v=\"135\"","sec-ch-ua-mobile":"?0","user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36","accept":"application/json, text/plain, */*","content-type":"application/json","origin":"http://localhost:3000","sec-fetch-site":"same-site","sec-fetch-mode":"cors","sec-fetch-dest":"empty","referer":"http://localhost:3000/","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7"},"responseHeaders":{"Vary":"Origin","Access-Control-Allow-Origin":"*","Access-Control-Expose-Headers":"Authorization","X-Request-ID":"4a49949a-67b2-4c99-81e6-f25bdd9b0ccb","X-Content-Type-Options":"nosniff","X-XSS-Protection":"0","Cache-Control":"no-cache, no-store, max-age=0, must-revalidate","Pragma":"no-cache","Expires":"0","X-Frame-Options":"DENY","Content-Type":"application/json","Transfer-Encoding":"chunked","Date":"Tue, 06 May 2025 02:57:45 GMT","Keep-Alive":"timeout=60","Connection":"keep-alive"},"requestBody":null,"responseBody":null,"queryParams":null}
+2025-05-06 11:57:45 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] INFO  c.a.a.interceptor.ApiLogInterceptor - GET /api/v1/gbs-members/leaders/11/history - 200 (75 ms)
+2025-05-06 11:57:45 [http-nio-8080-exec-4] [602cf0be-889e-4c38-a683-f2f7d75a395a] DEBUG c.a.a.interceptor.ApiLogInterceptor - API 상세 정보: {"requestId":"602cf0be-889e-4c38-a683-f2f7d75a395a","apiPath":"/api/v1/gbs-members/leaders/11/history","method":"GET","status":200,"duration":75,"requestHeaders":{"host":"localhost:8080","connection":"keep-alive","x-request-id":"602cf0be-889e-4c38-a683-f2f7d75a395a","sec-ch-ua-platform":"\"macOS\"","user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36","accept":"application/json, text/plain, */*","sec-ch-ua":"\"Google Chrome\";v=\"135\", \"Not-A.Brand\";v=\"8\", \"Chromium\";v=\"135\"","sec-ch-ua-mobile":"?0","origin":"http://localhost:3000","sec-fetch-site":"same-site","sec-fetch-mode":"cors","sec-fetch-dest":"empty","referer":"http://localhost:3000/","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7"},"responseHeaders":{"Vary":"Origin","Access-Control-Allow-Origin":"*","Access-Control-Expose-Headers":"Authorization","X-Request-ID":"602cf0be-889e-4c38-a683-f2f7d75a395a","X-Content-Type-Options":"nosniff","X-XSS-Protection":"0","Cache-Control":"no-cache, no-store, max-age=0, must-revalidate","Pragma":"no-cache","Expires":"0","X-Frame-Options":"DENY","Content-Type":"application/json","Transfer-Encoding":"chunked","Date":"Tue, 06 May 2025 02:57:45 GMT","Keep-Alive":"timeout=60","Connection":"keep-alive"},"requestBody":null,"responseBody":null,"queryParams":null}
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | statement | connection 0
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email='leader1@example.com'
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | statement | connection 0
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=11
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 0ms | commit | connection 0
+
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 0ms | statement | connection 0
+
+    select
+        u1_0.id,
+        u1_0.birth_date,
+        u1_0.created_at,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.name,
+        u1_0.password,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.role='LEADER'
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 0ms | statement | connection 0
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=1
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 0ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=4
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 1ms | statement | connection 0
+
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        department d1_0 
+    where
+        d1_0.id=2
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 0ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=9
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 0ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=11
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 0ms | statement | connection 0
+
+    select
+        vl1_0.user_id,
+        vl1_0.village_id,
+        vl1_0.created_at,
+        vl1_0.end_dt,
+        vl1_0.start_dt,
+        vl1_0.updated_at 
+    from
+        village_leader vl1_0 
+    where
+        vl1_0.user_id=12
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 0ms | commit | connection 0
+
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 2ms | statement | connection 0
+
+    insert 
+    into
+        system_log
+        (additional_info, category, ip_address, level, message, server_instance, timestamp, user_agent, user_id) 
+    values
+        ('{"method":"getUsersByRoles","class":"UserController","args":["UserListByRolesRequest(roles=[LEADER])"],"result":"<200 OK OK,UserListByRolesResponse(users=[UserResponse(id=4, name=이리더, email=leader@church.com, role=LEADER, departmentId=1, departmentName=대학부, birthDate=null, createdAt=2025-05-06T11:38:49, updatedAt=2025-05-06T11:38:49), UserResponse(id=9, name=마을장, email=village_leader@example.com, role=LEADER, departmentId=2, departmentName=univ4, birthDate=null, createdAt=2025-05-06T11:50:07, updatedAt=2025-05-06T11:50:07), UserResponse(id=11, name=리더1, email=leader1@example.com, role=LEADER, departmentId=2, departmentName=univ4, birthDate=null, createdAt=2025-05-06T11:50:12, updatedAt=2025-05-06T11:50:12), UserResponse(id=12, name=리더2, email=leader2@example.com, role=LEADER, departmentId=2, departmentName=univ4, birthDate=null, createdAt=2025-05-06T11:50:14, updatedAt=2025-05-06T11:50:14)]),[]>"}', 'USER_MANAGEMENT', '0:0:0:0:0:0:0:1', 'INFO', '성공: UserController.getUsersByRoles()', 'Mac', '2025-05-06T11:57:45.159+0900', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36', NULL)
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  p6spy - 
+
+2025-05-06 11:57:45 | 2ms | commit | connection 0
+
+
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] INFO  c.a.a.interceptor.ApiLogInterceptor - POST /api/users/by-roles - 200 (26 ms)
+2025-05-06 11:57:45 [http-nio-8080-exec-6] [c9cdf0ba-c01b-4de4-8309-33ef6ee20c23] DEBUG c.a.a.interceptor.ApiLogInterceptor - API 상세 정보: {"requestId":"c9cdf0ba-c01b-4de4-8309-33ef6ee20c23","apiPath":"/api/users/by-roles","method":"POST","status":200,"duration":26,"requestHeaders":{"host":"localhost:8080","connection":"keep-alive","content-length":"20","x-request-id":"c9cdf0ba-c01b-4de4-8309-33ef6ee20c23","sec-ch-ua-platform":"\"macOS\"","sec-ch-ua":"\"Google Chrome\";v=\"135\", \"Not-A.Brand\";v=\"8\", \"Chromium\";v=\"135\"","sec-ch-ua-mobile":"?0","user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36","accept":"application/json, text/plain, */*","content-type":"application/json","origin":"http://localhost:3000","sec-fetch-site":"same-site","sec-fetch-mode":"cors","sec-fetch-dest":"empty","referer":"http://localhost:3000/","accept-encoding":"gzip, deflate, br, zstd","accept-language":"ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7"},"responseHeaders":{"Vary":"Origin","Access-Control-Allow-Origin":"*","Access-Control-Expose-Headers":"Authorization","X-Request-ID":"c9cdf0ba-c01b-4de4-8309-33ef6ee20c23","X-Content-Type-Options":"nosniff","X-XSS-Protection":"0","Cache-Control":"no-cache, no-store, max-age=0, must-revalidate","Pragma":"no-cache","Expires":"0","X-Frame-Options":"DENY","Content-Type":"application/json","Transfer-Encoding":"chunked","Date":"Tue, 06 May 2025 02:57:45 GMT","Keep-Alive":"timeout=60","Connection":"keep-alive"},"requestBody":null,"responseBody":null,"queryParams":null}

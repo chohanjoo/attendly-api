@@ -402,4 +402,69 @@ class AttendanceServiceTimeBasedTest {
         verify(exactly = 1) { gbsMemberHistoryRepository.countActiveMembers(gbsId, date2) }
         verify(exactly = 1) { gbsMemberHistoryRepository.countActiveMembers(gbsId, currentDate) }
     }
-} 
+
+    @Test
+    @DisplayName("시간에 따른 데이터 변화를 고려한 마을 출석 현황 조회 테스트")
+    fun testGetVillageAttendanceOverTime() {
+        // given
+        val villageId = 2L
+        
+        // 1. 마을 정보 조회
+        every { villageRepository.findById(villageId) } returns Optional.of(village)
+        
+        // 2. 과거 시점 - 과거 리더로 셋업
+        val pastDate = LocalDate.of(2023, 1, 8)
+        
+        // 과거 시점에는 GBS1, GBS2 모두 활성화
+        every { gbsGroupRepository.findActiveGroupsByVillageId(villageId, pastDate) } returns listOf(gbsGroup1, gbsGroup2)
+        // 과거 시점의 리더 설정
+        every { gbsLeaderHistoryRepository.findLeaderByGbsIdAndDate(gbsGroup1.id!!, pastDate) } returns leader1Past
+        // 간단한 출석 데이터와 멤버 수 설정 (상세 검증은 하지 않을 예정)
+        every { attendanceRepository.findDetailsByGbsIdAndWeek(gbsGroup1.id!!, pastDate) } returns listOf()
+        every { gbsMemberHistoryRepository.countActiveMembers(gbsGroup1.id!!, pastDate) } returns 2L
+        
+        // GBS2 관련 설정 (간단하게만 설정)
+        every { gbsLeaderHistoryRepository.findLeaderByGbsIdAndDate(gbsGroup2.id!!, pastDate) } returns leader2
+        every { attendanceRepository.findDetailsByGbsIdAndWeek(gbsGroup2.id!!, pastDate) } returns listOf()
+        every { gbsMemberHistoryRepository.countActiveMembers(gbsGroup2.id!!, pastDate) } returns 2L
+        
+        // 3. 현재 시점 - 현재 리더로 셋업
+        val currentDate = LocalDate.now()
+        
+        // 현재 시점에는 GBS1만 활성화 (GBS2는 이미 종료됨)
+        every { gbsGroupRepository.findActiveGroupsByVillageId(villageId, currentDate) } returns listOf(gbsGroup1)
+        // 현재 시점의 리더 설정
+        every { gbsLeaderHistoryRepository.findLeaderByGbsIdAndDate(gbsGroup1.id!!, currentDate) } returns leader1Current
+        // 간단한 출석 데이터와 멤버 수 설정
+        every { attendanceRepository.findDetailsByGbsIdAndWeek(gbsGroup1.id!!, currentDate) } returns listOf()
+        every { gbsMemberHistoryRepository.countActiveMembers(gbsGroup1.id!!, currentDate) } returns 3L // 멤버 수 변경
+        
+        // when - 과거 시점 조회
+        val pastResult = attendanceService.getVillageAttendance(villageId, pastDate)
+        
+        // then - 과거 시점 검증
+        assertEquals("R village", pastResult.villageName)
+        assertEquals(2, pastResult.gbsAttendances.size) // 과거에는 GBS1, GBS2 모두 있음
+        
+        val pastGbs1Data = pastResult.gbsAttendances.find { it.gbsId == 2L }!!
+        assertEquals("과거리더1", pastGbs1Data.leaderName) // 과거 리더 이름
+        assertEquals(2, pastGbs1Data.totalMembers) // 과거 멤버 수
+        
+        // when - 현재 시점 조회
+        val currentResult = attendanceService.getVillageAttendance(villageId, currentDate)
+        
+        // then - 현재 시점 검증
+        assertEquals(1, currentResult.gbsAttendances.size) // 현재는 GBS1만 활성화됨
+        
+        val currentGbs1Data = currentResult.gbsAttendances.find { it.gbsId == 2L }!!
+        assertEquals("현재리더1", currentGbs1Data.leaderName) // 현재 리더 이름
+        assertEquals(3, currentGbs1Data.totalMembers) // 현재 멤버 수
+        
+        // 호출 횟수 검증
+        verify(exactly = 2) { villageRepository.findById(villageId) } // 두 번 호출
+        verify(exactly = 1) { gbsGroupRepository.findActiveGroupsByVillageId(villageId, pastDate) }
+        verify(exactly = 1) { gbsGroupRepository.findActiveGroupsByVillageId(villageId, currentDate) }
+        verify(exactly = 1) { gbsLeaderHistoryRepository.findLeaderByGbsIdAndDate(gbsGroup1.id!!, pastDate) }
+        verify(exactly = 1) { gbsLeaderHistoryRepository.findLeaderByGbsIdAndDate(gbsGroup1.id!!, currentDate) }
+    }
+}
