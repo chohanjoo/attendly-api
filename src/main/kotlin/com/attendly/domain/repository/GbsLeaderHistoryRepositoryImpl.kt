@@ -5,6 +5,7 @@ import com.attendly.domain.entity.QGbsLeaderHistory
 import com.attendly.domain.entity.User
 import com.querydsl.jpa.impl.JPAQueryFactory
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
+import java.time.LocalDate
 
 class GbsLeaderHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory
@@ -61,6 +62,18 @@ class GbsLeaderHistoryRepositoryImpl(
             .where(
                 gbsLeaderHistory.leader.id.eq(leaderId),
                 gbsLeaderHistory.endDate.isNull
+            )
+            .fetchOne()
+    }
+
+    override fun findLeaderByGbsIdAndDate(gbsId: Long, date: LocalDate): User? {
+        return queryFactory
+            .select(gbsLeaderHistory.leader)
+            .from(gbsLeaderHistory)
+            .where(
+                gbsLeaderHistory.gbsGroup.id.eq(gbsId),
+                gbsLeaderHistory.startDate.loe(date),
+                gbsLeaderHistory.endDate.isNull.or(gbsLeaderHistory.endDate.goe(date))
             )
             .fetchOne()
     }

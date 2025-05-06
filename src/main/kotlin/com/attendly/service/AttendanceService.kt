@@ -172,11 +172,11 @@ class AttendanceService(
         val village = villageRepository.findById(villageId)
             .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "마을을 찾을 수 없습니다: $villageId") }
         
-        val today = LocalDate.now()
-        val gbsGroups = gbsGroupRepository.findActiveGroupsByVillageId(villageId, today)
+        // 현재 날짜 대신 요청된 주간 시작일(weekStart)를 기준으로 활성화된 GBS 그룹 조회
+        val gbsGroups = gbsGroupRepository.findActiveGroupsByVillageId(villageId, weekStart)
         
         val gbsAttendances = gbsGroups.map { gbsGroup ->
-            createGbsAttendanceSummary(gbsGroup, weekStart, today)
+            createGbsAttendanceSummary(gbsGroup, weekStart, weekStart)
         }
         
         return VillageAttendanceResponse(
@@ -190,14 +190,16 @@ class AttendanceService(
     /**
      * GBS 출석 요약 정보 생성
      */
-    private fun createGbsAttendanceSummary(gbsGroup: GbsGroup, weekStart: LocalDate, today: LocalDate): GbsAttendanceSummary {
+    private fun createGbsAttendanceSummary(gbsGroup: GbsGroup, weekStart: LocalDate, referenceDate: LocalDate): GbsAttendanceSummary {
         val gbsId = gbsGroup.id!!
         val attendances = attendanceRepository.findDetailsByGbsIdAndWeek(gbsId, weekStart)
         
-        val leader = gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsId)
-            ?: throw AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "현재 GBS의 리더를 찾을 수 없습니다: $gbsId")
+        // 해당 날짜(referenceDate)에 활성화된 리더 조회
+        val leader = gbsLeaderHistoryRepository.findLeaderByGbsIdAndDate(gbsId, referenceDate)
+            ?: throw AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "해당 날짜에 활성화된 GBS 리더를 찾을 수 없습니다: $gbsId, $referenceDate")
         
-        val totalMembers = gbsMemberHistoryRepository.countActiveMembers(gbsId, today).toInt()
+        // 기준일(referenceDate)에 활성화된 멤버 수 조회
+        val totalMembers = gbsMemberHistoryRepository.countActiveMembers(gbsId, referenceDate).toInt()
         val attendedMembers = attendances.count { it.worship == WorshipStatus.O }
         
         val attendanceRate = if (totalMembers > 0) {
