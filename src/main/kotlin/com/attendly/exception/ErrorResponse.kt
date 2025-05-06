@@ -1,6 +1,5 @@
 package com.attendly.exception
 
-import com.attendly.exception.ErrorCode
 import com.fasterxml.jackson.annotation.JsonInclude
 import java.time.LocalDateTime
 
@@ -28,40 +27,12 @@ data class ErrorResponse(
     
     companion object {
         /**
-         * ErrorCode로부터 ErrorResponse 생성
-         * @deprecated ErrorMessage를 사용하는 메서드를 권장합니다.
-         */
-        @Deprecated("ErrorMessage를 사용하는 of 메서드를 사용하세요.")
-        fun of(errorCode: ErrorCode, path: String? = null): ErrorResponse {
-            return ErrorResponse(
-                status = errorCode.status.value(),
-                code = errorCode.code,
-                message = errorCode.message,
-                path = path
-            )
-        }
-        
-        /**
-         * ErrorCode와 사용자 정의 메시지로 ErrorResponse 생성
-         * @deprecated ErrorMessage를 사용하는 메서드를 권장합니다.
-         */
-        @Deprecated("ErrorMessage를 사용하는 of 메서드를 사용하세요.")
-        fun of(errorCode: ErrorCode, message: String, path: String? = null): ErrorResponse {
-            return ErrorResponse(
-                status = errorCode.status.value(),
-                code = errorCode.code,
-                message = message,
-                path = path
-            )
-        }
-        
-        /**
          * ErrorMessage로부터 ErrorResponse 생성
          */
         fun of(errorMessage: ErrorMessage, path: String? = null): ErrorResponse {
             return ErrorResponse(
-                status = errorMessage.code.status.value(),
-                code = errorMessage.code.code,
+                status = errorMessage.status.value(),
+                code = errorMessage.code,
                 message = errorMessage.message,
                 path = path
             )
@@ -70,10 +41,10 @@ data class ErrorResponse(
         /**
          * ErrorMessage와 사용자 정의 메시지로 ErrorResponse 생성
          */
-        fun of(errorMessage: ErrorMessage, customMessage: String, path: String? = null): ErrorResponse {
+        fun withCustomMessage(errorMessage: ErrorMessage, customMessage: String, path: String? = null): ErrorResponse {
             return ErrorResponse(
-                status = errorMessage.code.status.value(),
-                code = errorMessage.code.code,
+                status = errorMessage.status.value(),
+                code = errorMessage.code,
                 message = customMessage,
                 path = path
             )
@@ -84,9 +55,9 @@ data class ErrorResponse(
          */
         fun of(exception: AttendlyApiException, path: String? = null): ErrorResponse {
             return ErrorResponse(
-                status = exception.errorCode.status.value(),
-                code = exception.errorCode.code,
-                message = exception.message ?: exception.errorCode.message,
+                status = exception.errorMessage.status.value(),
+                code = exception.errorMessage.code,
+                message = exception.message ?: exception.errorMessage.message,
                 path = path
             )
         }

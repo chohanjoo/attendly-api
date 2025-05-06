@@ -4,7 +4,6 @@ import com.attendly.api.dto.*
 import com.attendly.domain.entity.*
 import com.attendly.domain.repository.*
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
 import org.springframework.data.domain.Page

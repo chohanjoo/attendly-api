@@ -9,7 +9,6 @@ import com.attendly.domain.entity.User
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.UserRepository
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
 import org.springframework.security.core.Authentication
@@ -35,14 +34,14 @@ class UserService(
         // 이메일 중복 확인
         val existingUser = userRepository.findByEmail(request.email)
         if (existingUser.isPresent) {
-            throw AttendlyApiException(ErrorCode.DUPLICATE_RESOURCE, ErrorMessage.DUPLICATE_EMAIL.message)
+            throw AttendlyApiException(ErrorMessage.DUPLICATE_EMAIL)
         }
 
         // 부서 찾기
         val department = departmentRepository.findById(request.departmentId)
             .orElseThrow { 
                 AttendlyApiException(
-                    ErrorCode.RESOURCE_NOT_FOUND, 
+                    ErrorMessage.DEPARTMENT_NOT_FOUND, 
                     ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, request.departmentId)
                 ) 
             }
@@ -92,7 +91,7 @@ class UserService(
     fun getCurrentUser(authentication: Authentication): User {
         val email = authentication.name
         return userRepository.findByEmail(email)
-            .orElseThrow { AttendlyApiException(ErrorCode.USER_NOT_FOUND, ErrorMessage.USER_NOT_FOUND.message) }
+            .orElseThrow { AttendlyApiException(ErrorMessage.USER_NOT_FOUND) }
     }
     
     /**

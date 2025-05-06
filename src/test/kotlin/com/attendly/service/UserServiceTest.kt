@@ -9,7 +9,7 @@ import com.attendly.domain.entity.User
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.UserRepository
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -120,7 +120,7 @@ class UserServiceTest {
             userService.signup(signupRequest)
         }
         assertEquals("이미 사용 중인 이메일입니다", exception.message)
-        assertEquals(ErrorCode.DUPLICATE_RESOURCE, exception.errorCode)
+        assertEquals(ErrorMessage.DUPLICATE_EMAIL, exception.errorMessage)
         verify { userRepository.findByEmail(signupRequest.email) }
         verify(exactly = 0) { departmentRepository.findById(any()) }
         verify(exactly = 0) { passwordEncoder.encode(any()) }
@@ -138,7 +138,7 @@ class UserServiceTest {
             userService.signup(signupRequest)
         }
         assertEquals("찾을 수 없는 부서입니다: ID ${signupRequest.departmentId}", exception.message)
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND, exception.errorMessage)
         verify { userRepository.findByEmail(signupRequest.email) }
         verify { departmentRepository.findById(signupRequest.departmentId) }
         verify(exactly = 0) { passwordEncoder.encode(any()) }
@@ -340,7 +340,7 @@ class UserServiceTest {
         }
         
         assertEquals("사용자를 찾을 수 없습니다", exception.message)
-        assertEquals(ErrorCode.USER_NOT_FOUND, exception.errorCode)
+        assertEquals(ErrorMessage.USER_NOT_FOUND, exception.errorMessage)
         verify { authentication.name }
         verify { userRepository.findByEmail(email) }
     }

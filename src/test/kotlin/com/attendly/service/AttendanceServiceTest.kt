@@ -6,7 +6,7 @@ import com.attendly.domain.entity.*
 import com.attendly.domain.model.GbsMemberHistorySearchCondition
 import com.attendly.domain.repository.*
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
 import com.attendly.security.UserDetailsAdapter
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -449,7 +449,7 @@ class AttendanceServiceTest {
             attendanceService.createAttendances(batchRequest)
         }
         
-        assertEquals(ErrorCode.FORBIDDEN, exception.errorCode)
+        assertEquals(ErrorMessage.FORBIDDEN.code, exception.errorMessage.code)
         verify { gbsGroupRepository.findById(1L) }
         verify { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) }
         verify { leaderDelegationRepository.findActiveDelegationsByDelegateeAndGbs(1L, 1L, today) }
@@ -672,7 +672,7 @@ class AttendanceServiceTest {
             attendanceService.createAttendances(batchRequest)
         }
         
-        assertEquals(ErrorCode.FORBIDDEN, exception.errorCode)
+        assertEquals(ErrorMessage.FORBIDDEN.code, exception.errorMessage.code)
         verify { gbsGroupRepository.findById(1L) }
         verify { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) }
         verify { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) }

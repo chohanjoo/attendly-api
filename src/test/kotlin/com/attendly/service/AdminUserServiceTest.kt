@@ -1,30 +1,24 @@
 package com.attendly.service
 
-import com.attendly.api.dto.UserCreateRequest
-import com.attendly.api.dto.UserPasswordResetRequest
-import com.attendly.api.dto.UserUpdateRequest
-import com.attendly.domain.entity.Department
-import com.attendly.domain.entity.Role
-import com.attendly.domain.entity.User
-import com.attendly.domain.repository.DepartmentRepository
-import com.attendly.domain.repository.UserRepository
+import com.attendly.api.dto.*
+import com.attendly.domain.entity.*
+import com.attendly.domain.repository.*
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
-import org.junit.jupiter.api.Assertions.*
+import io.mockk.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.Optional
+import org.junit.jupiter.api.Assertions.*
 
 class AdminUserServiceTest {
 
@@ -112,7 +106,7 @@ class AdminUserServiceTest {
         val exception = assertThrows<AttendlyApiException> {
             adminUserService.createUser(userCreateRequest)
         }
-        assertEquals(ErrorMessage.DUPLICATE_EMAIL.code, exception.errorCode)
+        assertEquals(ErrorMessage.DUPLICATE_EMAIL.code, exception.errorMessage.code)
         assertEquals(ErrorMessage.DUPLICATE_EMAIL.message, exception.message)
         
         verify { userRepository.findByEmail("hong@example.com") }
@@ -238,7 +232,7 @@ class AdminUserServiceTest {
             adminUserService.deleteUser(userId)
         }
         
-        assertEquals(ErrorMessage.USER_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.USER_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.USER_NOT_FOUND, userId), exception.message)
         verify { userRepository.existsById(userId) }
         verify(exactly = 0) { userRepository.deleteById(any()) }

@@ -30,12 +30,12 @@ class GlobalExceptionHandler {
     ): ResponseEntity<ErrorResponse> {
         log.error("AttendlyApiException: {}", e)
         val errorResponse = ErrorResponse(
-            status = e.errorCode.status.value(),
-            code = e.errorCode.code,
-            message = e.errorCode.message,
+            status = e.errorMessage.status.value(),
+            code = e.errorMessage.code,
+            message = e.message ?: e.errorMessage.message,
             path = request.requestURI
         )
-        return ResponseEntity.status(e.errorCode.status).body(errorResponse)
+        return ResponseEntity.status(e.errorMessage.status).body(errorResponse)
     }
     
     /**
@@ -48,9 +48,9 @@ class GlobalExceptionHandler {
     ): ResponseEntity<ErrorResponse> {
         log.error("ResourceNotFoundException: {}", e)
         val errorResponse = ErrorResponse(
-            status = ErrorCode.RESOURCE_NOT_FOUND.status.value(),
-            code = ErrorCode.RESOURCE_NOT_FOUND.code,
-            message = e.message ?: ErrorCode.RESOURCE_NOT_FOUND.message,
+            status = ErrorMessage.RESOURCE_NOT_FOUND.status.value(),
+            code = ErrorMessage.RESOURCE_NOT_FOUND.code,
+            message = e.message ?: ErrorMessage.RESOURCE_NOT_FOUND.message,
             path = request.requestURI
         )
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)
@@ -66,9 +66,9 @@ class GlobalExceptionHandler {
     ): ResponseEntity<ErrorResponse> {
         log.error("AccessDeniedException: {}", e)
         val errorResponse = ErrorResponse(
-            status = ErrorCode.FORBIDDEN.status.value(),
-            code = ErrorCode.FORBIDDEN.code,
-            message = e.message ?: ErrorCode.FORBIDDEN.message,
+            status = ErrorMessage.FORBIDDEN.status.value(),
+            code = ErrorMessage.FORBIDDEN.code,
+            message = e.message ?: ErrorMessage.FORBIDDEN.message,
             path = request.requestURI
         )
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse)
@@ -92,8 +92,8 @@ class GlobalExceptionHandler {
         }
         
         val errorResponse = ErrorResponse(
-            status = ErrorCode.INVALID_INPUT.status.value(),
-            code = ErrorCode.INVALID_INPUT.code,
+            status = ErrorMessage.INVALID_INPUT.status.value(),
+            code = ErrorMessage.INVALID_INPUT.code,
             message = "입력값 검증에 실패했습니다",
             path = request.requestURI,
             errors = fieldErrors
@@ -120,8 +120,8 @@ class GlobalExceptionHandler {
         }
         
         val errorResponse = ErrorResponse(
-            status = ErrorCode.INVALID_INPUT.status.value(),
-            code = ErrorCode.INVALID_INPUT.code,
+            status = ErrorMessage.INVALID_INPUT.status.value(),
+            code = ErrorMessage.INVALID_INPUT.code,
             message = "입력값 검증에 실패했습니다",
             path = request.requestURI,
             errors = fieldErrors
@@ -140,8 +140,8 @@ class GlobalExceptionHandler {
     ): ResponseEntity<ErrorResponse> {
         log.error("MethodArgumentTypeMismatchException: {}", e)
         val errorResponse = ErrorResponse(
-            status = ErrorCode.BAD_REQUEST.status.value(),
-            code = ErrorCode.BAD_REQUEST.code,
+            status = ErrorMessage.BAD_REQUEST.status.value(),
+            code = ErrorMessage.BAD_REQUEST.code,
             message = "잘못된 타입입니다: ${e.name} - ${e.value}",
             path = request.requestURI
         )
@@ -158,8 +158,8 @@ class GlobalExceptionHandler {
     ): ResponseEntity<ErrorResponse> {
         log.error("NoHandlerFoundException: {}", e)
         val errorResponse = ErrorResponse(
-            status = ErrorCode.RESOURCE_NOT_FOUND.status.value(),
-            code = ErrorCode.RESOURCE_NOT_FOUND.code,
+            status = ErrorMessage.RESOURCE_NOT_FOUND.status.value(),
+            code = ErrorMessage.RESOURCE_NOT_FOUND.code,
             message = "요청한 리소스를 찾을 수 없습니다: ${e.requestURL}",
             path = request.requestURI
         )
@@ -176,9 +176,9 @@ class GlobalExceptionHandler {
     ): ResponseEntity<ErrorResponse> {
         log.error("Unhandled Exception", e)
         val errorResponse = ErrorResponse(
-            status = ErrorCode.INTERNAL_SERVER_ERROR.status.value(),
-            code = ErrorCode.INTERNAL_SERVER_ERROR.code,
-            message = ErrorCode.INTERNAL_SERVER_ERROR.message,
+            status = ErrorMessage.INTERNAL_SERVER_ERROR.status.value(),
+            code = ErrorMessage.INTERNAL_SERVER_ERROR.code,
+            message = ErrorMessage.INTERNAL_SERVER_ERROR.message,
             path = request.requestURI
         )
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse)

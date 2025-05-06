@@ -7,18 +7,6 @@ import java.time.LocalDate
 class ErrorMessageUtilsTest {
 
     @Test
-    fun `getDefaultMessage는 ErrorCode에 맞는 메시지를 반환해야 한다`() {
-        // given
-        val errorCode = ErrorCode.USER_NOT_FOUND
-        
-        // when
-        val message = ErrorMessageUtils.getDefaultMessage(errorCode)
-        
-        // then
-        assertEquals("사용자를 찾을 수 없습니다", message)
-    }
-    
-    @Test
     fun `withId는 ID가 포함된 메시지를 생성해야 한다`() {
         // given
         val errorMessage = ErrorMessage.USER_NOT_FOUND

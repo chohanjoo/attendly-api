@@ -7,59 +7,59 @@ import kotlin.test.assertEquals
 class AttendlyApiExceptionTest {
 
     @Test
-    fun `생성자 - ErrorCode만 전달하는 경우`() {
+    fun `생성자 - ErrorMessage만 전달하는 경우`() {
         // given
-        val errorCode = ErrorCode.BAD_REQUEST
+        val errorMessage = ErrorMessage.BAD_REQUEST
         
         // when
-        val exception = AttendlyApiException(errorCode)
+        val exception = AttendlyApiException(errorMessage)
         
         // then
-        assertEquals(errorCode, exception.errorCode)
-        assertEquals(errorCode.message, exception.message)
+        assertEquals(errorMessage, exception.errorMessage)
+        assertEquals(errorMessage.message, exception.message)
     }
     
     @Test
-    fun `생성자 - ErrorCode와 메시지를 전달하는 경우`() {
+    fun `생성자 - ErrorMessage와 메시지를 전달하는 경우`() {
         // given
-        val errorCode = ErrorCode.BAD_REQUEST
+        val errorMessage = ErrorMessage.BAD_REQUEST
         val message = "테스트 메시지"
         
         // when
-        val exception = AttendlyApiException(errorCode, message)
+        val exception = AttendlyApiException(errorMessage, message)
         
         // then
-        assertEquals(errorCode, exception.errorCode)
+        assertEquals(errorMessage, exception.errorMessage)
         assertEquals(message, exception.message)
     }
     
     @Test
-    fun `생성자 - ErrorCode와 cause를 전달하는 경우`() {
+    fun `생성자 - ErrorMessage와 cause를 전달하는 경우`() {
         // given
-        val errorCode = ErrorCode.BAD_REQUEST
+        val errorMessage = ErrorMessage.BAD_REQUEST
         val cause = RuntimeException("원인 예외")
         
         // when
-        val exception = AttendlyApiException(errorCode, cause)
+        val exception = AttendlyApiException(errorMessage, cause)
         
         // then
-        assertEquals(errorCode, exception.errorCode)
-        assertEquals(errorCode.message, exception.message)
+        assertEquals(errorMessage, exception.errorMessage)
+        assertEquals(errorMessage.message, exception.message)
         assertEquals(cause, exception.cause)
     }
     
     @Test
-    fun `생성자 - ErrorCode와 메시지와 cause를 전달하는 경우`() {
+    fun `생성자 - ErrorMessage와 메시지와 cause를 전달하는 경우`() {
         // given
-        val errorCode = ErrorCode.BAD_REQUEST
+        val errorMessage = ErrorMessage.BAD_REQUEST
         val message = "테스트 메시지"
         val cause = RuntimeException("원인 예외")
         
         // when
-        val exception = AttendlyApiException(errorCode, message, cause)
+        val exception = AttendlyApiException(errorMessage, message, cause)
         
         // then
-        assertEquals(errorCode, exception.errorCode)
+        assertEquals(errorMessage, exception.errorMessage)
         assertEquals(message, exception.message)
         assertEquals(cause, exception.cause)
     }

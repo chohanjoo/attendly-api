@@ -4,7 +4,6 @@ import com.attendly.api.dto.*
 import com.attendly.domain.entity.*
 import com.attendly.domain.repository.*
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
 import io.mockk.every
@@ -61,7 +60,7 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.updateDepartment(departmentId, request)
         }
         
-        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, departmentId), exception.message)
         
         verify { departmentRepository.findById(departmentId) }
@@ -79,7 +78,7 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.deleteDepartment(departmentId)
         }
         
-        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, departmentId), exception.message)
         
         verify { departmentRepository.existsById(departmentId) }
@@ -97,7 +96,7 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.getDepartment(departmentId)
         }
         
-        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, departmentId), exception.message)
         
         verify { departmentRepository.findById(departmentId) }
@@ -119,7 +118,7 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.createVillage(request)
         }
         
-        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, request.departmentId), exception.message)
         
         verify { departmentRepository.findById(999L) }
@@ -138,7 +137,7 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.updateVillage(villageId, request)
         }
         
-        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId), exception.message)
         
         verify { villageRepository.findById(villageId) }
@@ -162,7 +161,7 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.createGbsGroup(request)
         }
         
-        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, request.villageId), exception.message)
         
         verify { villageRepository.findById(999L) }
@@ -181,7 +180,7 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.updateGbsGroup(gbsGroupId, request)
         }
         
-        assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.GBS_GROUP_NOT_FOUND, gbsGroupId), exception.message)
         
         verify { gbsGroupRepository.findById(gbsGroupId) }
@@ -203,7 +202,7 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.assignLeaderToGbs(gbsGroupId, request)
         }
         
-        assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.GBS_GROUP_NOT_FOUND, gbsGroupId), exception.message)
         
         verify { gbsGroupRepository.findById(gbsGroupId) }
@@ -235,7 +234,7 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.assignLeaderToGbs(gbsGroupId, request)
         }
         
-        assertEquals(ErrorMessage.USER_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.USER_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.USER_NOT_FOUND, leaderId), exception.message)
         
         verify { gbsGroupRepository.findById(gbsGroupId) }
@@ -258,7 +257,7 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.executeGbsReorganization(request)
         }
         
-        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, request.departmentId), exception.message)
         
         verify { departmentRepository.findById(request.departmentId) }

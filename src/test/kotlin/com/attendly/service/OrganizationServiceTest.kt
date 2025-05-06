@@ -10,7 +10,7 @@ import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.GbsMemberHistoryRepository
 import com.attendly.domain.repository.VillageRepository
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -121,7 +121,7 @@ class OrganizationServiceTest {
             // when
             organizationService.getDepartmentById(999L)
         }
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
+        assertEquals(ErrorMessage.RESOURCE_NOT_FOUND.code, exception.errorMessage.code)
     }
 
     @Test
@@ -160,7 +160,7 @@ class OrganizationServiceTest {
             // when
             organizationService.getVillageById(999L)
         }
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
+        assertEquals(ErrorMessage.RESOURCE_NOT_FOUND.code, exception.errorMessage.code)
     }
 
     @Test
@@ -213,7 +213,7 @@ class OrganizationServiceTest {
             // when
             organizationService.getGbsGroupById(999L)
         }
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
+        assertEquals(ErrorMessage.RESOURCE_NOT_FOUND.code, exception.errorMessage.code)
     }
 
     @Test
@@ -238,6 +238,6 @@ class OrganizationServiceTest {
             // when
             organizationService.getCurrentLeaderForGbs(999L)
         }
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
+        assertEquals(ErrorMessage.RESOURCE_NOT_FOUND.code, exception.errorMessage.code)
     }
 } 

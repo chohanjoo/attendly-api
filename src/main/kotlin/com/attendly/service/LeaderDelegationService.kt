@@ -7,7 +7,6 @@ import com.attendly.domain.repository.UserRepository
 import com.attendly.domain.entity.User
 import com.attendly.domain.entity.GbsGroup
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
 import com.attendly.exception.ErrorMessage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

@@ -1,25 +1,21 @@
 package com.attendly.service
 
 import com.attendly.api.dto.*
-import com.attendly.domain.entity.BatchJob
-import com.attendly.domain.entity.BatchJobLog
-import com.attendly.domain.repository.BatchJobRepository
+import com.attendly.domain.entity.*
+import com.attendly.domain.repository.*
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
 import com.attendly.exception.ErrorMessage
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
-import org.junit.jupiter.api.Assertions.*
+import io.mockk.*
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.PageRequest
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
-import java.util.*
+import java.util.Optional
+import org.junit.jupiter.api.Assertions.*
 
 class AdminBatchServiceTest {
 
@@ -80,11 +76,11 @@ class AdminBatchServiceTest {
         every { batchJobRepository.findById(jobId) } returns Optional.empty()
 
         // when & then
-        val exception = assertThrows<AttendlyApiException> {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             adminBatchService.cancelBatchJob(jobId, request)
         }
         
-        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.message, exception.message)
         
         verify { batchJobRepository.findById(jobId) }
@@ -109,11 +105,11 @@ class AdminBatchServiceTest {
         every { batchJobRepository.findById(jobId) } returns Optional.of(completedJob)
 
         // when & then
-        val exception = assertThrows<AttendlyApiException> {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             adminBatchService.cancelBatchJob(jobId, request)
         }
         
-        assertEquals(ErrorMessage.CANNOT_CANCEL_COMPLETED_JOB.code, exception.errorCode)
+        assertEquals(ErrorMessage.CANNOT_CANCEL_COMPLETED_JOB.code, exception.errorMessage.code)
         assertEquals(ErrorMessage.CANNOT_CANCEL_COMPLETED_JOB.message, exception.message)
         
         verify { batchJobRepository.findById(jobId) }
@@ -138,11 +134,11 @@ class AdminBatchServiceTest {
         every { batchJobRepository.findById(jobId) } returns Optional.of(runningJob)
 
         // when & then
-        val exception = assertThrows<AttendlyApiException> {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             adminBatchService.restartBatchJob(jobId, request)
         }
         
-        assertEquals(ErrorMessage.CANNOT_RESTART_RUNNING_JOB.code, exception.errorCode)
+        assertEquals(ErrorMessage.CANNOT_RESTART_RUNNING_JOB.code, exception.errorMessage.code)
         assertEquals(ErrorMessage.CANNOT_RESTART_RUNNING_JOB.message, exception.message)
         
         verify { batchJobRepository.findById(jobId) }
@@ -156,11 +152,11 @@ class AdminBatchServiceTest {
         every { batchJobRepository.findById(jobId) } returns Optional.empty()
 
         // when & then
-        val exception = assertThrows<AttendlyApiException> {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             adminBatchService.getBatchJob(jobId)
         }
         
-        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.message, exception.message)
         
         verify { batchJobRepository.findById(jobId) }
@@ -174,11 +170,11 @@ class AdminBatchServiceTest {
         every { batchJobRepository.findById(jobId) } returns Optional.empty()
 
         // when & then
-        val exception = assertThrows<AttendlyApiException> {
+        val exception = assertThrows(AttendlyApiException::class.java) {
             adminBatchService.getBatchJobLogs(jobId)
         }
         
-        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.message, exception.message)
         
         verify { batchJobRepository.findById(jobId) }

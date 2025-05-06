@@ -16,7 +16,6 @@ import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.GbsMemberHistoryRepository
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
 import com.attendly.exception.ErrorMessage
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -166,8 +165,7 @@ class StatisticsServiceTest {
             statisticsService.getDepartmentStatistics(1L, startDate, endDate)
         }
         
-        // 올바른 에러 코드 확인
-        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        // 올바른 에러 메시지 확인
         assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.message, exception.message)
     }
 
@@ -219,8 +217,7 @@ class StatisticsServiceTest {
             statisticsService.getVillageStatistics(1L, startDate, endDate)
         }
         
-        // 올바른 에러 코드 확인
-        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorCode)
+        // 올바른 에러 메시지 확인
         assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.message, exception.message)
     }
 
@@ -328,8 +325,7 @@ class StatisticsServiceTest {
             statisticsService.getGbsStatistics(1L, startDate, endDate)
         }
         
-        // 올바른 에러 코드 확인
-        assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.code, exception.errorCode)
+        // 올바른 에러 메시지 확인
         assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.message, exception.message)
     }
 

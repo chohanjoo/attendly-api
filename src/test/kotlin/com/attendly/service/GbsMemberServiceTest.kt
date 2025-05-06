@@ -7,7 +7,7 @@ import com.attendly.domain.entity.*
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.LeaderDelegationRepository
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.impl.annotations.InjectMockKs
@@ -22,6 +22,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Optional
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 
 @ExtendWith(MockKExtension::class)
 class GbsMemberServiceTest {
@@ -131,7 +134,7 @@ class GbsMemberServiceTest {
             gbsMemberService.getGbsMembers(gbsId, date, villageLeaderUser)
         }
         
-        assertEquals(ErrorCode.FORBIDDEN, exception.errorCode)
+        assertEquals(ErrorMessage.ACCESS_DENIED_GBS.code, exception.errorMessage.code)
     }
 
     @Test
@@ -189,7 +192,7 @@ class GbsMemberServiceTest {
             gbsMemberService.getGbsMembers(gbsId, date, leaderUser)
         }
         
-        assertEquals(ErrorCode.FORBIDDEN, exception.errorCode)
+        assertEquals(ErrorMessage.ACCESS_DENIED_GBS.code, exception.errorMessage.code)
     }
 
     @Test
@@ -246,7 +249,7 @@ class GbsMemberServiceTest {
             gbsMemberService.getGbsForLeader(userId)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
+        assertEquals(ErrorMessage.RESOURCE_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals("현재 담당하는 GBS가 없습니다", exception.message)
         verify { gbsLeaderHistoryRepository.findByLeaderIdAndEndDateIsNull(userId) }
     }
@@ -346,7 +349,7 @@ class GbsMemberServiceTest {
             gbsMemberService.getLeaderGbsHistories(leaderId, currentUser)
         }
         
-        assertEquals(ErrorCode.FORBIDDEN, exception.errorCode)
+        assertEquals(ErrorMessage.ACCESS_DENIED_GBS.code, exception.errorMessage.code)
     }
 
     // Private helper methods

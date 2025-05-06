@@ -5,7 +5,7 @@ import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.LeaderDelegationRepository
 import com.attendly.domain.repository.UserRepository
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -141,7 +141,7 @@ class LeaderDelegationServiceTest {
             leaderDelegationService.createDelegation(request)
         }
         
-        assertEquals(ErrorCode.USER_NOT_FOUND, exception.errorCode)
+        assertEquals(ErrorMessage.DELEGATOR_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals("위임자를 찾을 수 없습니다", exception.message)
     }
     
@@ -164,7 +164,7 @@ class LeaderDelegationServiceTest {
             leaderDelegationService.createDelegation(request)
         }
         
-        assertEquals(ErrorCode.USER_NOT_FOUND, exception.errorCode)
+        assertEquals(ErrorMessage.DELEGATEE_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals("수임자를 찾을 수 없습니다", exception.message)
     }
     
@@ -188,7 +188,7 @@ class LeaderDelegationServiceTest {
             leaderDelegationService.createDelegation(request)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
+        assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.code, exception.errorMessage.code)
         assertEquals("GBS 그룹을 찾을 수 없습니다", exception.message)
     }
     
@@ -215,7 +215,7 @@ class LeaderDelegationServiceTest {
             leaderDelegationService.createDelegation(request)
         }
         
-        assertEquals(ErrorCode.INVALID_INPUT, exception.errorCode)
+        assertEquals(ErrorMessage.INVALID_START_DATE.code, exception.errorMessage.code)
         assertEquals("시작일은 현재 날짜 이후여야 합니다", exception.message)
     }
     
@@ -252,7 +252,7 @@ class LeaderDelegationServiceTest {
             leaderDelegationService.createDelegation(request)
         }
         
-        assertEquals(ErrorCode.DUPLICATE_RESOURCE, exception.errorCode)
+        assertEquals(ErrorMessage.DUPLICATE_DELEGATION.code, exception.errorMessage.code)
         assertEquals("이 GBS 그룹에 이미 활성 위임이 존재합니다", exception.message)
     }
     
@@ -279,7 +279,7 @@ class LeaderDelegationServiceTest {
             leaderDelegationService.createDelegation(request)
         }
         
-        assertEquals(ErrorCode.INVALID_INPUT, exception.errorCode)
+        assertEquals(ErrorMessage.INVALID_DELEGATION_DATES.code, exception.errorMessage.code)
         assertEquals("시작일은 종료일보다 이전이거나 같아야 합니다", exception.message)
     }
     

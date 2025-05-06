@@ -54,10 +54,10 @@ class AdminBatchService(
     @Transactional
     fun cancelBatchJob(jobId: Long, request: BatchJobCancelRequest?): BatchJobResponse {
         val batchJob = batchJobRepository.findById(jobId)
-            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND.code, ErrorMessage.BATCH_JOB_NOT_FOUND.message) }
+            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND) }
 
         if (batchJob.status == BatchJobStatus.COMPLETED || batchJob.status == BatchJobStatus.FAILED) {
-            throw AttendlyApiException(ErrorMessage.CANNOT_CANCEL_COMPLETED_JOB.code, ErrorMessage.CANNOT_CANCEL_COMPLETED_JOB.message)
+            throw AttendlyApiException(ErrorMessage.CANNOT_CANCEL_COMPLETED_JOB)
         }
 
         val updatedJob = BatchJob(
@@ -99,10 +99,10 @@ class AdminBatchService(
     @Transactional
     fun restartBatchJob(jobId: Long, request: BatchJobRestartRequest?): BatchJobResponse {
         val batchJob = batchJobRepository.findById(jobId)
-            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND.code, ErrorMessage.BATCH_JOB_NOT_FOUND.message) }
+            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND) }
 
         if (batchJob.status == BatchJobStatus.RUNNING) {
-            throw AttendlyApiException(ErrorMessage.CANNOT_RESTART_RUNNING_JOB.code, ErrorMessage.CANNOT_RESTART_RUNNING_JOB.message)
+            throw AttendlyApiException(ErrorMessage.CANNOT_RESTART_RUNNING_JOB)
         }
 
         val parametersMap = try {
@@ -147,7 +147,7 @@ class AdminBatchService(
      */
     fun getBatchJob(jobId: Long): BatchJobResponse {
         val batchJob = batchJobRepository.findById(jobId)
-            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND.code, ErrorMessage.BATCH_JOB_NOT_FOUND.message) }
+            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND) }
 
         val parameters = try {
             objectMapper.readValue(batchJob.parameters, Map::class.java) as Map<String, String>
@@ -212,7 +212,7 @@ class AdminBatchService(
      */
     fun getBatchJobLogs(jobId: Long): List<BatchLogResponse> {
         val batchJob = batchJobRepository.findById(jobId)
-            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND.code, ErrorMessage.BATCH_JOB_NOT_FOUND.message) }
+            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND) }
 
         return batchJob.logs.map { log ->
             BatchLogResponse(

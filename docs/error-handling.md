@@ -149,7 +149,7 @@ val response = ErrorResponse.of(ErrorCode.BAD_REQUEST)
 val response = ErrorResponse.of(ErrorCode.BAD_REQUEST, "/api/users")
 
 // ErrorCode, 사용자 정의 메시지, 경로로 생성
-val response = ErrorResponse.of(ErrorCode.BAD_REQUEST, "잘못된 요청입니다", "/api/users")
+val response = ErrorResponse.withCustomMessage(ErrorCode.BAD_REQUEST, "잘못된 요청입니다", "/api/users")
 ```
 
 ## GlobalExceptionHandler

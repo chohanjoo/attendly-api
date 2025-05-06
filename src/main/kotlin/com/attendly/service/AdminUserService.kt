@@ -5,7 +5,6 @@ import com.attendly.domain.entity.User
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.UserRepository
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
 import org.springframework.data.domain.Page

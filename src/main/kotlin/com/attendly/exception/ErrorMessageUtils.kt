@@ -6,14 +6,6 @@ package com.attendly.exception
 object ErrorMessageUtils {
     
     /**
-     * ErrorCode에 기반한 기본 ErrorMessage 반환
-     * 만약 해당 ErrorCode에 맞는 기본 메시지가 없다면 코드 자체의 메시지 사용
-     */
-    fun getDefaultMessage(errorCode: ErrorCode): String {
-        return ErrorMessage.values().firstOrNull { it.code == errorCode }?.message ?: errorCode.message
-    }
-    
-    /**
      * 기본 에러 메시지에 ID를 추가하여 상세 메시지 생성
      * @param errorMessage 기본 에러 메시지
      * @param id 리소스 ID

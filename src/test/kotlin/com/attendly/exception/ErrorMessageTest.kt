@@ -12,20 +12,35 @@ class ErrorMessageTest {
         val message = ErrorMessage.USER_NOT_FOUND
         
         // then
-        assertEquals(ErrorCode.USER_NOT_FOUND, message.code)
+        assertEquals(HttpStatus.NOT_FOUND, message.status)
+        assertEquals("E1002", message.code)
         assertEquals("사용자를 찾을 수 없습니다", message.message)
     }
     
     @Test
-    fun `getDefaultMessage 메서드가 올바르게 작동하는지 확인`() {
+    fun `fromCode 메서드가 올바르게 작동하는지 확인`() {
         // given
-        val errorCode = ErrorCode.USER_NOT_FOUND
+        val code = "E1002"
         
         // when
-        val message = ErrorMessage.getDefaultMessage(errorCode)
+        val message = ErrorMessage.fromCode(code)
         
         // then
-        assertEquals("사용자를 찾을 수 없습니다", message)
+        assertEquals(ErrorMessage.USER_NOT_FOUND, message)
+        assertEquals("사용자를 찾을 수 없습니다", message.message)
+    }
+    
+    @Test
+    fun `fromStatus 메서드가 올바르게 작동하는지 확인`() {
+        // given
+        val status = HttpStatus.NOT_FOUND
+        
+        // when
+        val message = ErrorMessage.fromStatus(status)
+        
+        // then
+        assertEquals(ErrorMessage.RESOURCE_NOT_FOUND, message)
+        assertEquals("요청한 리소스를 찾을 수 없습니다", message.message)
     }
     
     @Test
@@ -50,7 +65,7 @@ class ErrorMessageTest {
         val exception = AttendlyApiException(errorMessage)
         
         // then
-        assertEquals(ErrorCode.USER_NOT_FOUND, exception.errorCode)
+        assertEquals(errorMessage, exception.errorMessage)
         assertEquals("위임자를 찾을 수 없습니다", exception.message)
     }
     
@@ -64,7 +79,7 @@ class ErrorMessageTest {
         
         // then
         assertEquals(HttpStatus.BAD_REQUEST.value(), response.status)
-        assertEquals(ErrorCode.INVALID_INPUT.code, response.code)
+        assertEquals("E1000", response.code)
         assertEquals("시작일은 종료일보다 이전이거나 같아야 합니다", response.message)
     }
 } 
