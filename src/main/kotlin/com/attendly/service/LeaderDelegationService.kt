@@ -8,6 +8,7 @@ import com.attendly.domain.entity.User
 import com.attendly.domain.entity.GbsGroup
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -22,13 +23,13 @@ class LeaderDelegationService(
     @Transactional
     fun createDelegation(request: DelegationCreateRequest): LeaderDelegation {
         val delegator = userRepository.findById(request.delegatorId)
-            .orElseThrow { AttendlyApiException(ErrorCode.USER_NOT_FOUND, "위임자를 찾을 수 없습니다") }
+            .orElseThrow { AttendlyApiException(ErrorMessage.DELEGATOR_NOT_FOUND) }
         
         val delegatee = userRepository.findById(request.delegateId)
-            .orElseThrow { AttendlyApiException(ErrorCode.USER_NOT_FOUND, "수임자를 찾을 수 없습니다") }
+            .orElseThrow { AttendlyApiException(ErrorMessage.DELEGATEE_NOT_FOUND) }
         
         val gbsGroup = gbsGroupRepository.findById(request.gbsGroupId)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "GBS 그룹을 찾을 수 없습니다") }
+            .orElseThrow { AttendlyApiException(ErrorMessage.GBS_GROUP_NOT_FOUND) }
 
         validateDelegation(delegator, delegatee, gbsGroup, request.startDate, request.endDate)
 
@@ -63,16 +64,16 @@ class LeaderDelegationService(
         endDate: LocalDate
     ) {
         if (startDate > endDate) {
-            throw AttendlyApiException(ErrorCode.INVALID_INPUT, "시작일은 종료일보다 이전이거나 같아야 합니다")
+            throw AttendlyApiException(ErrorMessage.INVALID_DELEGATION_DATES)
         }
         
         if (startDate < LocalDate.now()) {
-            throw AttendlyApiException(ErrorCode.INVALID_INPUT, "시작일은 현재 날짜 이후여야 합니다")
+            throw AttendlyApiException(ErrorMessage.INVALID_START_DATE)
         }
         
         val existingDelegation = leaderDelegationRepository.findActiveByGbsGroupIdAndDate(gbsGroup.id!!, startDate)
         if (existingDelegation != null) {
-            throw AttendlyApiException(ErrorCode.DUPLICATE_RESOURCE, "이 GBS 그룹에 이미 활성 위임이 존재합니다")
+            throw AttendlyApiException(ErrorMessage.DUPLICATE_DELEGATION)
         }
     }
 }

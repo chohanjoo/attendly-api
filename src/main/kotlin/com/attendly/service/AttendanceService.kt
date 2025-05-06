@@ -18,7 +18,8 @@ import com.attendly.domain.repository.LeaderDelegationRepository
 import com.attendly.domain.repository.UserRepository
 import com.attendly.domain.repository.VillageRepository
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
+import com.attendly.exception.ErrorMessageUtils
 import com.attendly.security.UserDetailsAdapter
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -66,7 +67,7 @@ class AttendanceService(
 
         val hasGbsAccess = hasLeaderAccess(gbsId, currentUser.id!!)
         if (!hasGbsAccess) {
-            throw AttendlyApiException(ErrorCode.FORBIDDEN, "이 GBS에 대한 출석 입력 권한이 없습니다")
+            throw AttendlyApiException(ErrorMessage.ACCESS_DENIED_ATTENDANCE)
         }
     }
     
@@ -90,7 +91,9 @@ class AttendanceService(
      */
     private fun getGbsGroup(gbsId: Long): GbsGroup {
         return gbsGroupRepository.findById(gbsId)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "GBS 그룹을 찾을 수 없습니다: $gbsId") }
+            .orElseThrow { 
+                AttendlyApiException(ErrorMessage.GBS_GROUP_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.GBS_GROUP_NOT_FOUND, gbsId)) 
+            }
     }
     
     /**
@@ -131,7 +134,9 @@ class AttendanceService(
      */
     private fun getMember(memberId: Long): User {
         return userRepository.findById(memberId)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "조원을 찾을 수 없습니다: $memberId") }
+            .orElseThrow { 
+                AttendlyApiException(ErrorMessage.MEMBER_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.MEMBER_NOT_FOUND, memberId)) 
+            }
     }
     
     /**
@@ -148,7 +153,10 @@ class AttendanceService(
         ).any { it.member.id == memberId }
         
         if (!isMemberOfGbs) {
-            throw AttendlyApiException(ErrorCode.FORBIDDEN, "해당 조원은 이 GBS에 속하지 않습니다: $memberId")
+            throw AttendlyApiException(
+                ErrorMessage.MEMBER_NOT_IN_GBS, 
+                ErrorMessageUtils.withIds(ErrorMessage.MEMBER_NOT_IN_GBS, "memberId" to memberId, "gbsId" to gbsId)
+            )
         }
     }
     
@@ -158,7 +166,9 @@ class AttendanceService(
     @Transactional(readOnly = true)
     fun getAttendancesByGbs(gbsId: Long, weekStart: LocalDate): List<AttendanceResponse> {
         val gbsGroup = gbsGroupRepository.findById(gbsId)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "GBS 그룹을 찾을 수 없습니다: $gbsId") }
+            .orElseThrow { 
+                AttendlyApiException(ErrorMessage.GBS_GROUP_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.GBS_GROUP_NOT_FOUND, gbsId)) 
+            }
         
         return attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart)
             .map { it.toAttendanceResponse() }
@@ -170,7 +180,9 @@ class AttendanceService(
     @Transactional(readOnly = true)
     fun getVillageAttendance(villageId: Long, weekStart: LocalDate): VillageAttendanceResponse {
         val village = villageRepository.findById(villageId)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "마을을 찾을 수 없습니다: $villageId") }
+            .orElseThrow { 
+                AttendlyApiException(ErrorMessage.VILLAGE_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId)) 
+            }
         
         // 현재 날짜 대신 요청된 주간 시작일(weekStart)를 기준으로 활성화된 GBS 그룹 조회
         val gbsGroups = gbsGroupRepository.findActiveGroupsByVillageId(villageId, weekStart)
@@ -196,7 +208,10 @@ class AttendanceService(
         
         // 해당 날짜(referenceDate)에 활성화된 리더 조회
         val leader = gbsLeaderHistoryRepository.findLeaderByGbsIdAndDate(gbsId, referenceDate)
-            ?: throw AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "해당 날짜에 활성화된 GBS 리더를 찾을 수 없습니다: $gbsId, $referenceDate")
+            ?: throw AttendlyApiException(
+                ErrorMessage.NO_ACTIVE_LEADER,
+                ErrorMessageUtils.withIdAndDate(ErrorMessage.NO_ACTIVE_LEADER, gbsId, referenceDate)
+            )
         
         // 기준일(referenceDate)에 활성화된 멤버 수 조회
         val totalMembers = gbsMemberHistoryRepository.countActiveMembers(gbsId, referenceDate).toInt()

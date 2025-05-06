@@ -339,7 +339,7 @@ class UserServiceTest {
             userService.getCurrentUser(authentication)
         }
         
-        assertEquals("사용자를 찾을 수 없습니다.", exception.message)
+        assertEquals("사용자를 찾을 수 없습니다", exception.message)
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.errorCode)
         verify { authentication.name }
         verify { userRepository.findByEmail(email) }

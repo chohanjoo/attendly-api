@@ -17,6 +17,7 @@ import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.GbsMemberHistoryRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.InjectMockKs
@@ -166,8 +167,8 @@ class StatisticsServiceTest {
         }
         
         // 올바른 에러 코드 확인
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertTrue(exception.message!!.contains("부서에 마을이 없습니다: 1"))
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.message, exception.message)
     }
 
     @Test
@@ -219,8 +220,8 @@ class StatisticsServiceTest {
         }
         
         // 올바른 에러 코드 확인
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertTrue(exception.message!!.contains("마을에 활성 GBS가 없습니다: 1"))
+        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.message, exception.message)
     }
 
     @Test
@@ -310,6 +311,26 @@ class StatisticsServiceTest {
                 assertEquals(3.5, weeklyStat.averageQtCount)
             }
         }
+    }
+
+    @Test
+    @DisplayName("getGbsStatistics: 활성 멤버가 없는 경우 예외를 발생시켜야 함")
+    fun getGbsStatisticsWithNoActiveMembers() {
+        // given
+        val today = LocalDate.now()
+        
+        every { organizationService.getGbsGroupById(1L) } returns gbsGroup
+        every { organizationService.getCurrentLeaderForGbs(1L) } returns "홍길동"
+        every { gbsMemberHistoryRepository.countActiveMembers(1L, today) } returns 0L
+        
+        // when & then
+        val exception = assertThrows<AttendlyApiException> {
+            statisticsService.getGbsStatistics(1L, startDate, endDate)
+        }
+        
+        // 올바른 에러 코드 확인
+        assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.message, exception.message)
     }
 
     @Test

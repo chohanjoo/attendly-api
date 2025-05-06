@@ -5,7 +5,7 @@ import com.attendly.domain.entity.BatchJob
 import com.attendly.domain.entity.BatchJobLog
 import com.attendly.domain.repository.BatchJobRepository
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -54,10 +54,10 @@ class AdminBatchService(
     @Transactional
     fun cancelBatchJob(jobId: Long, request: BatchJobCancelRequest?): BatchJobResponse {
         val batchJob = batchJobRepository.findById(jobId)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "배치 작업을 찾을 수 없습니다: ID $jobId") }
+            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND.code, ErrorMessage.BATCH_JOB_NOT_FOUND.message) }
 
         if (batchJob.status == BatchJobStatus.COMPLETED || batchJob.status == BatchJobStatus.FAILED) {
-            throw AttendlyApiException(ErrorCode.INVALID_INPUT, "이미 완료되거나 실패한 작업은 취소할 수 없습니다")
+            throw AttendlyApiException(ErrorMessage.CANNOT_CANCEL_COMPLETED_JOB.code, ErrorMessage.CANNOT_CANCEL_COMPLETED_JOB.message)
         }
 
         val updatedJob = BatchJob(
@@ -99,10 +99,10 @@ class AdminBatchService(
     @Transactional
     fun restartBatchJob(jobId: Long, request: BatchJobRestartRequest?): BatchJobResponse {
         val batchJob = batchJobRepository.findById(jobId)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "배치 작업을 찾을 수 없습니다: ID $jobId") }
+            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND.code, ErrorMessage.BATCH_JOB_NOT_FOUND.message) }
 
         if (batchJob.status == BatchJobStatus.RUNNING) {
-            throw AttendlyApiException(ErrorCode.INVALID_INPUT, "실행 중인 작업은 재시작할 수 없습니다")
+            throw AttendlyApiException(ErrorMessage.CANNOT_RESTART_RUNNING_JOB.code, ErrorMessage.CANNOT_RESTART_RUNNING_JOB.message)
         }
 
         val parametersMap = try {
@@ -147,7 +147,7 @@ class AdminBatchService(
      */
     fun getBatchJob(jobId: Long): BatchJobResponse {
         val batchJob = batchJobRepository.findById(jobId)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "배치 작업을 찾을 수 없습니다: ID $jobId") }
+            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND.code, ErrorMessage.BATCH_JOB_NOT_FOUND.message) }
 
         val parameters = try {
             objectMapper.readValue(batchJob.parameters, Map::class.java) as Map<String, String>
@@ -212,7 +212,7 @@ class AdminBatchService(
      */
     fun getBatchJobLogs(jobId: Long): List<BatchLogResponse> {
         val batchJob = batchJobRepository.findById(jobId)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "배치 작업을 찾을 수 없습니다: ID $jobId") }
+            .orElseThrow { AttendlyApiException(ErrorMessage.BATCH_JOB_NOT_FOUND.code, ErrorMessage.BATCH_JOB_NOT_FOUND.message) }
 
         return batchJob.logs.map { log ->
             BatchLogResponse(

@@ -5,6 +5,8 @@ import com.attendly.domain.entity.*
 import com.attendly.domain.repository.*
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
+import com.attendly.exception.ErrorMessageUtils
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -59,8 +61,8 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.updateDepartment(departmentId, request)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("부서를 찾을 수 없습니다: ID $departmentId", exception.message)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, departmentId), exception.message)
         
         verify { departmentRepository.findById(departmentId) }
     }
@@ -77,8 +79,8 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.deleteDepartment(departmentId)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("부서를 찾을 수 없습니다: ID $departmentId", exception.message)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, departmentId), exception.message)
         
         verify { departmentRepository.existsById(departmentId) }
     }
@@ -95,8 +97,8 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.getDepartment(departmentId)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("부서를 찾을 수 없습니다: ID $departmentId", exception.message)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, departmentId), exception.message)
         
         verify { departmentRepository.findById(departmentId) }
     }
@@ -117,8 +119,8 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.createVillage(request)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("부서를 찾을 수 없습니다: ID ${request.departmentId}", exception.message)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, request.departmentId), exception.message)
         
         verify { departmentRepository.findById(999L) }
     }
@@ -136,8 +138,8 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.updateVillage(villageId, request)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("마을을 찾을 수 없습니다: ID $villageId", exception.message)
+        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId), exception.message)
         
         verify { villageRepository.findById(villageId) }
     }
@@ -160,8 +162,8 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.createGbsGroup(request)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("마을을 찾을 수 없습니다: ID ${request.villageId}", exception.message)
+        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, request.villageId), exception.message)
         
         verify { villageRepository.findById(999L) }
     }
@@ -179,8 +181,8 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.updateGbsGroup(gbsGroupId, request)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("GBS 그룹을 찾을 수 없습니다: ID $gbsGroupId", exception.message)
+        assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessageUtils.withId(ErrorMessage.GBS_GROUP_NOT_FOUND, gbsGroupId), exception.message)
         
         verify { gbsGroupRepository.findById(gbsGroupId) }
     }
@@ -201,8 +203,8 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.assignLeaderToGbs(gbsGroupId, request)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("GBS 그룹을 찾을 수 없습니다: ID $gbsGroupId", exception.message)
+        assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessageUtils.withId(ErrorMessage.GBS_GROUP_NOT_FOUND, gbsGroupId), exception.message)
         
         verify { gbsGroupRepository.findById(gbsGroupId) }
     }
@@ -233,8 +235,8 @@ class AdminOrganizationServiceTest {
             adminOrganizationService.assignLeaderToGbs(gbsGroupId, request)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("사용자를 찾을 수 없습니다: ID $leaderId", exception.message)
+        assertEquals(ErrorMessage.USER_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessageUtils.withId(ErrorMessage.USER_NOT_FOUND, leaderId), exception.message)
         
         verify { gbsGroupRepository.findById(gbsGroupId) }
         verify { userRepository.findById(leaderId) }
@@ -249,16 +251,16 @@ class AdminOrganizationServiceTest {
             endDate = LocalDate.now().plusMonths(6)
         )
         
-        every { departmentRepository.findById(999L) } returns Optional.empty()
+        every { departmentRepository.findById(request.departmentId) } returns Optional.empty()
 
         // when & then
         val exception = assertThrows<AttendlyApiException> {
             adminOrganizationService.executeGbsReorganization(request)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("부서를 찾을 수 없습니다: ID ${request.departmentId}", exception.message)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, request.departmentId), exception.message)
         
-        verify { departmentRepository.findById(999L) }
+        verify { departmentRepository.findById(request.departmentId) }
     }
 } 

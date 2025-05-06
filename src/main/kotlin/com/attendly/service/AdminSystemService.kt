@@ -3,6 +3,8 @@ package com.attendly.service
 import com.attendly.api.dto.*
 import com.attendly.domain.entity.SystemSetting
 import com.attendly.domain.repository.SystemSettingRepository
+import com.attendly.exception.AttendlyApiException
+import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ResourceNotFoundException
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.cache.annotation.CacheEvict
@@ -62,7 +64,7 @@ class AdminSystemService(
     @CacheEvict(value = ["systemSettings"], allEntries = true)
     fun deleteSystemSetting(key: String) {
         val setting = systemSettingRepository.findByKey(key)
-            .orElseThrow { ResourceNotFoundException("설정을 찾을 수 없습니다: 키 $key") }
+            .orElseThrow { AttendlyApiException(ErrorMessage.SYSTEM_SETTING_NOT_FOUND) }
         
         systemSettingRepository.deleteById(setting.id!!)
     }
@@ -73,7 +75,7 @@ class AdminSystemService(
     // @Cacheable(value = ["systemSettings"], key = "#key")
     fun getSystemSetting(key: String): SystemSettingResponse {
         val setting = systemSettingRepository.findByKey(key)
-            .orElseThrow { ResourceNotFoundException("설정을 찾을 수 없습니다: 키 $key") }
+            .orElseThrow { AttendlyApiException(ErrorMessage.SYSTEM_SETTING_NOT_FOUND) }
 
         return SystemSettingResponse(
             id = setting.id ?: 0L,

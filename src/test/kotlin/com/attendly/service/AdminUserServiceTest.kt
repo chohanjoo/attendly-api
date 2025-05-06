@@ -10,6 +10,8 @@ import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.UserRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
+import com.attendly.exception.ErrorMessageUtils
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -110,8 +112,8 @@ class AdminUserServiceTest {
         val exception = assertThrows<AttendlyApiException> {
             adminUserService.createUser(userCreateRequest)
         }
-        assertEquals(ErrorCode.DUPLICATE_RESOURCE, exception.errorCode)
-        assertEquals("이미 사용 중인 이메일입니다", exception.message)
+        assertEquals(ErrorMessage.DUPLICATE_EMAIL.code, exception.errorCode)
+        assertEquals(ErrorMessage.DUPLICATE_EMAIL.message, exception.message)
         
         verify { userRepository.findByEmail("hong@example.com") }
         verify(exactly = 0) { departmentRepository.findById(any()) }
@@ -236,8 +238,8 @@ class AdminUserServiceTest {
             adminUserService.deleteUser(userId)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("사용자를 찾을 수 없습니다: ID $userId", exception.message)
+        assertEquals(ErrorMessage.USER_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessageUtils.withId(ErrorMessage.USER_NOT_FOUND, userId), exception.message)
         verify { userRepository.existsById(userId) }
         verify(exactly = 0) { userRepository.deleteById(any()) }
     }

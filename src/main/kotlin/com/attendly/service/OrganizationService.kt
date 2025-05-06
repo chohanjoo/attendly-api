@@ -12,7 +12,8 @@ import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.GbsMemberHistoryRepository
 import com.attendly.domain.repository.VillageRepository
 import com.attendly.exception.AttendlyApiException
-import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
+import com.attendly.exception.ErrorMessageUtils
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -26,6 +27,16 @@ class OrganizationService(
     private val gbsLeaderHistoryRepository: GbsLeaderHistoryRepository,
     private val gbsMemberHistoryRepository: GbsMemberHistoryRepository
 ) {
+    /**
+     * 더 간결한 코드를 위한 확장 함수
+     */
+    private fun ErrorMessage.withId(id: Long): AttendlyApiException {
+        return AttendlyApiException(this, ErrorMessageUtils.withId(this, id))
+    }
+    
+    private fun ErrorMessage.withIdAndDate(id: Long, date: LocalDate): AttendlyApiException {
+        return AttendlyApiException(this, ErrorMessageUtils.withIdAndDate(this, id, date))
+    }
 
     @Transactional(readOnly = true)
     fun getAllDepartments(): List<Department> {
@@ -35,7 +46,7 @@ class OrganizationService(
     @Transactional(readOnly = true)
     fun getDepartmentById(id: Long): Department {
         return departmentRepository.findById(id)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "부서를 찾을 수 없습니다: $id") }
+            .orElseThrow { ErrorMessage.DEPARTMENT_NOT_FOUND.withId(id) }
     }
 
     @Transactional(readOnly = true)
@@ -47,7 +58,7 @@ class OrganizationService(
     @Transactional(readOnly = true)
     fun getVillageById(id: Long): Village {
         return villageRepository.findById(id)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "마을을 찾을 수 없습니다: $id") }
+            .orElseThrow { ErrorMessage.VILLAGE_NOT_FOUND.withId(id) }
     }
 
     @Transactional(readOnly = true)
@@ -64,13 +75,13 @@ class OrganizationService(
     @Transactional(readOnly = true)
     fun getGbsGroupById(id: Long): GbsGroup {
         return gbsGroupRepository.findById(id)
-            .orElseThrow { AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "GBS 그룹을 찾을 수 없습니다: $id") }
+            .orElseThrow { ErrorMessage.GBS_GROUP_NOT_FOUND.withId(id) }
     }
 
     @Transactional(readOnly = true)
     fun getCurrentLeaderForGbs(gbsId: Long): String {
         val leader = gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsId)
-            ?: throw AttendlyApiException(ErrorCode.RESOURCE_NOT_FOUND, "현재 GBS의 리더를 찾을 수 없습니다: $gbsId")
+            ?: throw ErrorMessage.NO_ACTIVE_LEADER.withIdAndDate(gbsId, LocalDate.now())
         
         return leader.name
     }

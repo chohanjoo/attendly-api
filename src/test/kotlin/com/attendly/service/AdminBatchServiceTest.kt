@@ -6,6 +6,7 @@ import com.attendly.domain.entity.BatchJobLog
 import com.attendly.domain.repository.BatchJobRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorCode
+import com.attendly.exception.ErrorMessage
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.mockk
@@ -83,8 +84,8 @@ class AdminBatchServiceTest {
             adminBatchService.cancelBatchJob(jobId, request)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("배치 작업을 찾을 수 없습니다: ID $jobId", exception.message)
+        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.message, exception.message)
         
         verify { batchJobRepository.findById(jobId) }
     }
@@ -112,8 +113,8 @@ class AdminBatchServiceTest {
             adminBatchService.cancelBatchJob(jobId, request)
         }
         
-        assertEquals(ErrorCode.INVALID_INPUT, exception.errorCode)
-        assertEquals("이미 완료되거나 실패한 작업은 취소할 수 없습니다", exception.message)
+        assertEquals(ErrorMessage.CANNOT_CANCEL_COMPLETED_JOB.code, exception.errorCode)
+        assertEquals(ErrorMessage.CANNOT_CANCEL_COMPLETED_JOB.message, exception.message)
         
         verify { batchJobRepository.findById(jobId) }
     }
@@ -141,8 +142,8 @@ class AdminBatchServiceTest {
             adminBatchService.restartBatchJob(jobId, request)
         }
         
-        assertEquals(ErrorCode.INVALID_INPUT, exception.errorCode)
-        assertEquals("실행 중인 작업은 재시작할 수 없습니다", exception.message)
+        assertEquals(ErrorMessage.CANNOT_RESTART_RUNNING_JOB.code, exception.errorCode)
+        assertEquals(ErrorMessage.CANNOT_RESTART_RUNNING_JOB.message, exception.message)
         
         verify { batchJobRepository.findById(jobId) }
     }
@@ -159,8 +160,8 @@ class AdminBatchServiceTest {
             adminBatchService.getBatchJob(jobId)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("배치 작업을 찾을 수 없습니다: ID $jobId", exception.message)
+        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.message, exception.message)
         
         verify { batchJobRepository.findById(jobId) }
     }
@@ -177,8 +178,8 @@ class AdminBatchServiceTest {
             adminBatchService.getBatchJobLogs(jobId)
         }
         
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.errorCode)
-        assertEquals("배치 작업을 찾을 수 없습니다: ID $jobId", exception.message)
+        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.code, exception.errorCode)
+        assertEquals(ErrorMessage.BATCH_JOB_NOT_FOUND.message, exception.message)
         
         verify { batchJobRepository.findById(jobId) }
     }
