@@ -13,6 +13,10 @@ FROM amazoncorretto:21
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 
+# 타임존 설정
+ENV TZ=Asia/Seoul
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # 실행
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"] 

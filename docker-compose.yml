@@ -9,6 +9,7 @@ services:
       MYSQL_DATABASE: attendly_api
       MYSQL_USER: user
       MYSQL_PASSWORD: password
+      TZ: Asia/Seoul
     volumes:
       - mysql-data:/var/lib/mysql
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
@@ -25,12 +26,13 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:p6spy:mysql://db:3306/attendly_api?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:p6spy:mysql://db:3306/attendly_api?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.p6spy.engine.spy.P6SpyDriver
       SPRING_FLYWAY_REPAIR: "true"
       DISCORD_WEBHOOK_URL: https://discord.com/api/webhooks/1368899732864503818/2kxY39C_ZOklifqUImZpYYp_5mSpWALlnHB2GUT7bAQjpaOjGM3MU7N1YfRUWlt9B0_Q
+      TZ: Asia/Seoul
     depends_on:
       db:
         condition: service_healthy
