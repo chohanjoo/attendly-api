@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.ModelAndView
@@ -18,11 +19,24 @@ class ApiLogInterceptor(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val requestMap = Collections.synchronizedMap(HashMap<String, Long>())
+    
+    companion object {
+        const val X_REQUEST_ID = "X-Request-ID"
+        const val REQUEST_ID_ATTRIBUTE = "requestId"
+    }
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        val requestId = UUID.randomUUID().toString()
+        // 헤더에서 requestId를 가져오거나 없으면 생성
+        val requestId = request.getHeader(X_REQUEST_ID) ?: UUID.randomUUID().toString()
+        
         requestMap[requestId] = System.currentTimeMillis()
-        request.setAttribute("requestId", requestId)
+        request.setAttribute(REQUEST_ID_ATTRIBUTE, requestId)
+        
+        // 응답 헤더에도 requestId 추가
+        response.addHeader(X_REQUEST_ID, requestId)
+        
+        // MDC에 requestId 설정하여 로깅에 활용
+        MDC.put(REQUEST_ID_ATTRIBUTE, requestId)
         
         return true
     }
@@ -43,7 +57,7 @@ class ApiLogInterceptor(
         ex: Exception?
     ) {
         try {
-            val requestId = request.getAttribute("requestId") as String?
+            val requestId = request.getAttribute(REQUEST_ID_ATTRIBUTE) as String?
             val startTime = requestMap.remove(requestId)
             
             if (startTime != null) {
@@ -91,6 +105,9 @@ class ApiLogInterceptor(
             }
         } catch (e: Exception) {
             logger.error("API 로깅 중 오류 발생", e)
+        } finally {
+            // MDC에서 requestId 제거
+            MDC.remove(REQUEST_ID_ATTRIBUTE)
         }
     }
     

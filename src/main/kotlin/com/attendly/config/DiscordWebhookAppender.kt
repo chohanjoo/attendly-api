@@ -463,6 +463,9 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
         val color = getColorForLevel(level)
         val timestamp = Instant.ofEpochMilli(event.timeStamp)
         
+        // MDC에서 requestId 가져오기
+        val requestId = event.mdcPropertyMap["requestId"] ?: "NONE"
+        
         val summary = event.formattedMessage.let {
             if (it.length > 100) it.substring(0, 97) + "..." else it
         }
@@ -473,6 +476,7 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
             .setDescription("로그가 첨부 파일로 제공됩니다. 요약: $summary")
             .addField(WebhookEmbed.EmbedField(true, "Application", applicationName))
             .addField(WebhookEmbed.EmbedField(true, "Thread", event.threadName))
+            .addField(WebhookEmbed.EmbedField(true, "RequestId", requestId))
             .setFooter(WebhookEmbed.EmbedFooter("Logback Discord Appender", null))
             .setTimestamp(timestamp)
             .build()
@@ -490,6 +494,11 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
         sb.appendLine("스레드: ${event.threadName}")
         sb.appendLine("애플리케이션: $applicationName")
         sb.appendLine("환경: $environment")
+        
+        // MDC에서 requestId 가져오기
+        val requestId = event.mdcPropertyMap["requestId"] ?: "NONE"
+        sb.appendLine("요청 ID: $requestId")
+        
         sb.appendLine("===== 메시지 =====")
         sb.appendLine(event.formattedMessage)
         
@@ -549,12 +558,16 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
         val color = getColorForLevel(level)
         val timestamp = Instant.ofEpochMilli(event.timeStamp)
         
+        // MDC에서 requestId 가져오기
+        val requestId = event.mdcPropertyMap["requestId"] ?: "NONE"
+        
         return WebhookEmbedBuilder()
             .setColor(color)
             .setTitle(WebhookEmbed.EmbedTitle("[$environment] $level: ${event.loggerName}", null))
             .setDescription(event.formattedMessage)
             .addField(WebhookEmbed.EmbedField(true, "Application", applicationName))
             .addField(WebhookEmbed.EmbedField(true, "Thread", event.threadName))
+            .addField(WebhookEmbed.EmbedField(true, "RequestId", requestId))
             .setFooter(WebhookEmbed.EmbedFooter("Logback Discord Appender", null))
             .setTimestamp(timestamp)
             .build()
