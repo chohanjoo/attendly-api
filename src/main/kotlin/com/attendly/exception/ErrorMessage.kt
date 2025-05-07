@@ -36,7 +36,6 @@ enum class ErrorMessage(
     ACCESS_DENIED_GBS(HttpStatus.FORBIDDEN, "E403", "이 GBS의 멤버 정보를 조회할 권한이 없습니다"),
     ACCESS_DENIED_LEADER_HISTORY(HttpStatus.FORBIDDEN, "E403", "다른 리더의 히스토리를 조회할 권한이 없습니다"),
     ACCESS_DENIED_ATTENDANCE(HttpStatus.FORBIDDEN, "E403", "이 GBS에 대한 출석 입력 권한이 없습니다"),
-    MEMBER_NOT_IN_GBS(HttpStatus.FORBIDDEN, "E403", "해당 조원은 이 GBS에 속하지 않습니다"),
     
     // LeaderDelegation 관련 메시지
     DELEGATOR_NOT_FOUND(HttpStatus.NOT_FOUND, "E1002", "위임자를 찾을 수 없습니다"),
@@ -67,7 +66,14 @@ enum class ErrorMessage(
     CANNOT_RESTART_RUNNING_JOB(HttpStatus.BAD_REQUEST, "E1000", "실행 중인 작업은 재시작할 수 없습니다"),
     
     // 시스템 설정 관련 메시지
-    SYSTEM_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "E404", "시스템 설정을 찾을 수 없습니다");
+    SYSTEM_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "E404", "시스템 설정을 찾을 수 없습니다"),
+    
+    // 출석 관련 에러
+    WORSHIP_NOT_FOUND(HttpStatus.NOT_FOUND, "E4001", "예배 정보를 찾을 수 없습니다."),
+    ATTENDANCE_NOT_FOUND(HttpStatus.NOT_FOUND, "E4002", "출석 정보를 찾을 수 없습니다."),
+    MEMBER_NOT_IN_GBS(HttpStatus.BAD_REQUEST, "E4003", "해당 멤버는 GBS에 속하지 않습니다."),
+    GBS_WEEK_NOT_FOUND(HttpStatus.NOT_FOUND, "E4004", "해당 주차의 GBS 정보를 찾을 수 없습니다."),
+    USER_NOT_ASSIGNED_TO_VILLAGE(HttpStatus.BAD_REQUEST, "E4005", "사용자가 마을에 배정되지 않았습니다.");
     
     companion object {
         /**

@@ -672,7 +672,7 @@ class AttendanceServiceTest {
             attendanceService.createAttendances(batchRequest)
         }
         
-        assertEquals(ErrorMessage.FORBIDDEN.code, exception.errorMessage.code)
+        assertEquals(ErrorMessage.MEMBER_NOT_IN_GBS.code, exception.errorMessage.code)
         verify { gbsGroupRepository.findById(1L) }
         verify { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) }
         verify { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) }
@@ -684,5 +684,8 @@ class AttendanceServiceTest {
                 }
             ) 
         }
+        // 에러 메시지에 원인 정보 포함 확인
+        assertTrue(exception.message!!.contains("memberId"))
+        assertTrue(exception.message!!.contains("gbsId"))
     }
 } 

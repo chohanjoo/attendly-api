@@ -32,7 +32,7 @@ class ErrorMessageUtilsTest {
         )
         
         // then
-        assertEquals("해당 조원은 이 GBS에 속하지 않습니다 (memberId: 123, gbsId: 456)", message)
+        assertEquals("해당 멤버는 GBS에 속하지 않습니다. (memberId: 123, gbsId: 456)", message)
     }
     
     @Test

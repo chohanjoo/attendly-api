@@ -1416,6 +1416,45 @@ paths:
                   $ref: '#/components/schemas/BatchLogResponse'
       security:
         - bearerAuth: []
+  /api/users/by-roles:
+    post:
+      tags:
+        - 사용자
+      summary: 역할별 사용자 목록 조회
+      description: 지정된 역할을 가진 사용자 목록을 조회합니다
+      operationId: getUsersByRoles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserListByRolesRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UserListByRolesResponse'
+      security:
+        - bearerAuth: []
+  
+  /api/users/my-village:
+    get:
+      tags:
+        - 사용자
+      summary: 현재 사용자의 마을 정보 조회
+      description: 현재 로그인한 사용자가 속한 마을 정보를 조회합니다
+      operationId: getCurrentUserVillage
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UserVillageResponse'
+      security:
+        - bearerAuth: []
 components:
   schemas:
     UserUpdateRequest:

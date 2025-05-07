@@ -4,10 +4,14 @@ import com.attendly.api.dto.SignupRequest
 import com.attendly.api.dto.SignupResponse
 import com.attendly.api.dto.UserResponse
 import com.attendly.api.dto.UserListByRolesRequest
+import com.attendly.api.dto.UserVillageResponse
 import com.attendly.domain.entity.Role
 import com.attendly.domain.entity.User
+import com.attendly.domain.entity.Village
 import com.attendly.domain.repository.DepartmentRepository
+import com.attendly.domain.repository.GbsMemberHistoryRepository
 import com.attendly.domain.repository.UserRepository
+import com.attendly.domain.repository.VillageRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
@@ -23,6 +27,7 @@ import java.util.Optional
 class UserService(
     private val userRepository: UserRepository,
     private val departmentRepository: DepartmentRepository,
+    private val gbsMemberHistoryRepository: GbsMemberHistoryRepository,
     private val passwordEncoder: PasswordEncoder
 ) {
 
@@ -122,5 +127,55 @@ class UserService(
                 updatedAt = user.updatedAt
             )
         }
+    }
+
+    /**
+     * 사용자가 속한 마을 정보 조회
+     */
+    @Transactional(readOnly = true)
+    fun getUserVillage(userId: Long): UserVillageResponse {
+        val user = userRepository.findById(userId)
+            .orElseThrow { AttendlyApiException(ErrorMessage.USER_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.USER_NOT_FOUND, userId)) }
+        
+        // 마을장인 경우 직접 마을 정보 제공
+        if (user.role == Role.VILLAGE_LEADER && user.villageLeader != null) {
+            val village = user.villageLeader.village
+            return UserVillageResponse(
+                userId = user.id!!,
+                userName = user.name,
+                villageId = village.id!!,
+                villageName = village.name,
+                departmentId = village.department.id!!,
+                departmentName = village.department.name,
+                isVillageLeader = true
+            )
+        }
+        
+        // 일반 멤버인 경우 현재 속한 GBS를 통해 마을 정보 조회
+        val currentMemberHistory = gbsMemberHistoryRepository.findCurrentMemberHistoryByMemberId(userId)
+        if (currentMemberHistory != null) {
+            val village = currentMemberHistory.gbsGroup.village
+            return UserVillageResponse(
+                userId = user.id!!,
+                userName = user.name,
+                villageId = village.id!!,
+                villageName = village.name,
+                departmentId = village.department.id!!,
+                departmentName = village.department.name,
+                isVillageLeader = false
+            )
+        }
+        
+        // 마을에 속하지 않은 경우 예외 처리
+        throw AttendlyApiException(ErrorMessage.USER_NOT_ASSIGNED_TO_VILLAGE)
+    }
+
+    /**
+     * 현재 인증된 사용자의 마을 정보 조회
+     */
+    @Transactional(readOnly = true)
+    fun getCurrentUserVillage(authentication: Authentication): UserVillageResponse {
+        val user = getCurrentUser(authentication)
+        return getUserVillage(user.id!!)
     }
 } 

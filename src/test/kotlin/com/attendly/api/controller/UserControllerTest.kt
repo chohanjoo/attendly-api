@@ -1,7 +1,9 @@
 package com.attendly.api.controller
 
 import com.attendly.api.dto.UserListByRolesRequest
+import com.attendly.api.dto.UserListByRolesResponse
 import com.attendly.api.dto.UserResponse
+import com.attendly.api.dto.UserVillageResponse
 import com.attendly.domain.entity.Role
 import com.attendly.security.TestSecurityConfig
 import com.attendly.security.JwtTokenProvider
@@ -19,9 +21,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
@@ -129,5 +133,86 @@ class UserControllerTest {
         )
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    @WithMockUser(roles = ["ADMIN"])
+    fun `역할별 사용자 목록 조회 성공`() {
+        // given
+        val request = UserListByRolesRequest(listOf("LEADER", "MEMBER"))
+        val usersList = listOf(
+            UserResponse(
+                id = 1L,
+                name = "홍길동",
+                email = "hong@example.com",
+                phoneNumber = "010-1234-5678",
+                role = Role.LEADER,
+                departmentId = 1L,
+                departmentName = "대학부",
+                birthDate = LocalDate.of(1990, 1, 1),
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now()
+            ),
+            UserResponse(
+                id = 2L,
+                name = "김철수",
+                email = "kim@example.com",
+                phoneNumber = "010-2345-6789",
+                role = Role.MEMBER,
+                departmentId = 1L,
+                departmentName = "대학부",
+                birthDate = LocalDate.of(1995, 5, 5),
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now()
+            )
+        )
+        val response = UserListByRolesResponse(usersList)
+
+        every { userService.getUsersByRoles(any()) } returns usersList
+
+        // when & then
+        mockMvc.perform(
+            post("/api/users/by-roles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.users[0].id").value(1))
+            .andExpect(jsonPath("$.users[0].name").value("홍길동"))
+            .andExpect(jsonPath("$.users[0].role").value("LEADER"))
+            .andExpect(jsonPath("$.users[1].id").value(2))
+            .andExpect(jsonPath("$.users[1].name").value("김철수"))
+            .andExpect(jsonPath("$.users[1].role").value("MEMBER"))
+    }
+    
+    @Test
+    @WithMockUser(roles = ["MEMBER"])
+    fun `현재 사용자의 마을 정보 조회 성공`() {
+        // given
+        val response = UserVillageResponse(
+            userId = 1L,
+            userName = "홍길동",
+            villageId = 10L,
+            villageName = "1마을",
+            departmentId = 20L,
+            departmentName = "대학부",
+            isVillageLeader = false
+        )
+        
+        every { userService.getCurrentUserVillage(any<Authentication>()) } returns response
+        
+        // when & then
+        mockMvc.perform(
+            get("/api/users/my-village")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.userId").value(1))
+            .andExpect(jsonPath("$.userName").value("홍길동"))
+            .andExpect(jsonPath("$.villageId").value(10))
+            .andExpect(jsonPath("$.villageName").value("1마을"))
+            .andExpect(jsonPath("$.departmentId").value(20))
+            .andExpect(jsonPath("$.departmentName").value("대학부"))
+            .andExpect(jsonPath("$.isVillageLeader").value(false))
     }
 } 

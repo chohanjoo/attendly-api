@@ -2,6 +2,7 @@ package com.attendly.api.controller
 
 import com.attendly.api.dto.UserListByRolesRequest
 import com.attendly.api.dto.UserListByRolesResponse
+import com.attendly.api.dto.UserVillageResponse
 import com.attendly.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -9,6 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -32,5 +35,17 @@ class UserController(
     fun getUsersByRoles(@Valid @RequestBody request: UserListByRolesRequest): ResponseEntity<UserListByRolesResponse> {
         val users = userService.getUsersByRoles(request)
         return ResponseEntity.ok(UserListByRolesResponse(users))
+    }
+    
+    @Operation(
+        summary = "현재 사용자의 마을 정보 조회",
+        description = "현재 로그인한 사용자가 속한 마을 정보를 조회합니다",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @GetMapping("/my-village")
+    @PreAuthorize("isAuthenticated()")
+    fun getCurrentUserVillage(authentication: Authentication): ResponseEntity<UserVillageResponse> {
+        val villageResponse = userService.getCurrentUserVillage(authentication)
+        return ResponseEntity.ok(villageResponse)
     }
 } 

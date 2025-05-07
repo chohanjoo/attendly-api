@@ -3,21 +3,29 @@ package com.attendly.service
 import com.attendly.api.dto.SignupRequest
 import com.attendly.api.dto.UserListByRolesRequest
 import com.attendly.api.dto.UserResponse
+import com.attendly.api.dto.UserVillageResponse
 import com.attendly.domain.entity.Department
+import com.attendly.domain.entity.GbsGroup
+import com.attendly.domain.entity.GbsMemberHistory
 import com.attendly.domain.entity.Role
 import com.attendly.domain.entity.User
+import com.attendly.domain.entity.Village
+import com.attendly.domain.entity.VillageLeader
 import com.attendly.domain.repository.DepartmentRepository
+import com.attendly.domain.repository.GbsMemberHistoryRepository
 import com.attendly.domain.repository.UserRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.SpyK
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -31,18 +39,35 @@ class UserServiceTest {
 
     @MockK
     private lateinit var departmentRepository: DepartmentRepository
+    
+    @MockK
+    private lateinit var gbsMemberHistoryRepository: GbsMemberHistoryRepository
 
     @MockK
     private lateinit var passwordEncoder: PasswordEncoder
 
+    @MockK
+    private lateinit var authentication: Authentication
+
     @InjectMockKs
     private lateinit var userService: UserService
+
+    private val userId = 1L
+    private val userName = "테스트 사용자"
+    private val villageId = 10L
+    private val villageName = "테스트 마을"
+    private val departmentId = 20L
+    private val departmentName = "테스트 부서"
+    private val gbsId = 30L
+    private val gbsName = "테스트 GBS"
 
     private lateinit var department: Department
     private lateinit var signupRequest: SignupRequest
 
     @BeforeEach
     fun setUp() {
+        clearAllMocks()
+        
         // 테스트용 부서 설정
         department = Department(
             id = 1L,
@@ -352,5 +377,194 @@ class UserServiceTest {
         assertEquals(ErrorMessage.USER_NOT_FOUND, exception.errorMessage)
         verify { authentication.name }
         verify { userRepository.findByEmail(email) }
+    }
+
+    @Test
+    fun `마을장 사용자의 마을 정보 조회 성공`() {
+        // given
+        val department = Department(
+            id = departmentId,
+            name = departmentName
+        )
+        
+        val village = Village(
+            id = villageId,
+            name = villageName,
+            department = department
+        )
+        
+        val villageLeader = VillageLeader(
+            user = mockk(),
+            village = village,
+            startDate = LocalDate.now()
+        )
+        
+        val user = User(
+            id = userId,
+            name = userName,
+            role = Role.VILLAGE_LEADER,
+            department = department,
+            villageLeader = villageLeader
+        )
+        
+        every { userRepository.findById(userId) } returns Optional.of(user)
+        
+        // when
+        val result = userService.getUserVillage(userId)
+        
+        // then
+        assertEquals(userId, result.userId)
+        assertEquals(userName, result.userName)
+        assertEquals(villageId, result.villageId)
+        assertEquals(villageName, result.villageName)
+        assertEquals(departmentId, result.departmentId)
+        assertEquals(departmentName, result.departmentName)
+        assertTrue(result.isVillageLeader)
+        
+        verify(exactly = 1) { userRepository.findById(userId) }
+    }
+    
+    @Test
+    fun `일반 사용자의 마을 정보 조회 성공`() {
+        // given
+        val department = Department(
+            id = departmentId,
+            name = departmentName
+        )
+        
+        val village = Village(
+            id = villageId,
+            name = villageName,
+            department = department
+        )
+        
+        val user = User(
+            id = userId,
+            name = userName,
+            role = Role.MEMBER,
+            department = department
+        )
+        
+        val gbsGroup = GbsGroup(
+            id = gbsId,
+            name = gbsName,
+            village = village,
+            termStartDate = LocalDate.now(),
+            termEndDate = LocalDate.now().plusMonths(6)
+        )
+        
+        val memberHistory = GbsMemberHistory(
+            id = 1L,
+            gbsGroup = gbsGroup,
+            member = user,
+            startDate = LocalDate.now()
+        )
+        
+        every { userRepository.findById(userId) } returns Optional.of(user)
+        every { gbsMemberHistoryRepository.findCurrentMemberHistoryByMemberId(userId) } returns memberHistory
+        
+        // when
+        val result = userService.getUserVillage(userId)
+        
+        // then
+        assertEquals(userId, result.userId)
+        assertEquals(userName, result.userName)
+        assertEquals(villageId, result.villageId)
+        assertEquals(villageName, result.villageName)
+        assertEquals(departmentId, result.departmentId)
+        assertEquals(departmentName, result.departmentName)
+        assertFalse(result.isVillageLeader)
+        
+        verify(exactly = 1) { userRepository.findById(userId) }
+        verify(exactly = 1) { gbsMemberHistoryRepository.findCurrentMemberHistoryByMemberId(userId) }
+    }
+    
+    @Test
+    fun `사용자가 마을에 배정되지 않은 경우 예외 발생`() {
+        // given
+        val department = Department(
+            id = departmentId,
+            name = departmentName
+        )
+        
+        val user = User(
+            id = userId,
+            name = userName,
+            role = Role.MEMBER,
+            department = department
+        )
+        
+        every { userRepository.findById(userId) } returns Optional.of(user)
+        every { gbsMemberHistoryRepository.findCurrentMemberHistoryByMemberId(userId) } returns null
+        
+        // when & then
+        val exception = assertThrows(AttendlyApiException::class.java) {
+            userService.getUserVillage(userId)
+        }
+        
+        assertEquals(ErrorMessage.USER_NOT_ASSIGNED_TO_VILLAGE.code, exception.errorMessage.code)
+        
+        verify(exactly = 1) { userRepository.findById(userId) }
+        verify(exactly = 1) { gbsMemberHistoryRepository.findCurrentMemberHistoryByMemberId(userId) }
+    }
+    
+    @Test
+    fun `현재 인증된 사용자의 마을 정보 조회 성공`() {
+        // given
+        val department = Department(
+            id = departmentId,
+            name = departmentName
+        )
+        
+        val village = Village(
+            id = villageId,
+            name = villageName,
+            department = department
+        )
+        
+        val user = User(
+            id = userId,
+            name = userName,
+            email = "test@example.com",
+            role = Role.MEMBER,
+            department = department
+        )
+        
+        val gbsGroup = GbsGroup(
+            id = gbsId,
+            name = gbsName,
+            village = village,
+            termStartDate = LocalDate.now(),
+            termEndDate = LocalDate.now().plusMonths(6)
+        )
+        
+        val memberHistory = GbsMemberHistory(
+            id = 1L,
+            gbsGroup = gbsGroup,
+            member = user,
+            startDate = LocalDate.now()
+        )
+        
+        every { authentication.name } returns "test@example.com"
+        every { userRepository.findByEmail("test@example.com") } returns Optional.of(user)
+        every { userRepository.findById(userId) } returns Optional.of(user)
+        every { gbsMemberHistoryRepository.findCurrentMemberHistoryByMemberId(userId) } returns memberHistory
+        
+        // when
+        val result = userService.getCurrentUserVillage(authentication)
+        
+        // then
+        assertEquals(userId, result.userId)
+        assertEquals(userName, result.userName)
+        assertEquals(villageId, result.villageId)
+        assertEquals(villageName, result.villageName)
+        assertEquals(departmentId, result.departmentId)
+        assertEquals(departmentName, result.departmentName)
+        assertFalse(result.isVillageLeader)
+        
+        verify { authentication.name }
+        verify { userRepository.findByEmail("test@example.com") }
+        verify { userRepository.findById(userId) }
+        verify { gbsMemberHistoryRepository.findCurrentMemberHistoryByMemberId(userId) }
     }
 } 

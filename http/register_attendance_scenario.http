@@ -60,7 +60,7 @@ Authorization: Bearer {{accessToken}}
   "name": "마을장",
   "email": "village_leader@example.com",
   "password": "test123!@#",
-  "role": "LEADER",
+  "role": "VILLAGE_LEADER",
   "departmentId": {{departmentId}},
   "phoneNumber": "010-2222-3333",
   "birthDate": "1985-05-15"
@@ -363,3 +363,19 @@ Authorization: Bearer {{leader2Token}}
 ### 24. 마을 출석 현황 조회 (ADMIN 권한으로)
 GET http://localhost:8080/api/village/{{villageId}}/attendance?weekStart=2023-01-08
 Authorization: Bearer {{accessToken}} 
+
+### 25. 마을장 로그인
+# @name loginVillageLeader1
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "village_leader@example.com",
+  "password": "test123!@#"
+}
+
+@vaillageLeader1Token = {{loginVillageLeader1.response.body.accessToken}}
+
+### 26. 마을 출석 현황 조회 (마을장 권한으로)
+GET http://localhost:8080/api/village/{{villageId}}/attendance?weekStart=2023-01-08
+Authorization: Bearer {{vaillageLeader1Token}}
