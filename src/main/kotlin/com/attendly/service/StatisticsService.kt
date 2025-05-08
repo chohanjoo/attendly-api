@@ -11,6 +11,7 @@ import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.GbsMemberHistoryRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.DayOfWeek
@@ -25,12 +26,12 @@ class StatisticsService(
     private val gbsMemberHistoryRepository: GbsMemberHistoryRepository,
     private val organizationService: OrganizationService
 ) {
+    private val log = LoggerFactory.getLogger(this.javaClass)!!
 
     /**
      * 부서 출석 통계 조회
      */
     @Transactional(readOnly = true)
-    // @Cacheable("departmentStatistics")
     fun getDepartmentStatistics(departmentId: Long, startDate: LocalDate, endDate: LocalDate): DepartmentStatistics {
         val department = organizationService.getDepartmentById(departmentId)
         val villages = organizationService.getVillagesByDepartment(departmentId)
@@ -38,7 +39,9 @@ class StatisticsService(
         if (villages.isEmpty()) {
             throw AttendlyApiException(ErrorMessage.DEPARTMENT_NOT_FOUND)
         }
-        
+
+        log.debug("getDepartmentStatistics;Villages: {}", villages)
+
         // 마을별 통계 수집
         val villageStatsList = villages.map { village ->
             getVillageStatistics(village.id!!, startDate, endDate)
@@ -78,11 +81,12 @@ class StatisticsService(
      * 마을 출석 통계 조회
      */
     @Transactional(readOnly = true)
-    // @Cacheable("villageStatistics")
     fun getVillageStatistics(villageId: Long, startDate: LocalDate, endDate: LocalDate): VillageStatistics {
         val village = organizationService.getVillageById(villageId)
-        val gbsGroups = organizationService.getActiveGbsGroupsByVillage(villageId)
-        
+        val gbsGroups = organizationService.getActiveGbsGroupsByVillage(villageId, startDate)
+
+        log.debug("getVillageStatistics;gbsGroups: {}", gbsGroups)
+
         if (gbsGroups.isEmpty()) {
             throw AttendlyApiException(ErrorMessage.VILLAGE_NOT_FOUND)
         }
@@ -124,14 +128,15 @@ class StatisticsService(
      * GBS 출석 통계 조회
      */
     @Transactional(readOnly = true)
-    // @Cacheable("gbsStatistics")
     fun getGbsStatistics(gbsId: Long, startDate: LocalDate, endDate: LocalDate): GbsStatistics {
         val gbsGroup = organizationService.getGbsGroupById(gbsId)
         val leaderName = organizationService.getCurrentLeaderForGbs(gbsId)
         
-        // 활성 멤버 수
-        val totalMembers = gbsMemberHistoryRepository.countActiveMembers(gbsId, LocalDate.now()).toInt()
-        
+        // 활성 멤버 수 - 통계 기간의 시작일자 기준으로 조회하도록 수정
+        val totalMembers = gbsMemberHistoryRepository.countActiveMembers(gbsId, startDate).toInt()
+
+        log.debug("getGbsStatistics;gbsGroup: {}, totalMembers: {}", gbsGroup, totalMembers)
+
         if (totalMembers == 0) {
             throw AttendlyApiException(ErrorMessage.GBS_GROUP_NOT_FOUND)
         }
@@ -139,8 +144,11 @@ class StatisticsService(
         // 주차별 통계 생성
         val weeklyStatsList = generateWeeklyDates(startDate, endDate).map { weekStart ->
             val attendances = attendanceRepository.findDetailsByGbsIdAndWeek(gbsId, weekStart)
-            
-            val attendedMembers = attendances.count { it.worship == WorshipStatus.O }
+
+            log.debug("getGbsStatistics;weekStart: {}, attendances: {}", weekStart, attendances)
+
+            // 수정: GBS 출석 여부를 worship 상태가 아닌 attendance 테이블 기록 여부로 판단
+            val attendedMembers = attendances.size
             val attendanceRate = if (totalMembers > 0) {
                 (attendedMembers.toDouble() / totalMembers) * 100
             } else {
@@ -165,13 +173,13 @@ class StatisticsService(
         
         // GBS 전체 기간 통계 계산
         val attendedMembers = if (weeklyStatsList.isNotEmpty()) {
-            weeklyStatsList.sumOf { it.attendedMembers } / weeklyStatsList.size
+            weeklyStatsList.maxOf { it.attendedMembers }
         } else {
             0
         }
         
-        val attendanceRate = if (totalMembers > 0) {
-            (attendedMembers.toDouble() / totalMembers) * 100
+        val attendanceRate = if (weeklyStatsList.isNotEmpty()) {
+            weeklyStatsList.map { it.attendanceRate }.average()
         } else {
             0.0
         }

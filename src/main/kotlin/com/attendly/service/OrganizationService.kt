@@ -2,6 +2,7 @@ package com.attendly.service
 
 import com.attendly.api.dto.GbsMemberResponse
 import com.attendly.api.dto.GbsMembersListResponse
+import com.attendly.api.dto.VillageGbsInfoResponse
 import com.attendly.domain.entity.Department
 import com.attendly.domain.entity.GbsGroup
 import com.attendly.domain.entity.Village
@@ -104,6 +105,46 @@ class OrganizationService(
             gbsName = gbsGroup.name,
             memberCount = members.size,
             members = members.map { GbsMemberResponse.from(it) }
+        )
+    }
+    
+    /**
+     * 마을장을 위한 마을내 모든 GBS 정보 조회
+     * 각 GBS별 리더 및 조원 정보를 포함하여 반환
+     */
+    @Transactional(readOnly = true)
+    fun getVillageGbsInfo(villageId: Long, date: LocalDate = LocalDate.now()): VillageGbsInfoResponse {
+        val village = getVillageById(villageId)
+        val activeGbsGroups = getActiveGbsGroupsByVillage(villageId, date)
+        
+        val gbsInfoList = activeGbsGroups.map { gbsGroup ->
+            val leaderId = gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsGroup.id!!)?.id
+            val leaderName = gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsGroup.id!!)?.name ?: "리더 없음"
+            
+            // 각 GBS의 모든 멤버 조회
+            val condition = GbsMemberHistorySearchCondition(
+                gbsId = gbsGroup.id!!,
+                startDate = date,
+                endDate = date
+            )
+            val members = gbsMemberHistoryRepository.findActiveMembers(condition)
+            
+            VillageGbsInfoResponse.GbsInfo(
+                gbsId = gbsGroup.id!!,
+                gbsName = gbsGroup.name,
+                leaderId = leaderId,
+                leaderName = leaderName,
+                memberCount = members.size,
+                members = members.map { GbsMemberResponse.from(it) }
+            )
+        }
+        
+        return VillageGbsInfoResponse(
+            villageId = villageId,
+            villageName = village.name,
+            gbsCount = gbsInfoList.size,
+            totalMemberCount = gbsInfoList.sumOf { it.memberCount },
+            gbsList = gbsInfoList
         )
     }
 } 

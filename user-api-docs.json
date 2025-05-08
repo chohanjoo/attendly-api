@@ -36,6 +36,10 @@
         {
             "name": "통계 API",
             "description": "출석 통계 조회 API"
+        },
+        {
+            "name": "마을장 API",
+            "description": "마을장을 위한 API"
         }
     ],
     "paths": {
@@ -479,6 +483,53 @@
                 ]
             }
         },
+        "/api/village-leader/{villageId}/gbs": {
+            "get": {
+                "tags": [
+                    "마을장 API"
+                ],
+                "summary": "마을내 모든 GBS 정보 조회",
+                "description": "마을장이 자신의 마을에 속한 모든 GBS 그룹과 각 GBS의 리더, 조원들의 정보를 조회합니다.",
+                "operationId": "getVillageGbsInfo",
+                "parameters": [
+                    {
+                        "name": "villageId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VillageGbsInfoResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/gbs-members/{gbsId}": {
             "get": {
                 "tags": [
@@ -591,6 +642,40 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/users/my-village": {
+            "get": {
+                "tags": [
+                    "사용자"
+                ],
+                "summary": "현재 사용자의 마을 정보 조회",
+                "description": "현재 로그인한 사용자가 속한 마을 정보를 조회합니다",
+                "operationId": "getCurrentUserVillage",
+                "parameters": [
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserVillageResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/test/logging/warn/{message}": {
@@ -960,6 +1045,10 @@
                     "name": {
                         "type": "string"
                     },
+                    "phoneNumber": {
+                        "pattern": "^\\d{3}-?\\d{3,4}-?\\d{4}$",
+                        "type": "string"
+                    },
                     "role": {
                         "type": "string",
                         "enum": [
@@ -993,6 +1082,9 @@
                         "type": "string"
                     },
                     "email": {
+                        "type": "string"
+                    },
+                    "phoneNumber": {
                         "type": "string"
                     },
                     "role": {
@@ -1117,6 +1209,9 @@
                         "type": "string"
                     },
                     "email": {
+                        "type": "string"
+                    },
+                    "phoneNumber": {
                         "type": "string"
                     },
                     "role": {
@@ -1628,6 +1723,49 @@
                 },
                 "description": "마을 출석 현황 응답"
             },
+            "GbsInfo": {
+                "required": [
+                    "gbsId",
+                    "gbsName",
+                    "leaderName",
+                    "memberCount",
+                    "members"
+                ],
+                "type": "object",
+                "properties": {
+                    "gbsId": {
+                        "type": "integer",
+                        "description": "GBS ID",
+                        "format": "int64"
+                    },
+                    "gbsName": {
+                        "type": "string",
+                        "description": "GBS 이름"
+                    },
+                    "leaderId": {
+                        "type": "integer",
+                        "description": "리더 ID",
+                        "format": "int64"
+                    },
+                    "leaderName": {
+                        "type": "string",
+                        "description": "리더 이름"
+                    },
+                    "memberCount": {
+                        "type": "integer",
+                        "description": "조원 수",
+                        "format": "int32"
+                    },
+                    "members": {
+                        "type": "array",
+                        "description": "조원 리스트",
+                        "items": {
+                            "$ref": "#/components/schemas/GbsMemberResponse"
+                        }
+                    }
+                },
+                "description": "GBS 상세 정보"
+            },
             "GbsMemberResponse": {
                 "required": [
                     "id",
@@ -1657,7 +1795,47 @@
                     "phoneNumber": {
                         "type": "string"
                     }
-                }
+                },
+                "description": "조원 리스트"
+            },
+            "VillageGbsInfoResponse": {
+                "required": [
+                    "gbsCount",
+                    "gbsList",
+                    "totalMemberCount",
+                    "villageId",
+                    "villageName"
+                ],
+                "type": "object",
+                "properties": {
+                    "villageId": {
+                        "type": "integer",
+                        "description": "마을 ID",
+                        "format": "int64"
+                    },
+                    "villageName": {
+                        "type": "string",
+                        "description": "마을 이름"
+                    },
+                    "gbsCount": {
+                        "type": "integer",
+                        "description": "마을 내 GBS 수",
+                        "format": "int32"
+                    },
+                    "totalMemberCount": {
+                        "type": "integer",
+                        "description": "마을 내 총 조원 수",
+                        "format": "int32"
+                    },
+                    "gbsList": {
+                        "type": "array",
+                        "description": "GBS 리스트",
+                        "items": {
+                            "$ref": "#/components/schemas/GbsInfo"
+                        }
+                    }
+                },
+                "description": "마을내 모든 GBS 정보 응답"
             },
             "GbsMembersListResponse": {
                 "required": [
@@ -1801,6 +1979,44 @@
                         "items": {
                             "$ref": "#/components/schemas/GbsMemberResponse"
                         }
+                    }
+                }
+            },
+            "UserVillageResponse": {
+                "required": [
+                    "departmentId",
+                    "departmentName",
+                    "isVillageLeader",
+                    "userId",
+                    "userName",
+                    "villageId",
+                    "villageName"
+                ],
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "userName": {
+                        "type": "string"
+                    },
+                    "villageId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "villageName": {
+                        "type": "string"
+                    },
+                    "departmentId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "departmentName": {
+                        "type": "string"
+                    },
+                    "isVillageLeader": {
+                        "type": "boolean"
                     }
                 }
             },

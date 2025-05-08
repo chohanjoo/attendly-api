@@ -260,8 +260,8 @@ class AttendanceServiceTimeBasedTest {
         assertEquals("GBS2", gbs2Data.gbsName)
         assertEquals("리더2", gbs2Data.leaderName)
         assertEquals(2, gbs2Data.totalMembers)
-        assertEquals(1, gbs2Data.attendedMembers) // "O"인 멤버는 1명
-        assertEquals(50.0, gbs2Data.attendanceRate) // 1/2 = 50%
+        assertEquals(2, gbs2Data.attendedMembers) // 출석 기록이 있는 멤버는 2명 (WorshipStatus에 관계없이)
+        assertEquals(100.0, gbs2Data.attendanceRate) // 2/2 = 100% 
         assertEquals(2, gbs2Data.memberAttendances.size)
         
         // 5. 호출 검증

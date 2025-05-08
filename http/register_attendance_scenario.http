@@ -379,3 +379,12 @@ Content-Type: application/json
 ### 26. 마을 출석 현황 조회 (마을장 권한으로)
 GET http://localhost:8080/api/village/{{villageId}}/attendance?weekStart=2023-01-08
 Authorization: Bearer {{vaillageLeader1Token}}
+
+### 27. 마을 출석 통계 조회 (마을장 권한으로)
+GET http://localhost:8080/api/villages/{{villageId}}/report?startDate=2023-01-08&endDate=2025-05-08
+Authorization: Bearer {{vaillageLeader1Token}}
+
+
+### 28. 마을내 모든 GBS 정보 조회 (마을장 권한으로)
+GET http://localhost:8080/api/village-leader/{{villageId}}/gbs?date=2023-01-08
+Authorization: Bearer {{vaillageLeader1Token}}

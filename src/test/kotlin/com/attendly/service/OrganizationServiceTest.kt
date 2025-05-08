@@ -2,8 +2,11 @@ package com.attendly.service
 
 import com.attendly.domain.entity.Department
 import com.attendly.domain.entity.GbsGroup
+import com.attendly.domain.entity.GbsLeaderHistory
+import com.attendly.domain.entity.GbsMemberHistory
 import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
+import com.attendly.domain.model.GbsMemberHistorySearchCondition
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
@@ -47,7 +50,13 @@ class OrganizationServiceTest {
     private lateinit var department: Department
     private lateinit var village: Village
     private lateinit var gbsGroup: GbsGroup
+    private lateinit var gbsGroup2: GbsGroup
     private lateinit var leader: User
+    private lateinit var member1: User
+    private lateinit var member2: User
+    private lateinit var leaderHistory: GbsLeaderHistory
+    private lateinit var memberHistory1: GbsMemberHistory
+    private lateinit var memberHistory2: GbsMemberHistory
 
     @BeforeEach
     fun setUp() {
@@ -76,11 +85,66 @@ class OrganizationServiceTest {
             updatedAt = LocalDateTime.now()
         )
         
+        gbsGroup2 = GbsGroup(
+            id = 2L, 
+            name = "2GBS", 
+            village = village, 
+            termStartDate = LocalDate.of(2023, 1, 1),
+            termEndDate = LocalDate.of(2023, 12, 31),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        
         leader = User(
             id = 1L,
             name = "홍길동",
             role = com.attendly.domain.entity.Role.LEADER,
             department = department,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        
+        member1 = User(
+            id = 2L,
+            name = "김조원",
+            role = com.attendly.domain.entity.Role.MEMBER,
+            department = department,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        
+        member2 = User(
+            id = 3L,
+            name = "이조원",
+            role = com.attendly.domain.entity.Role.MEMBER,
+            department = department,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        
+        leaderHistory = GbsLeaderHistory(
+            id = 1L,
+            gbsGroup = gbsGroup,
+            leader = leader,
+            startDate = LocalDate.of(2023, 1, 1),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        
+        memberHistory1 = GbsMemberHistory(
+            id = 1L,
+            gbsGroup = gbsGroup,
+            member = member1,
+            startDate = LocalDate.of(2023, 1, 1),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        
+        memberHistory2 = GbsMemberHistory(
+            id = 2L,
+            gbsGroup = gbsGroup,
+            member = member2,
+            startDate = LocalDate.of(2023, 1, 1),
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
         )
@@ -239,5 +303,56 @@ class OrganizationServiceTest {
             organizationService.getCurrentLeaderForGbs(999L)
         }
         assertEquals(ErrorMessage.RESOURCE_NOT_FOUND.code, exception.errorMessage.code)
+    }
+    
+    @Test
+    fun `getVillageGbsInfo 마을의 모든 GBS 정보를 반환해야 함`() {
+        // given
+        val date = LocalDate.now()
+        val gbsGroups = listOf(gbsGroup, gbsGroup2)
+        val condition1 = GbsMemberHistorySearchCondition(
+            gbsId = 1L,
+            startDate = date,
+            endDate = date
+        )
+        val condition2 = GbsMemberHistorySearchCondition(
+            gbsId = 2L,
+            startDate = date,
+            endDate = date
+        )
+        val memberHistories = listOf(memberHistory1, memberHistory2)
+        
+        every { villageRepository.findById(1L) } returns Optional.of(village)
+        every { gbsGroupRepository.findActiveGroupsByVillageId(1L, date) } returns gbsGroups
+        every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L) } returns leader
+        every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(2L) } returns null
+        every { gbsMemberHistoryRepository.findActiveMembers(condition1) } returns memberHistories
+        every { gbsMemberHistoryRepository.findActiveMembers(condition2) } returns emptyList()
+        
+        // when
+        val result = organizationService.getVillageGbsInfo(1L, date)
+        
+        // then
+        assertEquals(1L, result.villageId)
+        assertEquals("1마을", result.villageName)
+        assertEquals(2, result.gbsCount)
+        assertEquals(2, result.totalMemberCount)
+        assertEquals(2, result.gbsList.size)
+        
+        val gbsInfo1 = result.gbsList.find { it.gbsId == 1L }
+        assertNotNull(gbsInfo1)
+        assertEquals("1GBS", gbsInfo1!!.gbsName)
+        assertEquals(1L, gbsInfo1.leaderId)
+        assertEquals("홍길동", gbsInfo1.leaderName)
+        assertEquals(2, gbsInfo1.memberCount)
+        assertEquals(2, gbsInfo1.members.size)
+        
+        val gbsInfo2 = result.gbsList.find { it.gbsId == 2L }
+        assertNotNull(gbsInfo2)
+        assertEquals("2GBS", gbsInfo2!!.gbsName)
+        assertNull(gbsInfo2.leaderId)
+        assertEquals("리더 없음", gbsInfo2.leaderName)
+        assertEquals(0, gbsInfo2.memberCount)
+        assertEquals(0, gbsInfo2.members.size)
     }
 } 

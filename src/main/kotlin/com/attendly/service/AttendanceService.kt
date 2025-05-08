@@ -202,7 +202,11 @@ class AttendanceService(
     /**
      * GBS 출석 요약 정보 생성
      */
-    private fun createGbsAttendanceSummary(gbsGroup: GbsGroup, weekStart: LocalDate, referenceDate: LocalDate): GbsAttendanceSummary {
+    private fun createGbsAttendanceSummary(
+        gbsGroup: GbsGroup,
+        weekStart: LocalDate,
+        referenceDate: LocalDate
+    ): GbsAttendanceSummary {
         val gbsId = gbsGroup.id!!
         val attendances = attendanceRepository.findDetailsByGbsIdAndWeek(gbsId, weekStart)
         
@@ -215,7 +219,8 @@ class AttendanceService(
         
         // 기준일(referenceDate)에 활성화된 멤버 수 조회
         val totalMembers = gbsMemberHistoryRepository.countActiveMembers(gbsId, referenceDate).toInt()
-        val attendedMembers = attendances.count { it.worship == WorshipStatus.O }
+        // 수정: 대예배 참석 여부와 관계없이 attendance 테이블에 기록된 모든 조원을 출석으로 인정
+        val attendedMembers = attendances.size
         
         val attendanceRate = if (totalMembers > 0) {
             (attendedMembers.toDouble() / totalMembers) * 100

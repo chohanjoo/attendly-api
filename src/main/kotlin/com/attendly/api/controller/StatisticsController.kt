@@ -30,7 +30,7 @@ class StatisticsController(
         description = "특정 부서의 출석 통계를 조회합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    @PreAuthorize("@methodSecurityExpressions.isMinister(authentication) or hasRole('ADMIN')")
+    @PreAuthorize("@securityUtils.isMinister(authentication) or hasRole('ADMIN')")
     fun getDepartmentStatistics(
         @PathVariable id: Long,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) startDate: LocalDate,
@@ -46,7 +46,7 @@ class StatisticsController(
         description = "특정 마을의 출석 통계를 조회합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    @PreAuthorize("@methodSecurityExpressions.canAccessVillage(#id)")
+    @PreAuthorize("@securityUtils.canAccessVillage(#id)")
     fun getVillageStatistics(
         @PathVariable id: Long,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) startDate: LocalDate,
@@ -62,7 +62,7 @@ class StatisticsController(
         description = "특정 GBS의 출석 통계를 조회합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    @PreAuthorize("@methodSecurityExpressions.canManageGbsAttendance(#id) or hasAnyRole('ADMIN', 'MINISTER')")
+    @PreAuthorize("@securityUtils.canManageGbsAttendance(#id) or hasAnyRole('ADMIN', 'MINISTER')")
     fun getGbsStatistics(
         @PathVariable id: Long,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) startDate: LocalDate,

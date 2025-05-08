@@ -23,8 +23,7 @@ class AttendanceRepositoryImpl(
             .from(attendance)
             .where(
                 attendance.gbsGroup.id.`in`(gbsIds),
-                attendance.weekStart.eq(weekStart),
-                attendance.worship.eq(WorshipStatus.O)
+                attendance.weekStart.eq(weekStart)
             )
             .fetchOne() ?: 0L
     }

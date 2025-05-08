@@ -27,7 +27,7 @@ class AttendanceController(
         description = "리더 권한으로 출석 데이터를 일괄 등록합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    @PreAuthorize("@methodSecurityExpressions.canManageGbsAttendance(#request.gbsId)")
+    @PreAuthorize("@securityUtils.canManageGbsAttendance(#request.gbsId)")
     fun createAttendances(
         @Valid @RequestBody request: AttendanceBatchRequest
     ): ResponseEntity<List<AttendanceResponse>> {
@@ -56,7 +56,7 @@ class AttendanceController(
         description = "특정 마을의 특정 주차 출석 현황을 집계하여 조회합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    @PreAuthorize("@methodSecurityExpressions.canAccessVillage(#id)")
+    @PreAuthorize("@securityUtils.canAccessVillage(#id)")
     fun getVillageAttendance(
         @PathVariable id: Long,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) weekStart: LocalDate
