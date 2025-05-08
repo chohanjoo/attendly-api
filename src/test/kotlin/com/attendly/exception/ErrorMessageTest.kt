@@ -13,14 +13,14 @@ class ErrorMessageTest {
         
         // then
         assertEquals(HttpStatus.NOT_FOUND, message.status)
-        assertEquals("E1002", message.code)
+        assertEquals("E5000", message.code)
         assertEquals("사용자를 찾을 수 없습니다", message.message)
     }
     
     @Test
     fun `fromCode 메서드가 올바르게 작동하는지 확인`() {
         // given
-        val code = "E1002"
+        val code = "E5000"
         
         // when
         val message = ErrorMessage.fromCode(code)
@@ -79,7 +79,7 @@ class ErrorMessageTest {
         
         // then
         assertEquals(HttpStatus.BAD_REQUEST.value(), response.status)
-        assertEquals("E1000", response.code)
+        assertEquals("E3002", response.code)
         assertEquals("시작일은 종료일보다 이전이거나 같아야 합니다", response.message)
     }
 } 

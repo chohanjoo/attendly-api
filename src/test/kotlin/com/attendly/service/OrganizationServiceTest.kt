@@ -185,7 +185,7 @@ class OrganizationServiceTest {
             // when
             organizationService.getDepartmentById(999L)
         }
-        assertEquals(ErrorMessage.RESOURCE_NOT_FOUND.code, exception.errorMessage.code)
+        assertEquals(ErrorMessage.DEPARTMENT_NOT_FOUND.code, exception.errorMessage.code)
     }
 
     @Test
@@ -224,7 +224,7 @@ class OrganizationServiceTest {
             // when
             organizationService.getVillageById(999L)
         }
-        assertEquals(ErrorMessage.RESOURCE_NOT_FOUND.code, exception.errorMessage.code)
+        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorMessage.code)
     }
 
     @Test
@@ -277,7 +277,7 @@ class OrganizationServiceTest {
             // when
             organizationService.getGbsGroupById(999L)
         }
-        assertEquals(ErrorMessage.RESOURCE_NOT_FOUND.code, exception.errorMessage.code)
+        assertEquals(ErrorMessage.GBS_GROUP_NOT_FOUND.code, exception.errorMessage.code)
     }
 
     @Test
@@ -302,7 +302,7 @@ class OrganizationServiceTest {
             // when
             organizationService.getCurrentLeaderForGbs(999L)
         }
-        assertEquals(ErrorMessage.RESOURCE_NOT_FOUND.code, exception.errorMessage.code)
+        assertEquals(ErrorMessage.NO_ACTIVE_LEADER.code, exception.errorMessage.code)
     }
     
     @Test

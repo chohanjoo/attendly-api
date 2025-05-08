@@ -70,7 +70,7 @@ class AttendanceServiceTest {
     private lateinit var village: Village
     private lateinit var department: Department
     private val today = LocalDate.now()
-    private val weekStart = today.minusDays((today.dayOfWeek.value - 1).toLong())
+    private val weekStart = today.with(java.time.DayOfWeek.SUNDAY)
 
     @BeforeEach
     fun setUp() {
@@ -449,7 +449,7 @@ class AttendanceServiceTest {
             attendanceService.createAttendances(batchRequest)
         }
         
-        assertEquals(ErrorMessage.FORBIDDEN.code, exception.errorMessage.code)
+        assertEquals(ErrorMessage.ACCESS_DENIED_ATTENDANCE.code, exception.errorMessage.code)
         verify { gbsGroupRepository.findById(1L) }
         verify { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) }
         verify { leaderDelegationRepository.findActiveDelegationsByDelegateeAndGbs(1L, 1L, today) }

@@ -249,8 +249,8 @@ class GbsMemberServiceTest {
             gbsMemberService.getGbsForLeader(userId)
         }
         
-        assertEquals(ErrorMessage.RESOURCE_NOT_FOUND.code, exception.errorMessage.code)
-        assertEquals("현재 담당하는 GBS가 없습니다", exception.message)
+        assertEquals(ErrorMessage.NO_CURRENT_GBS_FOR_LEADER.code, exception.errorMessage.code)
+        assertEquals(ErrorMessage.NO_CURRENT_GBS_FOR_LEADER.message, exception.message)
         verify { gbsLeaderHistoryRepository.findByLeaderIdAndEndDateIsNull(userId) }
     }
 
@@ -349,7 +349,7 @@ class GbsMemberServiceTest {
             gbsMemberService.getLeaderGbsHistories(leaderId, currentUser)
         }
         
-        assertEquals(ErrorMessage.ACCESS_DENIED_GBS.code, exception.errorMessage.code)
+        assertEquals(ErrorMessage.ACCESS_DENIED_LEADER_HISTORY.code, exception.errorMessage.code)
     }
 
     // Private helper methods
