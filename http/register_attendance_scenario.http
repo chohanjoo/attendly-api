@@ -217,8 +217,8 @@ Authorization: Bearer {{accessToken}}
 {
   "name": "GBS1",
   "villageId": {{villageId}},
-  "termStartDate": "2023-01-01",
-  "termEndDate": "2023-06-30",
+  "termStartDate": "2025-01-01",
+  "termEndDate": "2025-09-01",
   "leaderId": {{leader1Id}}
 }
 
@@ -231,7 +231,7 @@ Authorization: Bearer {{accessToken}}
 
 {
   "memberId": {{member1Id}},
-  "startDate": "2023-01-01"
+  "startDate": "2025-01-01"
 }
 
 ### 14. GBS 그룹1에 조원2 배정
@@ -241,7 +241,7 @@ Authorization: Bearer {{accessToken}}
 
 {
   "memberId": {{member2Id}},
-  "startDate": "2023-01-01"
+  "startDate": "2025-01-01"
 }
 
 ### 15. GBS 그룹2 생성 (리더2 + 조원3 + 조원4)
@@ -253,8 +253,8 @@ Authorization: Bearer {{accessToken}}
 {
   "name": "GBS2",
   "villageId": {{villageId}},
-  "termStartDate": "2023-01-01",
-  "termEndDate": "2023-06-30",
+  "termStartDate": "2025-01-01",
+  "termEndDate": "2025-09-01",
   "leaderId": {{leader2Id}}
 }
 
@@ -267,7 +267,7 @@ Authorization: Bearer {{accessToken}}
 
 {
   "memberId": {{member3Id}},
-  "startDate": "2023-01-01"
+  "startDate": "2025-01-01"
 }
 
 ### 17. GBS 그룹2에 조원4 배정
@@ -277,7 +277,7 @@ Authorization: Bearer {{accessToken}}
 
 {
   "memberId": {{member4Id}},
-  "startDate": "2023-01-01"
+  "startDate": "2025-01-01"
 }
 
 ### 18. 리더1로 로그인
@@ -299,7 +299,7 @@ Authorization: Bearer {{leader1Token}}
 
 {
   "gbsId": {{gbs1Id}},
-  "weekStart": "2023-01-08",
+  "weekStart": "2025-05-04",
   "attendances": [
     {
       "memberId": {{member1Id}},
@@ -335,7 +335,7 @@ Authorization: Bearer {{leader2Token}}
 
 {
   "gbsId": {{gbs2Id}},
-  "weekStart": "2023-01-08",
+  "weekStart": "2025-05-04",
   "attendances": [
     {
       "memberId": {{member3Id}},

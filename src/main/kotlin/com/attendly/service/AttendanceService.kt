@@ -21,6 +21,7 @@ import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
 import com.attendly.security.UserDetailsAdapter
+import org.slf4j.LoggerFactory
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -36,7 +37,8 @@ class AttendanceService(
     private val leaderDelegationRepository: LeaderDelegationRepository,
     private val villageRepository: VillageRepository
 ) {
-    
+    private val log = LoggerFactory.getLogger(this.javaClass)!!
+
     /**
      * 현재 인증된 사용자 조회
      */
@@ -79,11 +81,24 @@ class AttendanceService(
         val currentUser = getCurrentUser()
         val gbsGroup = getGbsGroup(request.gbsId)
         
+        validateWeekStartIsSunday(request.weekStart)
         validateLeaderAccess(currentUser, request.gbsId)
         deleteExistingAttendances(gbsGroup, request.weekStart)
         
         val attendances = createAttendanceEntities(request, gbsGroup, currentUser)
         return attendanceRepository.saveAll(attendances).map { it.toAttendanceResponse() }
+    }
+    
+    /**
+     * 주 시작일이 일요일인지 검증
+     */
+    private fun validateWeekStartIsSunday(weekStart: LocalDate) {
+        if (weekStart.dayOfWeek != java.time.DayOfWeek.SUNDAY) {
+            throw AttendlyApiException(
+                ErrorMessage.INVALID_WEEK_START,
+                "주 시작일은 일요일이어야 합니다. 입력된 날짜: ${weekStart}"
+            )
+        }
     }
     
     /**
@@ -209,6 +224,8 @@ class AttendanceService(
     ): GbsAttendanceSummary {
         val gbsId = gbsGroup.id!!
         val attendances = attendanceRepository.findDetailsByGbsIdAndWeek(gbsId, weekStart)
+
+        log.debug("createGbsAttendanceSummary;gbsId: {}, weekStart: {}, attendances: {}", gbsId, weekStart, attendances)
         
         // 해당 날짜(referenceDate)에 활성화된 리더 조회
         val leader = gbsLeaderHistoryRepository.findLeaderByGbsIdAndDate(gbsId, referenceDate)
@@ -216,9 +233,14 @@ class AttendanceService(
                 ErrorMessage.NO_ACTIVE_LEADER,
                 ErrorMessageUtils.withIdAndDate(ErrorMessage.NO_ACTIVE_LEADER, gbsId, referenceDate)
             )
-        
+
+        log.debug("createGbsAttendanceSummary;leader: {}", leader)
+
         // 기준일(referenceDate)에 활성화된 멤버 수 조회
         val totalMembers = gbsMemberHistoryRepository.countActiveMembers(gbsId, referenceDate).toInt()
+
+        log.debug("createGbsAttendanceSummary;totalMembers: {}", totalMembers)
+
         // 수정: 대예배 참석 여부와 관계없이 attendance 테이블에 기록된 모든 조원을 출석으로 인정
         val attendedMembers = attendances.size
         

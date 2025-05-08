@@ -73,6 +73,7 @@ enum class ErrorMessage(
     ATTENDANCE_NOT_FOUND(HttpStatus.NOT_FOUND, "E4002", "출석 정보를 찾을 수 없습니다."),
     MEMBER_NOT_IN_GBS(HttpStatus.BAD_REQUEST, "E4003", "해당 멤버는 GBS에 속하지 않습니다."),
     GBS_WEEK_NOT_FOUND(HttpStatus.NOT_FOUND, "E4004", "해당 주차의 GBS 정보를 찾을 수 없습니다."),
+    INVALID_WEEK_START(HttpStatus.BAD_REQUEST, "E4006", "주 시작일은 일요일이어야 합니다."),
     USER_NOT_ASSIGNED_TO_VILLAGE(HttpStatus.BAD_REQUEST, "E4005", "사용자가 마을에 배정되지 않았습니다.");
     
     companion object {

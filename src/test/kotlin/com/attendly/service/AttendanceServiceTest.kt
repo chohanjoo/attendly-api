@@ -456,6 +456,39 @@ class AttendanceServiceTest {
     }
     
     @Test
+    @DisplayName("출석 일괄 등록 - 주 시작일이 일요일이 아닌 경우 예외 발생")
+    fun testCreateAttendances_NotSunday() {
+        // given
+        val notSunday = LocalDate.now().with(java.time.DayOfWeek.MONDAY)
+        val request = AttendanceBatchRequest(
+            gbsId = 1L,
+            weekStart = notSunday,
+            attendances = listOf(
+                AttendanceItemRequest(
+                    memberId = 1L,
+                    worship = WorshipStatus.O,
+                    qtCount = 3,
+                    ministry = MinistryStatus.A
+                )
+            )
+        )
+
+        // 현재 사용자 설정
+        every { securityContext.authentication } returns authentication
+        every { authentication.principal } returns UserDetailsAdapter(currentUser)
+        SecurityContextHolder.setContext(securityContext)
+
+        // GBS 그룹 조회 mock
+        every { gbsGroupRepository.findById(1L) } returns Optional.of(gbsGroup)
+
+        // when & then
+        val exception = assertThrows<AttendlyApiException> {
+            attendanceService.createAttendances(request)
+        }
+        assertEquals(ErrorMessage.INVALID_WEEK_START, exception.errorMessage)
+    }
+    
+    @Test
     @DisplayName("GBS 출석 조회")
     fun testGetAttendancesByGbs() {
         // given
