@@ -1,0 +1,353 @@
+# Univ4 리더 계정 자동화 테스트 시나리오
+#
+# 이 시나리오는 다음 단계를 자동화합니다:
+# 1. 관리자 계정으로 로그인
+# 2. "univ4" 부서 조회
+# 3. "univ4" 부서에 20명의 LEADER 권한 계정 생성
+#
+# 실행 방법: Visual Studio Code의 REST Client 확장 또는 IntelliJ의 HTTP Client를 사용하여
+# 순차적으로 각 요청을 실행하면 전체 시나리오가 테스트됩니다.
+
+### 1. 관리자 계정으로 로그인
+# @name adminLogin
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "hanjoo@naver.com",
+  "password": "test123!@#"
+}
+
+@accessToken = {{adminLogin.response.body.accessToken}}
+
+### 2. "univ5" 부서 생성
+# @name createDepartment
+POST http://localhost:8080/api/admin/organization/departments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "univ5"
+}
+
+@departmentId = {{createDepartment.response.body.id}}
+
+### 3-1. LEADER 권한의 계정 생성 (1/20)
+# @name createLeader01
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "John Smith",
+  "email": "univ4Rleader01@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1001-1001",
+  "birthDate": "1995-01-01"
+}
+
+### 3-2. LEADER 권한의 계정 생성 (2/20)
+# @name createLeader02
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Michael Johnson",
+  "email": "univ4Rleader02@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1002-1002",
+  "birthDate": "1995-02-02"
+}
+
+### 3-3. LEADER 권한의 계정 생성 (3/20)
+# @name createLeader03
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Robert Williams",
+  "email": "univ4Rleader03@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1003-1003",
+  "birthDate": "1995-03-03"
+}
+
+### 3-4. LEADER 권한의 계정 생성 (4/20)
+# @name createLeader04
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "David Brown",
+  "email": "univ4Rleader04@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1004-1004",
+  "birthDate": "1995-04-04"
+}
+
+### 3-5. LEADER 권한의 계정 생성 (5/20)
+# @name createLeader05
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "James Jones",
+  "email": "univ4Rleader05@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1005-1005",
+  "birthDate": "1995-05-05"
+}
+
+### 3-6. LEADER 권한의 계정 생성 (6/20)
+# @name createLeader06
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "William Miller",
+  "email": "univ4Rleader06@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1006-1006",
+  "birthDate": "1995-06-06"
+}
+
+### 3-7. LEADER 권한의 계정 생성 (7/20)
+# @name createLeader07
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Richard Davis",
+  "email": "univ4Rleader07@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1007-1007",
+  "birthDate": "1995-07-07"
+}
+
+### 3-8. LEADER 권한의 계정 생성 (8/20)
+# @name createLeader08
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Joseph Wilson",
+  "email": "univ4Rleader08@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1008-1008",
+  "birthDate": "1995-08-08"
+}
+
+### 3-9. LEADER 권한의 계정 생성 (9/20)
+# @name createLeader09
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Thomas Taylor",
+  "email": "univ4Rleader09@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1009-1009",
+  "birthDate": "1995-09-09"
+}
+
+### 3-10. LEADER 권한의 계정 생성 (10/20)
+# @name createLeader10
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Charles Anderson",
+  "email": "univ4Rleader10@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1010-1010",
+  "birthDate": "1995-10-10"
+}
+
+### 3-11. LEADER 권한의 계정 생성 (11/20)
+# @name createLeader11
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Daniel White",
+  "email": "univ4Rleader11@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1011-1011",
+  "birthDate": "1995-11-11"
+}
+
+### 3-12. LEADER 권한의 계정 생성 (12/20)
+# @name createLeader12
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Matthew Harris",
+  "email": "univ4Rleader12@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1012-1012",
+  "birthDate": "1995-12-12"
+}
+
+### 3-13. LEADER 권한의 계정 생성 (13/20)
+# @name createLeader13
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Anthony Thompson",
+  "email": "univ4Rleader13@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1013-1013",
+  "birthDate": "1996-01-13"
+}
+
+### 3-14. LEADER 권한의 계정 생성 (14/20)
+# @name createLeader14
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Donald Moore",
+  "email": "univ4Rleader14@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1014-1014",
+  "birthDate": "1996-02-14"
+}
+
+### 3-15. LEADER 권한의 계정 생성 (15/20)
+# @name createLeader15
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Mark Jackson",
+  "email": "univ4Rleader15@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1015-1015",
+  "birthDate": "1996-03-15"
+}
+
+### 3-16. LEADER 권한의 계정 생성 (16/20)
+# @name createLeader16
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Paul Martin",
+  "email": "univ4Rleader16@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1016-1016",
+  "birthDate": "1996-04-16"
+}
+
+### 3-17. LEADER 권한의 계정 생성 (17/20)
+# @name createLeader17
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Steven Lee",
+  "email": "univ4Rleader17@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1017-1017",
+  "birthDate": "1996-05-17"
+}
+
+### 3-18. LEADER 권한의 계정 생성 (18/20)
+# @name createLeader18
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Andrew Garcia",
+  "email": "univ4Rleader18@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1018-1018",
+  "birthDate": "1996-06-18"
+}
+
+### 3-19. LEADER 권한의 계정 생성 (19/20)
+# @name createLeader19
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Kenneth Robinson",
+  "email": "univ4Rleader19@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1019-1019",
+  "birthDate": "1996-07-19"
+}
+
+### 3-20. LEADER 권한의 계정 생성 (20/20)
+# @name createLeader20
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Joshua Clark",
+  "email": "univ4Rleader20@example.com",
+  "password": "test123!@#",
+  "role": "LEADER",
+  "departmentId": {{departmentId}},
+  "phoneNumber": "010-1020-1020",
+  "birthDate": "1996-08-20"
+} 
