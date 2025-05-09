@@ -66,6 +66,7 @@ enum class ErrorMessage(
     USER_NOT_ASSIGNED_TO_VILLAGE(HttpStatus.BAD_REQUEST, "E5004", "사용자가 마을에 배정되지 않았습니다"),
     DEPARTMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "E5005", "찾을 수 없는 부서입니다"),
     VILLAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "E5006", "마을을 찾을 수 없습니다"),
+    VILLAGE_LEADER_NOT_FOUND(HttpStatus.NOT_FOUND, "E5007", "마을장을 찾을 수 없습니다"),
     
     // 시스템/배치 관련 (E9000-E9099)
     BATCH_JOB_NOT_FOUND(HttpStatus.NOT_FOUND, "E9000", "배치 작업을 찾을 수 없습니다"),

@@ -95,6 +95,8 @@ VILLAGE_RESPONSE=$(curl -s -X POST "$BASE_URL/api/admin/organization/villages" \
     \"villageLeaderId\": $VILLAGE_LEADER_ID
   }")
 
+  
+
 # 마을 ID 추출
 VILLAGE_ID=$(echo "$VILLAGE_RESPONSE" | grep -o '"id":[0-9]*' | cut -d':' -f2)
 
