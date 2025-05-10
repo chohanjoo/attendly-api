@@ -62,7 +62,7 @@ for i in {1..100}; do
   
   # 이메일 생성
   email="univ5Rmember$(printf "%03d" $i)@example.com"
-  phone="010-20$(printf "%02d" $i)-20$(printf "%02d" $i)"
+  phone="010-2$(printf "%03d" $i)-2$(printf "%03d" $i)"
   
   # 생년월일 계산 (2000년 시작, 다양하게 분포)
   year=$((2000 + (i % 5)))
@@ -87,9 +87,9 @@ for i in {1..100}; do
   
   # 응답 확인
   if [[ $response == *"id"* ]]; then
-    echo "✅ 성공: $name 사용자 생성됨"
+    echo "✅ 성공: ${name} 사용자 생성됨"
   else
-    echo "❌ 실패: $name 사용자 생성 실패"
+    echo "❌ 실패: ${name} 사용자 생성 실패"
     echo "오류 응답: $response"
   fi
   

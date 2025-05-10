@@ -1,9 +1,9 @@
 package com.attendly.domain.repository
 
 import com.attendly.domain.entity.GbsGroup
-import com.attendly.domain.entity.QGbsGroup
-import com.attendly.domain.entity.QGbsLeaderHistory
-import com.attendly.domain.entity.QUser
+import com.attendly.domain.entity.QGbsGroup.gbsGroup
+import com.attendly.domain.entity.QGbsLeaderHistory.gbsLeaderHistory
+import com.attendly.domain.entity.QUser.user
 import com.attendly.domain.entity.Village
 import com.attendly.domain.model.GbsWithLeader
 import com.querydsl.jpa.impl.JPAQueryFactory
@@ -15,10 +15,6 @@ import java.time.LocalDate
 class GbsGroupRepositoryImpl(
     private val queryFactory: JPAQueryFactory
 ) : QuerydslRepositorySupport(GbsGroup::class.java), GbsGroupRepositoryCustom {
-
-    private val gbsGroup = QGbsGroup.gbsGroup
-    private val gbsLeaderHistory = QGbsLeaderHistory.gbsLeaderHistory
-    private val user = QUser.user
 
     override fun findActiveGroupsByVillageId(villageId: Long, date: LocalDate): List<GbsGroup> {
         return queryFactory
@@ -45,8 +41,7 @@ class GbsGroupRepositoryImpl(
     }
     
     override fun findWithCurrentLeader(gbsId: Long): GbsWithLeader? {
-        val result = queryFactory
-            .select(gbsGroup, user)
+        val result = queryFactory.select(gbsGroup, user)
             .from(gbsGroup)
             .leftJoin(gbsLeaderHistory)
             .on(

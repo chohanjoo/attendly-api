@@ -46,7 +46,6 @@ class AttendanceRepositoryImpl(
         
         val attendances = queryFactory
             .selectFrom(attendance)
-            .join(attendance.member, member).fetchJoin()
             .where(
                 attendance.gbsGroup.id.eq(gbsId),
                 attendance.weekStart.`in`(weekStarts)
