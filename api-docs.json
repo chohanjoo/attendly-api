@@ -58,6 +58,10 @@
             "description": "관리자 전용 시스템 설정 관리 API"
         },
         {
+            "name": "마을장 관리 API",
+            "description": "마을장 지정/해제 등의 관리 기능을 제공하는 API"
+        },
+        {
             "name": "관리자-사용자",
             "description": "관리자 전용 사용자 관리 API"
         }
@@ -481,6 +485,57 @@
                 }
             }
         },
+        "/api/village-leader/{villageId}/attendance": {
+            "post": {
+                "tags": [
+                    "마을장 API"
+                ],
+                "summary": "마을 내 GBS 출석 데이터 수정",
+                "description": "마을장이 자신의 마을에 속한 GBS의 출석 데이터를 수정합니다.",
+                "operationId": "updateVillageGbsAttendance",
+                "parameters": [
+                    {
+                        "name": "villageId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AttendanceUpdateRequestDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AttendanceResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/users/by-roles": {
             "post": {
                 "tags": [
@@ -634,6 +689,38 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/admin/village-leader": {
+            "post": {
+                "tags": [
+                    "마을장 관리 API"
+                ],
+                "summary": "마을장 등록",
+                "description": "특정 사용자를 특정 마을의 마을장으로 등록합니다. 이미 해당 마을에 마을장이 있는 경우 현재 마을장은 자동으로 해제됩니다.",
+                "operationId": "assignVillageLeader",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VillageLeaderAssignRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VillageLeaderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/admin/users": {
@@ -2108,6 +2195,79 @@
                 }
             }
         },
+        "/api/admin/village-leader/{villageId}": {
+            "get": {
+                "tags": [
+                    "마을장 관리 API"
+                ],
+                "summary": "마을장 조회",
+                "description": "특정 마을의 현재 마을장 정보를 조회합니다.",
+                "operationId": "getVillageLeader",
+                "parameters": [
+                    {
+                        "name": "villageId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VillageLeaderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "마을장 관리 API"
+                ],
+                "summary": "마을장 해제",
+                "description": "특정 마을의 현재 마을장을 해제합니다.",
+                "operationId": "terminateVillageLeader",
+                "parameters": [
+                    {
+                        "name": "villageId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VillageLeaderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/admin/system/settings/{key}": {
             "get": {
                 "tags": [
@@ -2870,6 +3030,149 @@
                     }
                 }
             },
+            "AttendanceMemberItemDto": {
+                "required": [
+                    "memberId",
+                    "ministry",
+                    "qtCount",
+                    "worship"
+                ],
+                "type": "object",
+                "properties": {
+                    "memberId": {
+                        "type": "integer",
+                        "description": "조원 ID",
+                        "format": "int64",
+                        "example": 5
+                    },
+                    "worship": {
+                        "type": "string",
+                        "description": "예배 출석 상태 (O/X)",
+                        "example": "O",
+                        "enum": [
+                            "O",
+                            "X",
+                            "O",
+                            "X"
+                        ]
+                    },
+                    "qtCount": {
+                        "maximum": 6,
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "QT 횟수 (0-6)",
+                        "format": "int32",
+                        "example": 5
+                    },
+                    "ministry": {
+                        "type": "string",
+                        "description": "대학부 출석 등급 (A/B/C)",
+                        "example": "A",
+                        "enum": [
+                            "A",
+                            "B",
+                            "C",
+                            "A",
+                            "B",
+                            "C"
+                        ]
+                    }
+                },
+                "description": "마을장의 개별 조원 출석 데이터"
+            },
+            "AttendanceUpdateRequestDto": {
+                "required": [
+                    "attendances",
+                    "gbsId",
+                    "weekStart"
+                ],
+                "type": "object",
+                "properties": {
+                    "gbsId": {
+                        "type": "integer",
+                        "description": "GBS 그룹 ID",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "weekStart": {
+                        "type": "string",
+                        "description": "주차 시작일 (일요일 기준)",
+                        "format": "date",
+                        "example": "2025-01-05"
+                    },
+                    "attendances": {
+                        "type": "array",
+                        "description": "조원별 출석 데이터",
+                        "items": {
+                            "$ref": "#/components/schemas/AttendanceMemberItemDto"
+                        }
+                    }
+                },
+                "description": "마을장의 출석 수정 요청"
+            },
+            "AttendanceResponse": {
+                "required": [
+                    "id",
+                    "memberId",
+                    "memberName",
+                    "ministry",
+                    "qtCount",
+                    "weekStart",
+                    "worship"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "출석 ID",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "memberId": {
+                        "type": "integer",
+                        "description": "조원 ID",
+                        "format": "int64",
+                        "example": 5
+                    },
+                    "memberName": {
+                        "type": "string",
+                        "description": "조원 이름",
+                        "example": "홍길동"
+                    },
+                    "weekStart": {
+                        "type": "string",
+                        "description": "주차 시작일",
+                        "format": "date",
+                        "example": "2025-01-05"
+                    },
+                    "worship": {
+                        "type": "string",
+                        "description": "예배 출석 상태",
+                        "example": "O",
+                        "enum": [
+                            "O",
+                            "X"
+                        ]
+                    },
+                    "qtCount": {
+                        "type": "integer",
+                        "description": "QT 횟수",
+                        "format": "int32",
+                        "example": 5
+                    },
+                    "ministry": {
+                        "type": "string",
+                        "description": "대학부 출석 등급",
+                        "example": "A",
+                        "enum": [
+                            "A",
+                            "B",
+                            "C"
+                        ]
+                    }
+                },
+                "description": "출석 목록 응답"
+            },
             "UserListByRolesRequest": {
                 "required": [
                     "roles"
@@ -3058,68 +3361,99 @@
                 },
                 "description": "개별 조원 출석 데이터"
             },
-            "AttendanceResponse": {
+            "VillageLeaderAssignRequest": {
                 "required": [
-                    "id",
-                    "memberId",
-                    "memberName",
-                    "ministry",
-                    "qtCount",
-                    "weekStart",
-                    "worship"
+                    "startDate",
+                    "userId",
+                    "villageId"
                 ],
                 "type": "object",
                 "properties": {
-                    "id": {
+                    "userId": {
                         "type": "integer",
-                        "description": "출석 ID",
+                        "description": "마을장으로 지정할 사용자 ID",
                         "format": "int64",
                         "example": 1
                     },
-                    "memberId": {
+                    "villageId": {
                         "type": "integer",
-                        "description": "조원 ID",
+                        "description": "마을장이 관리할 마을 ID",
                         "format": "int64",
-                        "example": 5
+                        "example": 1
                     },
-                    "memberName": {
+                    "startDate": {
                         "type": "string",
-                        "description": "조원 이름",
-                        "example": "홍길동"
-                    },
-                    "weekStart": {
-                        "type": "string",
-                        "description": "주차 시작일",
+                        "description": "마을장 임기 시작일",
                         "format": "date",
-                        "example": "2025-01-05"
+                        "example": "2023-01-01"
                     },
-                    "worship": {
+                    "endDate": {
                         "type": "string",
-                        "description": "예배 출석 상태",
-                        "example": "O",
-                        "enum": [
-                            "O",
-                            "X"
-                        ]
-                    },
-                    "qtCount": {
-                        "type": "integer",
-                        "description": "QT 횟수",
-                        "format": "int32",
-                        "example": 5
-                    },
-                    "ministry": {
-                        "type": "string",
-                        "description": "대학부 출석 등급",
-                        "example": "A",
-                        "enum": [
-                            "A",
-                            "B",
-                            "C"
-                        ]
+                        "description": "마을장 임기 종료일 (옵션)",
+                        "format": "date",
+                        "example": "2023-12-31"
                     }
                 },
-                "description": "출석 목록 응답"
+                "description": "마을장 할당 요청"
+            },
+            "VillageLeaderResponse": {
+                "required": [
+                    "createdAt",
+                    "startDate",
+                    "updatedAt",
+                    "userId",
+                    "userName",
+                    "villageId",
+                    "villageName"
+                ],
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "integer",
+                        "description": "사용자 ID",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "userName": {
+                        "type": "string",
+                        "description": "사용자 이름",
+                        "example": "홍길동"
+                    },
+                    "villageId": {
+                        "type": "integer",
+                        "description": "마을 ID",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "villageName": {
+                        "type": "string",
+                        "description": "마을 이름",
+                        "example": "동문마을"
+                    },
+                    "startDate": {
+                        "type": "string",
+                        "description": "임기 시작일",
+                        "format": "date",
+                        "example": "2023-01-01"
+                    },
+                    "endDate": {
+                        "type": "string",
+                        "description": "임기 종료일",
+                        "format": "date",
+                        "example": "2023-12-31"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "description": "생성일시",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "description": "수정일시",
+                        "format": "date-time"
+                    }
+                },
+                "description": "마을장 정보 응답"
             },
             "UserCreateRequest": {
                 "required": [

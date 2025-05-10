@@ -2,6 +2,7 @@ package com.attendly.service
 
 import com.attendly.api.dto.AttendanceBatchRequest
 import com.attendly.api.dto.AttendanceResponse
+import com.attendly.api.dto.AttendanceUpdateRequestDto
 import com.attendly.api.dto.GbsAttendanceSummary
 import com.attendly.api.dto.VillageAttendanceResponse
 import com.attendly.domain.entity.Attendance
@@ -272,4 +273,58 @@ class AttendanceService(
             qtCount = qtCount,
             ministry = ministry
         )
+    
+    /**
+     * 마을장이 GBS 출석 데이터 수정
+     */
+    @Transactional
+    fun updateVillageGbsAttendance(villageId: Long, request: AttendanceUpdateRequestDto): List<AttendanceResponse> {
+        // 1. 마을 존재 여부 확인
+        val village = villageRepository.findById(villageId)
+            .orElseThrow { 
+                AttendlyApiException(ErrorMessage.VILLAGE_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId)) 
+            }
+        
+        // 2. GBS 그룹이 마을에 속하는지 확인
+        val gbsGroup = getGbsGroup(request.gbsId)
+        if (gbsGroup.village.id != villageId) {
+            throw AttendlyApiException(
+                ErrorMessage.GBS_GROUP_NOT_IN_VILLAGE,
+                "GBS 그룹이 해당 마을에 속하지 않습니다. GBS ID: ${request.gbsId}, 마을 ID: ${villageId}"
+            )
+        }
+        
+        // 3. 주차 시작일 검증
+        validateWeekStartIsSunday(request.weekStart)
+        
+        // 4. 기존 출석 데이터 삭제
+        deleteExistingAttendances(gbsGroup, request.weekStart)
+        
+        // 5. 새 출석 데이터 생성 및 저장
+        val currentUser = getCurrentUser()
+        val attendances = request.attendances.map { item ->
+            val member = getMember(item.memberId)
+            
+            // 수정: 마을장이 수정하는 경우에는 이미 속한 마을의 조원이므로 GBS 소속 검증을 하지 않음
+            
+            Attendance(
+                member = member,
+                gbsGroup = gbsGroup,
+                weekStart = request.weekStart,
+                worship = item.worship,
+                qtCount = item.qtCount,
+                ministry = item.ministry,
+                createdBy = currentUser
+            )
+        }
+        
+        // 6. GBS 리더에게 알림 전송 (선택사항)
+        val gbsLeader = gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(request.gbsId)
+        if (gbsLeader != null) {
+            log.info("마을장(${currentUser.name})이 GBS(${gbsGroup.name})의 출석 데이터를 수정했습니다. 리더(${gbsLeader.name})에게 알림이 전송됩니다.")
+            // TODO: 알림 전송 로직 구현
+        }
+        
+        return attendanceRepository.saveAll(attendances).map { it.toAttendanceResponse() }
+    }
 } 

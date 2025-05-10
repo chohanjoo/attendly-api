@@ -111,4 +111,42 @@ data class GbsAttendanceSummary(
     
     @Schema(description = "조원별 출석 현황")
     val memberAttendances: List<AttendanceResponse>
+)
+
+// 마을장의 출석 수정 요청 DTO
+@Schema(description = "마을장의 출석 수정 요청")
+data class AttendanceUpdateRequestDto(
+    @field:NotNull(message = "GBS ID는 필수입니다")
+    @Schema(description = "GBS 그룹 ID", example = "1")
+    val gbsId: Long,
+    
+    @field:NotNull(message = "주차 시작일은 필수입니다")
+    @Schema(description = "주차 시작일 (일요일 기준)", example = "2025-01-05")
+    val weekStart: LocalDate,
+    
+    @field:Valid
+    @Schema(description = "조원별 출석 데이터")
+    val attendances: List<AttendanceMemberItemDto>
+)
+
+// 마을장의 개별 조원 출석 데이터 DTO
+@Schema(description = "마을장의 개별 조원 출석 데이터")
+data class AttendanceMemberItemDto(
+    @field:NotNull(message = "조원 ID는 필수입니다")
+    @Schema(description = "조원 ID", example = "5")
+    val memberId: Long,
+    
+    @field:NotNull(message = "예배 출석 여부는 필수입니다")
+    @Schema(description = "예배 출석 상태 (O/X)", example = "O", allowableValues = ["O", "X"])
+    val worship: WorshipStatus,
+    
+    @field:NotNull(message = "QT 횟수는 필수입니다")
+    @field:Min(value = 0, message = "QT 횟수는 0-6 사이어야 합니다")
+    @field:Max(value = 6, message = "QT 횟수는 0-6 사이어야 합니다")
+    @Schema(description = "QT 횟수 (0-6)", example = "5", minimum = "0", maximum = "6")
+    val qtCount: Int,
+    
+    @field:NotNull(message = "대학부 출석 등급은 필수입니다")
+    @Schema(description = "대학부 출석 등급 (A/B/C)", example = "A", allowableValues = ["A", "B", "C"])
+    val ministry: MinistryStatus
 ) 

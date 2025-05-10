@@ -2,6 +2,8 @@ package com.attendly.service
 
 import com.attendly.api.dto.AttendanceBatchRequest
 import com.attendly.api.dto.AttendanceItemRequest
+import com.attendly.api.dto.AttendanceMemberItemDto
+import com.attendly.api.dto.AttendanceUpdateRequestDto
 import com.attendly.domain.entity.*
 import com.attendly.domain.model.GbsMemberHistorySearchCondition
 import com.attendly.domain.repository.*
@@ -720,5 +722,201 @@ class AttendanceServiceTest {
         // 에러 메시지에 원인 정보 포함 확인
         assertTrue(exception.message!!.contains("memberId"))
         assertTrue(exception.message!!.contains("gbsId"))
+    }
+
+    @Test
+    @DisplayName("마을장이 마을 내 GBS 출석 데이터 수정 - 성공")
+    fun testUpdateVillageGbsAttendance_Success() {
+        // given
+        val villageId = 1L
+        val gbsId = 1L
+        val weekStart = today.with(java.time.DayOfWeek.SUNDAY)
+        
+        // SecurityContext 모킹 설정 (마을장 권한)
+        val villageLeader = User(
+            id = 10L,
+            email = "villageleader@example.com",
+            password = "password",
+            name = "마을장",
+            role = Role.VILLAGE_LEADER,
+            department = department
+        )
+        
+        val userDetails = UserDetailsAdapter(villageLeader)
+        every { securityContext.authentication } returns authentication
+        every { authentication.principal } returns userDetails
+        SecurityContextHolder.setContext(securityContext)
+        
+        // 마을 조회
+        every { villageRepository.findById(villageId) } returns Optional.of(village)
+        
+        // GBS 그룹 조회
+        every { gbsGroupRepository.findById(gbsId) } returns Optional.of(gbsGroup)
+        
+        // 기존 출석 데이터 삭제
+        every { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
+        
+        // 조원 정보
+        val member1 = User(
+            id = 2L, 
+            email = "member1@example.com", 
+            password = "pwd", 
+            name = "조원1", 
+            role = Role.MEMBER,
+            department = department
+        )
+        
+        val member2 = User(
+            id = 3L, 
+            email = "member2@example.com", 
+            password = "pwd", 
+            name = "조원2", 
+            role = Role.MEMBER,
+            department = department
+        )
+        
+        every { userRepository.findById(2L) } returns Optional.of(member1)
+        every { userRepository.findById(3L) } returns Optional.of(member2)
+        
+        // GBS 리더 정보
+        val gbsLeader = User(
+            id = 5L,
+            email = "leader@example.com",
+            password = "password",
+            name = "리더",
+            role = Role.LEADER,
+            department = department
+        )
+        
+        val leaderHistory = GbsLeaderHistory(
+            id = 1L,
+            leader = gbsLeader,
+            gbsGroup = gbsGroup,
+            startDate = today.minusDays(30)
+        )
+        
+        every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsId) } returns gbsLeader
+        
+        // 출석 데이터 저장
+        val attendance1 = Attendance(
+            id = 1L,
+            member = member1,
+            gbsGroup = gbsGroup,
+            weekStart = weekStart,
+            worship = WorshipStatus.O,
+            qtCount = 5,
+            ministry = MinistryStatus.A,
+            createdBy = villageLeader
+        )
+        
+        val attendance2 = Attendance(
+            id = 2L,
+            member = member2,
+            gbsGroup = gbsGroup,
+            weekStart = weekStart,
+            worship = WorshipStatus.X,
+            qtCount = 3,
+            ministry = MinistryStatus.B,
+            createdBy = villageLeader
+        )
+        
+        every { attendanceRepository.saveAll(any<List<Attendance>>()) } returns listOf(attendance1, attendance2)
+        
+        // when
+        val request = AttendanceUpdateRequestDto(
+            gbsId = gbsId,
+            weekStart = weekStart,
+            attendances = listOf(
+                AttendanceMemberItemDto(memberId = 2L, worship = WorshipStatus.O, qtCount = 5, ministry = MinistryStatus.A),
+                AttendanceMemberItemDto(memberId = 3L, worship = WorshipStatus.X, qtCount = 3, ministry = MinistryStatus.B)
+            )
+        )
+        
+        val result = attendanceService.updateVillageGbsAttendance(villageId, request)
+        
+        // then
+        assertEquals(2, result.size)
+        assertEquals(1L, result[0].id)
+        assertEquals(2L, result[0].memberId)
+        assertEquals("조원1", result[0].memberName)
+        assertEquals(WorshipStatus.O, result[0].worship)
+        
+        assertEquals(2L, result[1].id)
+        assertEquals(3L, result[1].memberId)
+        assertEquals("조원2", result[1].memberName)
+        assertEquals(WorshipStatus.X, result[1].worship)
+        
+        verify { villageRepository.findById(villageId) }
+        verify { gbsGroupRepository.findById(gbsId) }
+        verify { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) }
+        verify { userRepository.findById(2L) }
+        verify { userRepository.findById(3L) }
+        verify { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsId) }
+        verify { attendanceRepository.saveAll(any<List<Attendance>>()) }
+    }
+    
+    @Test
+    @DisplayName("마을장이 마을 내 GBS 출석 데이터 수정 - 다른 마을의 GBS 접근 시 실패")
+    fun testUpdateVillageGbsAttendance_FailWhenGbsNotInVillage() {
+        // given
+        val villageId = 1L
+        val gbsId = 2L
+        val weekStart = today.with(java.time.DayOfWeek.SUNDAY)
+        
+        // SecurityContext 모킹 설정 (마을장 권한)
+        val villageLeader = User(
+            id = 10L,
+            email = "villageleader@example.com",
+            password = "password",
+            name = "마을장",
+            role = Role.VILLAGE_LEADER,
+            department = department
+        )
+        
+        val userDetails = UserDetailsAdapter(villageLeader)
+        every { securityContext.authentication } returns authentication
+        every { authentication.principal } returns userDetails
+        SecurityContextHolder.setContext(securityContext)
+        
+        // 마을 조회
+        every { villageRepository.findById(villageId) } returns Optional.of(village)
+        
+        // 다른 마을에 속한 GBS 그룹
+        val anotherVillage = Village(
+            id = 2L,
+            name = "다른 마을",
+            department = department
+        )
+        
+        val anotherGbsGroup = GbsGroup(
+            id = 2L,
+            name = "다른 GBS",
+            village = anotherVillage,
+            termStartDate = today.minusMonths(6),
+            termEndDate = today.plusMonths(6)
+        )
+        
+        every { gbsGroupRepository.findById(gbsId) } returns Optional.of(anotherGbsGroup)
+        
+        // when
+        val request = AttendanceUpdateRequestDto(
+            gbsId = gbsId,
+            weekStart = weekStart,
+            attendances = listOf(
+                AttendanceMemberItemDto(memberId = 2L, worship = WorshipStatus.O, qtCount = 5, ministry = MinistryStatus.A)
+            )
+        )
+        
+        // then
+        val exception = assertThrows<AttendlyApiException> {
+            attendanceService.updateVillageGbsAttendance(villageId, request)
+        }
+        
+        assertEquals(ErrorMessage.GBS_GROUP_NOT_IN_VILLAGE, exception.errorMessage)
+        
+        verify { villageRepository.findById(villageId) }
+        verify { gbsGroupRepository.findById(gbsId) }
+        confirmVerified(attendanceRepository)
+        confirmVerified(userRepository)
     }
 } 

@@ -160,6 +160,62 @@
                 }
             }
         },
+        "/api/village-leader/{villageId}/attendance": {
+            "post": {
+                "tags": [
+                    "마을장 API"
+                ],
+                "summary": "마을 내 GBS 출석 데이터 수정",
+                "description": "마을장이 자신의 마을에 속한 GBS의 출석 데이터를 수정합니다.",
+                "operationId": "updateVillageGbsAttendance",
+                "parameters": [
+                    {
+                        "name": "villageId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AttendanceUpdateRequestDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AttendanceResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/users/by-roles": {
             "post": {
                 "tags": [
@@ -1161,6 +1217,149 @@
                     }
                 }
             },
+            "AttendanceMemberItemDto": {
+                "required": [
+                    "memberId",
+                    "ministry",
+                    "qtCount",
+                    "worship"
+                ],
+                "type": "object",
+                "properties": {
+                    "memberId": {
+                        "type": "integer",
+                        "description": "조원 ID",
+                        "format": "int64",
+                        "example": 5
+                    },
+                    "worship": {
+                        "type": "string",
+                        "description": "예배 출석 상태 (O/X)",
+                        "example": "O",
+                        "enum": [
+                            "O",
+                            "X",
+                            "O",
+                            "X"
+                        ]
+                    },
+                    "qtCount": {
+                        "maximum": 6,
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "QT 횟수 (0-6)",
+                        "format": "int32",
+                        "example": 5
+                    },
+                    "ministry": {
+                        "type": "string",
+                        "description": "대학부 출석 등급 (A/B/C)",
+                        "example": "A",
+                        "enum": [
+                            "A",
+                            "B",
+                            "C",
+                            "A",
+                            "B",
+                            "C"
+                        ]
+                    }
+                },
+                "description": "마을장의 개별 조원 출석 데이터"
+            },
+            "AttendanceUpdateRequestDto": {
+                "required": [
+                    "attendances",
+                    "gbsId",
+                    "weekStart"
+                ],
+                "type": "object",
+                "properties": {
+                    "gbsId": {
+                        "type": "integer",
+                        "description": "GBS 그룹 ID",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "weekStart": {
+                        "type": "string",
+                        "description": "주차 시작일 (일요일 기준)",
+                        "format": "date",
+                        "example": "2025-01-05"
+                    },
+                    "attendances": {
+                        "type": "array",
+                        "description": "조원별 출석 데이터",
+                        "items": {
+                            "$ref": "#/components/schemas/AttendanceMemberItemDto"
+                        }
+                    }
+                },
+                "description": "마을장의 출석 수정 요청"
+            },
+            "AttendanceResponse": {
+                "required": [
+                    "id",
+                    "memberId",
+                    "memberName",
+                    "ministry",
+                    "qtCount",
+                    "weekStart",
+                    "worship"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "출석 ID",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "memberId": {
+                        "type": "integer",
+                        "description": "조원 ID",
+                        "format": "int64",
+                        "example": 5
+                    },
+                    "memberName": {
+                        "type": "string",
+                        "description": "조원 이름",
+                        "example": "홍길동"
+                    },
+                    "weekStart": {
+                        "type": "string",
+                        "description": "주차 시작일",
+                        "format": "date",
+                        "example": "2025-01-05"
+                    },
+                    "worship": {
+                        "type": "string",
+                        "description": "예배 출석 상태",
+                        "example": "O",
+                        "enum": [
+                            "O",
+                            "X"
+                        ]
+                    },
+                    "qtCount": {
+                        "type": "integer",
+                        "description": "QT 횟수",
+                        "format": "int32",
+                        "example": 5
+                    },
+                    "ministry": {
+                        "type": "string",
+                        "description": "대학부 출석 등급",
+                        "example": "A",
+                        "enum": [
+                            "A",
+                            "B",
+                            "C"
+                        ]
+                    }
+                },
+                "description": "출석 목록 응답"
+            },
             "UserListByRolesRequest": {
                 "required": [
                     "roles"
@@ -1404,69 +1603,6 @@
                     }
                 },
                 "description": "개별 조원 출석 데이터"
-            },
-            "AttendanceResponse": {
-                "required": [
-                    "id",
-                    "memberId",
-                    "memberName",
-                    "ministry",
-                    "qtCount",
-                    "weekStart",
-                    "worship"
-                ],
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "description": "출석 ID",
-                        "format": "int64",
-                        "example": 1
-                    },
-                    "memberId": {
-                        "type": "integer",
-                        "description": "조원 ID",
-                        "format": "int64",
-                        "example": 5
-                    },
-                    "memberName": {
-                        "type": "string",
-                        "description": "조원 이름",
-                        "example": "홍길동"
-                    },
-                    "weekStart": {
-                        "type": "string",
-                        "description": "주차 시작일",
-                        "format": "date",
-                        "example": "2025-01-05"
-                    },
-                    "worship": {
-                        "type": "string",
-                        "description": "예배 출석 상태",
-                        "example": "O",
-                        "enum": [
-                            "O",
-                            "X"
-                        ]
-                    },
-                    "qtCount": {
-                        "type": "integer",
-                        "description": "QT 횟수",
-                        "format": "int32",
-                        "example": 5
-                    },
-                    "ministry": {
-                        "type": "string",
-                        "description": "대학부 출석 등급",
-                        "example": "A",
-                        "enum": [
-                            "A",
-                            "B",
-                            "C"
-                        ]
-                    }
-                },
-                "description": "출석 목록 응답"
             },
             "GbsStatistics": {
                 "required": [
