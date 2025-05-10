@@ -82,8 +82,8 @@ class StatisticsService(
      */
     @Transactional(readOnly = true)
     fun getVillageStatistics(villageId: Long, startDate: LocalDate, endDate: LocalDate): VillageStatistics {
-        val village = organizationService.getVillageById(villageId)
-        val gbsGroups = organizationService.getActiveGbsGroupsByVillage(villageId, startDate)
+        // 조인을 사용하여 마을과 활성 GBS 그룹을 한 번에 조회
+        val (village, gbsGroups) = organizationService.getVillageWithActiveGbsGroups(villageId, startDate)
 
         log.debug("getVillageStatistics;gbsGroups: {}", gbsGroups)
 
@@ -100,7 +100,7 @@ class StatisticsService(
         val totalMembers = gbsStatsList.sumOf { it.totalMembers }
         val attendedMembers = gbsStatsList.sumOf { it.attendedMembers }
         val totalQtSum = gbsStatsList.sumOf { it.averageQtCount * it.totalMembers }
-        
+
         val attendanceRate = if (totalMembers > 0) {
             (attendedMembers.toDouble() / totalMembers) * 100
         } else {
@@ -129,8 +129,10 @@ class StatisticsService(
      */
     @Transactional(readOnly = true)
     fun getGbsStatistics(gbsId: Long, startDate: LocalDate, endDate: LocalDate): GbsStatistics {
-        val gbsGroup = organizationService.getGbsGroupById(gbsId)
-        val leaderName = organizationService.getCurrentLeaderForGbs(gbsId)
+        // 한 번의 조인 쿼리로 GBS 그룹과 리더 정보를 함께 조회
+        val (gbsGroup, leaderNameOrNull) = organizationService.getGbsWithLeader(gbsId)
+        // 리더 이름이 없는 경우 "리더 없음"으로 표시
+        val leaderName = leaderNameOrNull ?: "리더 없음"
         
         // 활성 멤버 수 - 통계 기간의 시작일자 기준으로 조회하도록 수정
         val totalMembers = gbsMemberHistoryRepository.countActiveMembers(gbsId, startDate).toInt()

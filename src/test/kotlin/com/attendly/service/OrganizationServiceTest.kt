@@ -7,6 +7,7 @@ import com.attendly.domain.entity.GbsMemberHistory
 import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
 import com.attendly.domain.model.GbsMemberHistorySearchCondition
+import com.attendly.domain.model.GbsWithLeader
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
@@ -18,6 +19,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -354,5 +356,69 @@ class OrganizationServiceTest {
         assertEquals("리더 없음", gbsInfo2.leaderName)
         assertEquals(0, gbsInfo2.memberCount)
         assertEquals(0, gbsInfo2.members.size)
+    }
+
+    @Test
+    fun `getGbsWithLeader - GBS 그룹과 리더 정보를 함께 조회한다`() {
+        // given
+        val gbsId = 1L
+        val gbsGroup = GbsGroup(
+            id = gbsId,
+            name = "테스트 GBS",
+            village = mockk(),
+            termStartDate = LocalDate.now(),
+            termEndDate = LocalDate.now().plusMonths(6)
+        )
+        val leader = User(
+            id = 2L,
+            name = "테스트 리더",
+            role = com.attendly.domain.entity.Role.LEADER,
+            department = mockk()
+        )
+        val gbsWithLeader = GbsWithLeader(gbsGroup, leader)
+        
+        every { gbsGroupRepository.findWithCurrentLeader(gbsId) } returns gbsWithLeader
+        
+        // when
+        val result = organizationService.getGbsWithLeader(gbsId)
+        
+        // then
+        assertEquals(gbsGroup, result.first)
+        assertEquals("테스트 리더", result.second)
+    }
+    
+    @Test
+    fun `getGbsWithLeader - 리더가 없는 경우 그룹 정보만 조회된다`() {
+        // given
+        val gbsId = 1L
+        val gbsGroup = GbsGroup(
+            id = gbsId,
+            name = "테스트 GBS",
+            village = mockk(),
+            termStartDate = LocalDate.now(),
+            termEndDate = LocalDate.now().plusMonths(6)
+        )
+        val gbsWithLeader = GbsWithLeader(gbsGroup, null)
+        
+        every { gbsGroupRepository.findWithCurrentLeader(gbsId) } returns gbsWithLeader
+        
+        // when
+        val result = organizationService.getGbsWithLeader(gbsId)
+        
+        // then
+        assertEquals(gbsGroup, result.first)
+        assertNull(result.second)
+    }
+    
+    @Test
+    fun `getGbsWithLeader - GBS 그룹이 없는 경우 예외가 발생한다`() {
+        // given
+        val gbsId = 1L
+        every { gbsGroupRepository.findWithCurrentLeader(gbsId) } returns null
+        
+        // when, then
+        val exception = assertThrows(AttendlyApiException::class.java) {
+            organizationService.getGbsWithLeader(gbsId)
+        }
     }
 } 

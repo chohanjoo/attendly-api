@@ -3,6 +3,9 @@ package com.attendly.domain.repository
 import com.attendly.config.TestQuerydslConfig
 import com.attendly.domain.entity.Department
 import com.attendly.domain.entity.GbsGroup
+import com.attendly.domain.entity.GbsLeaderHistory
+import com.attendly.domain.entity.Role
+import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
@@ -31,6 +34,7 @@ class GbsGroupRepositoryCustomTest {
     private lateinit var department: Department
     private lateinit var village: Village
     private lateinit var otherVillage: Village
+    private lateinit var leader: User
 
     @BeforeEach
     fun setUp() {
@@ -58,6 +62,16 @@ class GbsGroupRepositoryCustomTest {
             updatedAt = LocalDateTime.now()
         )
         entityManager.persist(otherVillage)
+        
+        // 리더 생성
+        leader = User(
+            name = "리더",
+            role = Role.LEADER,
+            department = department,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(leader)
     }
 
     @Test
@@ -144,5 +158,94 @@ class GbsGroupRepositoryCustomTest {
         // then
         assertThat(result).hasSize(2)
         assertThat(result).extracting("name").containsExactlyInAnyOrder("GBS 그룹 1", "GBS 그룹 2")
+    }
+
+    @Test
+    fun `findWithCurrentLeader - GBS 그룹과 현재 리더를 함께 조회한다`() {
+        // given
+        val gbsGroup = GbsGroup(
+            name = "GBS 그룹",
+            village = village,
+            termStartDate = LocalDate.of(2023, 1, 1),
+            termEndDate = LocalDate.of(2023, 12, 31),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(gbsGroup)
+        
+        val leaderHistory = GbsLeaderHistory(
+            gbsGroup = gbsGroup,
+            leader = leader,
+            startDate = LocalDate.of(2023, 1, 1),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(leaderHistory)
+        
+        // when
+        val result = gbsGroupRepository.findWithCurrentLeader(gbsGroup.id!!)
+        
+        // then
+        assertThat(result).isNotNull
+        assertThat(result!!.gbsGroup.id).isEqualTo(gbsGroup.id)
+        assertThat(result.gbsGroup.name).isEqualTo("GBS 그룹")
+        assertThat(result.leader).isNotNull
+        assertThat(result.leader!!.name).isEqualTo("리더")
+    }
+    
+    @Test
+    fun `findWithCurrentLeader - 리더가 없는 경우 GBS 그룹만 조회된다`() {
+        // given
+        val gbsGroup = GbsGroup(
+            name = "리더 없는 GBS 그룹",
+            village = village,
+            termStartDate = LocalDate.of(2023, 1, 1),
+            termEndDate = LocalDate.of(2023, 12, 31),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(gbsGroup)
+        
+        // when
+        val result = gbsGroupRepository.findWithCurrentLeader(gbsGroup.id!!)
+        
+        // then
+        assertThat(result).isNotNull
+        assertThat(result!!.gbsGroup.id).isEqualTo(gbsGroup.id)
+        assertThat(result.gbsGroup.name).isEqualTo("리더 없는 GBS 그룹")
+        assertThat(result.leader).isNull()
+    }
+    
+    @Test
+    fun `findWithCurrentLeader - 종료된 리더 이력은 조회되지 않는다`() {
+        // given
+        val gbsGroup = GbsGroup(
+            name = "GBS 그룹",
+            village = village,
+            termStartDate = LocalDate.of(2023, 1, 1),
+            termEndDate = LocalDate.of(2023, 12, 31),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(gbsGroup)
+        
+        val endedLeaderHistory = GbsLeaderHistory(
+            gbsGroup = gbsGroup,
+            leader = leader,
+            startDate = LocalDate.of(2023, 1, 1),
+            endDate = LocalDate.of(2023, 6, 30), // 종료된 리더 이력
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(endedLeaderHistory)
+        
+        // when
+        val result = gbsGroupRepository.findWithCurrentLeader(gbsGroup.id!!)
+        
+        // then
+        assertThat(result).isNotNull
+        assertThat(result!!.gbsGroup.id).isEqualTo(gbsGroup.id)
+        assertThat(result.gbsGroup.name).isEqualTo("GBS 그룹")
+        assertThat(result.leader).isNull()
     }
 } 

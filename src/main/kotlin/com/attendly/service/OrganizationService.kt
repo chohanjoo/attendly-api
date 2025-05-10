@@ -88,6 +88,17 @@ class OrganizationService(
     }
 
     @Transactional(readOnly = true)
+    fun getGbsWithLeader(gbsId: Long): Pair<GbsGroup, String?> {
+        val gbsWithLeader = gbsGroupRepository.findWithCurrentLeader(gbsId)
+            ?: throw ErrorMessage.GBS_GROUP_NOT_FOUND.withId(gbsId)
+        
+        return Pair(
+            gbsWithLeader.gbsGroup,
+            gbsWithLeader.leader?.name
+        )
+    }
+
+    @Transactional(readOnly = true)
     fun getGbsMembers(gbsId: Long, date: LocalDate = LocalDate.now()): GbsMembersListResponse {
         val gbsGroup = getGbsGroupById(gbsId)
         
@@ -146,5 +157,13 @@ class OrganizationService(
             totalMemberCount = gbsInfoList.sumOf { it.memberCount },
             gbsList = gbsInfoList
         )
+    }
+
+    @Transactional(readOnly = true)
+    fun getVillageWithActiveGbsGroups(villageId: Long, date: LocalDate = LocalDate.now()): Pair<Village, List<GbsGroup>> {
+        val villageWithGbsGroups = villageRepository.findVillageWithActiveGbsGroups(villageId, date)
+            ?: throw ErrorMessage.VILLAGE_NOT_FOUND.withId(villageId)
+
+        return Pair(villageWithGbsGroups, villageWithGbsGroups.gbsGroups)
     }
 } 

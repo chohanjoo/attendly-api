@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface VillageRepository : JpaRepository<Village, Long> {
+interface VillageRepository : JpaRepository<Village, Long>, VillageRepositoryCustom {
     fun findByName(name: String): Village?
     fun findByDepartment(department: Department): List<Village>
 } 

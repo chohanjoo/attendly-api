@@ -1,40 +1,30 @@
 package com.attendly.service
 
-import com.attendly.api.dto.DepartmentStatistics
 import com.attendly.api.dto.GbsStatistics
 import com.attendly.api.dto.VillageStatistics
-import com.attendly.api.dto.WeeklyStatistics
-import com.attendly.domain.entity.Department
-import com.attendly.domain.entity.GbsGroup
-import com.attendly.domain.entity.User
-import com.attendly.domain.entity.Village
-import com.attendly.domain.entity.Attendance
-import com.attendly.domain.entity.WorshipStatus
-import com.attendly.domain.entity.MinistryStatus
+import com.attendly.domain.entity.*
 import com.attendly.domain.repository.AttendanceRepository
 import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.GbsMemberHistoryRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
-import io.mockk.*
-import io.mockk.impl.annotations.MockK
+import io.mockk.MockKAnnotations
+import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.SpyK
+import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.spyk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAdjusters
-import java.util.*
-import kotlin.reflect.jvm.isAccessible
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @ExtendWith(MockKExtension::class)
 class StatisticsServiceTest {
@@ -173,8 +163,7 @@ class StatisticsServiceTest {
     @DisplayName("getVillageStatistics: 마을 출석 통계를 올바르게 조회해야 함")
     fun getVillageStatisticsTest() {
         // given
-        every { organizationService.getVillageById(1L) } returns village
-        every { organizationService.getActiveGbsGroupsByVillage(1L, startDate) } returns listOf(gbsGroup)
+        every { organizationService.getVillageWithActiveGbsGroups(1L, startDate) } returns Pair(village, listOf(gbsGroup))
         
         // GBS 통계를 모킹
         val gbsStats = GbsStatistics(
@@ -209,8 +198,7 @@ class StatisticsServiceTest {
     @DisplayName("getVillageStatistics: 활성 GBS가 없는 경우 예외를 발생시켜야 함")
     fun getVillageStatisticsWithNoGbsTest() {
         // given
-        every { organizationService.getVillageById(1L) } returns village
-        every { organizationService.getActiveGbsGroupsByVillage(1L, startDate) } returns emptyList()
+        every { organizationService.getVillageWithActiveGbsGroups(1L, startDate) } returns Pair(village, emptyList())
         
         // when & then
         val exception = assertThrows<AttendlyApiException> {
@@ -228,8 +216,8 @@ class StatisticsServiceTest {
         val sunday = startDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
         val nextSunday = sunday.plusWeeks(1)
         
-        every { organizationService.getGbsGroupById(1L) } returns gbsGroup
-        every { organizationService.getCurrentLeaderForGbs(1L) } returns "홍길동"
+        // 조인 쿼리를 사용하여 GBS와 리더 정보를 함께 조회하도록 변경
+        every { organizationService.getGbsWithLeader(1L) } returns Pair(gbsGroup, "홍길동")
         every { gbsMemberHistoryRepository.countActiveMembers(1L, startDate) } returns 10L
         
         // 첫 번째 주 출석 데이터
@@ -274,11 +262,52 @@ class StatisticsServiceTest {
     }
 
     @Test
+    @DisplayName("getGbsStatistics: 리더가 없는 경우에도 올바르게 통계를 조회해야 함")
+    fun getGbsStatisticsWithNoLeaderTest() {
+        // given
+        val sunday = startDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+        
+        // 리더가 없는 경우
+        every { organizationService.getGbsWithLeader(1L) } returns Pair(gbsGroup, null)
+        every { gbsMemberHistoryRepository.countActiveMembers(1L, startDate) } returns 10L
+        
+        // 출석 데이터
+        val attendances = listOf(
+            createAttendance(1L, member, gbsGroup, sunday, WorshipStatus.O, 3)
+        )
+        every { attendanceRepository.findDetailsByGbsIdAndWeek(1L, sunday) } returns attendances
+        
+        // 주차 날짜 생성을 위해 테스트 서비스 스파이 생성
+        val spyService = spyk(statisticsService)
+        
+        // generateWeeklyDates 메서드가 특정 주차 날짜를 반환하도록 모킹
+        val weeklyDates = listOf(sunday)
+        val generateWeeklyDatesMethod = StatisticsService::class.java.getDeclaredMethod(
+            "generateWeeklyDates",
+            LocalDate::class.java,
+            LocalDate::class.java
+        ).apply { isAccessible = true }
+        
+        every { 
+            generateWeeklyDatesMethod.invoke(spyService, startDate, endDate)
+        } returns weeklyDates
+        
+        // when
+        val result = spyService.getGbsStatistics(1L, startDate, endDate)
+        
+        // then
+        assertEquals(1L, result.gbsId)
+        assertEquals("1GBS", result.gbsName)
+        assertEquals("리더 없음", result.leaderName)
+        assertEquals(10, result.totalMembers)
+        assertEquals(1, result.weeklyStats.size)
+    }
+
+    @Test
     @DisplayName("getGbsStatistics: 활성 멤버가 없는 경우 예외를 발생시켜야 함")
     fun getGbsStatisticsWithNoActiveMembers() {
         // given
-        every { organizationService.getGbsGroupById(1L) } returns gbsGroup
-        every { organizationService.getCurrentLeaderForGbs(1L) } returns "홍길동"
+        every { organizationService.getGbsWithLeader(1L) } returns Pair(gbsGroup, "홍길동")
         every { gbsMemberHistoryRepository.countActiveMembers(1L, startDate) } returns 0L
         
         // when & then
