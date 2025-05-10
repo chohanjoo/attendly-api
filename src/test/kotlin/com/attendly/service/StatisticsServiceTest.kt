@@ -220,20 +220,6 @@ class StatisticsServiceTest {
         every { organizationService.getGbsWithLeader(1L) } returns Pair(gbsGroup, "홍길동")
         every { gbsMemberHistoryRepository.countActiveMembers(1L, startDate) } returns 10L
         
-        // 첫 번째 주 출석 데이터
-        val attendances1 = listOf(
-            createAttendance(1L, member, gbsGroup, sunday, WorshipStatus.O, 3),
-            createAttendance(2L, member, gbsGroup, sunday, WorshipStatus.O, 4)
-        )
-        every { attendanceRepository.findDetailsByGbsIdAndWeek(1L, sunday) } returns attendances1
-        
-        // 두 번째 주 출석 데이터
-        val attendances2 = listOf(
-            createAttendance(3L, member, gbsGroup, nextSunday, WorshipStatus.O, 5),
-            createAttendance(4L, member, gbsGroup, nextSunday, WorshipStatus.X, 2)
-        )
-        every { attendanceRepository.findDetailsByGbsIdAndWeek(1L, nextSunday) } returns attendances2
-        
         // 주차 날짜 생성을 위해 테스트 서비스 스파이 생성
         val spyService = spyk(statisticsService)
         
@@ -248,6 +234,25 @@ class StatisticsServiceTest {
         every { 
             generateWeeklyDatesMethod.invoke(spyService, startDate, endDate)
         } returns weeklyDates
+        
+        // 첫 번째 주 출석 데이터
+        val attendances1 = listOf(
+            createAttendance(1L, member, gbsGroup, sunday, WorshipStatus.O, 3),
+            createAttendance(2L, member, gbsGroup, sunday, WorshipStatus.O, 4)
+        )
+        
+        // 두 번째 주 출석 데이터
+        val attendances2 = listOf(
+            createAttendance(3L, member, gbsGroup, nextSunday, WorshipStatus.O, 5),
+            createAttendance(4L, member, gbsGroup, nextSunday, WorshipStatus.X, 2)
+        )
+        
+        // 개선된 메서드를 모킹: 모든 주차의 데이터를 한 번에 조회
+        val attendancesByWeek = mapOf(
+            sunday to attendances1,
+            nextSunday to attendances2
+        )
+        every { attendanceRepository.findDetailsByGbsIdAndWeeks(1L, weeklyDates) } returns attendancesByWeek
         
         // when
         val result = spyService.getGbsStatistics(1L, startDate, endDate)
@@ -275,7 +280,6 @@ class StatisticsServiceTest {
         val attendances = listOf(
             createAttendance(1L, member, gbsGroup, sunday, WorshipStatus.O, 3)
         )
-        every { attendanceRepository.findDetailsByGbsIdAndWeek(1L, sunday) } returns attendances
         
         // 주차 날짜 생성을 위해 테스트 서비스 스파이 생성
         val spyService = spyk(statisticsService)
@@ -291,6 +295,12 @@ class StatisticsServiceTest {
         every { 
             generateWeeklyDatesMethod.invoke(spyService, startDate, endDate)
         } returns weeklyDates
+        
+        // 개선된 메서드를 모킹
+        val attendancesByWeek = mapOf(
+            sunday to attendances
+        )
+        every { attendanceRepository.findDetailsByGbsIdAndWeeks(1L, weeklyDates) } returns attendancesByWeek
         
         // when
         val result = spyService.getGbsStatistics(1L, startDate, endDate)

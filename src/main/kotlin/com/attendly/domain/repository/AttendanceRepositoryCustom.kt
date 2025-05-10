@@ -9,5 +9,7 @@ interface AttendanceRepositoryCustom {
     
     fun findDetailsByGbsIdAndWeek(gbsId: Long, weekStart: LocalDate): List<Attendance>
     
+    fun findDetailsByGbsIdAndWeeks(gbsId: Long, weekStarts: List<LocalDate>): Map<LocalDate, List<Attendance>>
+    
     fun findByVillageIdAndWeek(villageId: Long, weekStart: LocalDate): List<Attendance>
 } 

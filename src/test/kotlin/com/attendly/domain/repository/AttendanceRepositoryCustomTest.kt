@@ -220,4 +220,51 @@ class AttendanceRepositoryCustomTest {
         // then
         assertTrue(villageAttendances.isEmpty())
     }
+
+    @Test
+    fun `GBS ID와 주 시작일 목록으로 출석 상세 정보를 찾을 수 있다`() {
+        // given
+        val weekStart2 = LocalDate.of(2023, 5, 8)
+        val weekStarts = listOf(weekStart, weekStart2)
+        
+        // when
+        val attendancesByWeek = attendanceRepository.findDetailsByGbsIdAndWeeks(gbsGroup1.id!!, weekStarts)
+        
+        // then
+        assertEquals(2, attendancesByWeek.size) // 두 주차에 대한 맵 엔트리가 있어야 함
+        assertEquals(1, attendancesByWeek[weekStart]?.size ?: 0) // 첫 번째 주차에는 출석 1건
+        assertEquals(1, attendancesByWeek[weekStart2]?.size ?: 0) // 두 번째 주차에는 출석 1건
+        
+        // 첫 번째 주차 확인
+        val firstWeekAttendances = attendancesByWeek[weekStart]
+        assertEquals(member1.id, firstWeekAttendances?.get(0)?.member?.id)
+        assertEquals(gbsGroup1.id, firstWeekAttendances?.get(0)?.gbsGroup?.id)
+        
+        // 두 번째 주차 확인
+        val secondWeekAttendances = attendancesByWeek[weekStart2]
+        assertEquals(member2.id, secondWeekAttendances?.get(0)?.member?.id)
+        assertEquals(gbsGroup1.id, secondWeekAttendances?.get(0)?.gbsGroup?.id)
+    }
+    
+    @Test
+    fun `주 시작일 목록이 비어있으면 빈 맵이 반환된다`() {
+        // when
+        val attendancesByWeek = attendanceRepository.findDetailsByGbsIdAndWeeks(gbsGroup1.id!!, emptyList())
+        
+        // then
+        assertTrue(attendancesByWeek.isEmpty())
+    }
+    
+    @Test
+    fun `해당하는 출석 정보가 없는 주차는 맵에 포함되지 않는다`() {
+        // given
+        val nonExistentDate = LocalDate.of(2022, 1, 1)
+        val weekStarts = listOf(nonExistentDate)
+        
+        // when
+        val attendancesByWeek = attendanceRepository.findDetailsByGbsIdAndWeeks(gbsGroup1.id!!, weekStarts)
+        
+        // then
+        assertTrue(attendancesByWeek.isEmpty())
+    }
 } 

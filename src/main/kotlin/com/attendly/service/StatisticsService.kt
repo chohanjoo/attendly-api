@@ -144,8 +144,13 @@ class StatisticsService(
         }
         
         // 주차별 통계 생성
-        val weeklyStatsList = generateWeeklyDates(startDate, endDate).map { weekStart ->
-            val attendances = attendanceRepository.findDetailsByGbsIdAndWeek(gbsId, weekStart)
+        val weekStarts = generateWeeklyDates(startDate, endDate)
+        val attendancesByWeek = attendanceRepository.findDetailsByGbsIdAndWeeks(gbsId, weekStarts)
+        
+        log.debug("getGbsStatistics;weekStarts: {}, attendancesByWeek size: {}", weekStarts, attendancesByWeek.size)
+        
+        val weeklyStatsList = weekStarts.map { weekStart ->
+            val attendances = attendancesByWeek[weekStart] ?: emptyList()
 
             log.debug("getGbsStatistics;weekStart: {}, attendances: {}", weekStart, attendances)
 

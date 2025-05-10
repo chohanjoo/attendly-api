@@ -38,6 +38,23 @@ class AttendanceRepositoryImpl(
             )
             .fetch()
     }
+    
+    override fun findDetailsByGbsIdAndWeeks(gbsId: Long, weekStarts: List<LocalDate>): Map<LocalDate, List<Attendance>> {
+        if (weekStarts.isEmpty()) {
+            return emptyMap()
+        }
+        
+        val attendances = queryFactory
+            .selectFrom(attendance)
+            .join(attendance.member, member).fetchJoin()
+            .where(
+                attendance.gbsGroup.id.eq(gbsId),
+                attendance.weekStart.`in`(weekStarts)
+            )
+            .fetch()
+            
+        return attendances.groupBy { it.weekStart }
+    }
 
     override fun findByVillageIdAndWeek(villageId: Long, weekStart: LocalDate): List<Attendance> {
         return queryFactory
