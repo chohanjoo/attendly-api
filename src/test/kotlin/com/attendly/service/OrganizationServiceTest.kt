@@ -4,6 +4,7 @@ import com.attendly.domain.entity.Department
 import com.attendly.domain.entity.GbsGroup
 import com.attendly.domain.entity.GbsLeaderHistory
 import com.attendly.domain.entity.GbsMemberHistory
+import com.attendly.enums.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
 import com.attendly.domain.model.GbsMemberHistorySearchCondition
@@ -100,7 +101,7 @@ class OrganizationServiceTest {
         leader = User(
             id = 1L,
             name = "홍길동",
-            role = com.attendly.domain.entity.Role.LEADER,
+            role = Role.LEADER,
             department = department,
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
@@ -109,7 +110,7 @@ class OrganizationServiceTest {
         member1 = User(
             id = 2L,
             name = "김조원",
-            role = com.attendly.domain.entity.Role.MEMBER,
+            role = Role.MEMBER,
             department = department,
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
@@ -118,7 +119,7 @@ class OrganizationServiceTest {
         member2 = User(
             id = 3L,
             name = "이조원",
-            role = com.attendly.domain.entity.Role.MEMBER,
+            role = Role.MEMBER,
             department = department,
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
@@ -372,7 +373,7 @@ class OrganizationServiceTest {
         val leader = User(
             id = 2L,
             name = "테스트 리더",
-            role = com.attendly.domain.entity.Role.LEADER,
+            role = Role.LEADER,
             department = mockk()
         )
         val gbsWithLeader = GbsWithLeader(gbsGroup, leader)

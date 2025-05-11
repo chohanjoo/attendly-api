@@ -1,13 +1,10 @@
 package com.attendly.api.controller
 
-import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.LoginRequest
-import com.attendly.api.dto.LoginResponse
 import com.attendly.api.dto.SignupRequest
 import com.attendly.api.dto.SignupResponse
-import com.attendly.api.dto.UserResponse
 import com.attendly.domain.entity.Department
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.domain.entity.User
 import com.attendly.security.JwtTokenProvider
 import com.attendly.security.UserDetailsAdapter

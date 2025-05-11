@@ -4,7 +4,7 @@ import com.attendly.config.TestQuerydslConfig
 import com.attendly.domain.entity.Department
 import com.attendly.domain.entity.GbsGroup
 import com.attendly.domain.entity.GbsMemberHistory
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
 import com.attendly.domain.model.GbsMemberHistorySearchCondition

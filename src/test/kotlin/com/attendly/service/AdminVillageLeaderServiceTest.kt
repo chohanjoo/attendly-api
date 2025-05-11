@@ -5,13 +5,12 @@ import com.attendly.domain.entity.*
 import com.attendly.domain.repository.UserRepository
 import com.attendly.domain.repository.VillageLeaderRepository
 import com.attendly.domain.repository.VillageRepository
+import com.attendly.enums.Role
 import com.attendly.exception.AttendlyApiException
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.just
-import io.mockk.runs
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 @ExtendWith(MockKExtension::class)

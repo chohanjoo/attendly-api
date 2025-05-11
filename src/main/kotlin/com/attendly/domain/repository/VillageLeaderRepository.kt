@@ -4,7 +4,6 @@ import com.attendly.domain.entity.VillageLeader
 import com.attendly.domain.entity.VillageLeaderId
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
-import java.time.LocalDate
 
 @Repository
 interface VillageLeaderRepository : JpaRepository<VillageLeader, VillageLeaderId> {

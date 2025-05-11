@@ -1,5 +1,7 @@
 package com.attendly.domain.entity
 
+import com.attendly.enums.MinistryStatus
+import com.attendly.enums.WorshipStatus
 import jakarta.persistence.*
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -60,11 +62,3 @@ class Attendance(
         return "Attendance(id=$id, member=${member.id}, week=$weekStart)"
     }
 }
-
-enum class WorshipStatus {
-    O, X
-}
-
-enum class MinistryStatus {
-    A, B, C
-} 

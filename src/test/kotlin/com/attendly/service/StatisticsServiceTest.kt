@@ -7,6 +7,9 @@ import com.attendly.domain.repository.AttendanceRepository
 import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.GbsMemberHistoryRepository
+import com.attendly.enums.MinistryStatus
+import com.attendly.enums.Role
+import com.attendly.enums.WorshipStatus
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import io.mockk.MockKAnnotations
@@ -87,7 +90,7 @@ class StatisticsServiceTest {
         leader = User(
             id = 1L,
             name = "홍길동",
-            role = com.attendly.domain.entity.Role.LEADER,
+            role = Role.LEADER,
             department = department,
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
@@ -96,7 +99,7 @@ class StatisticsServiceTest {
         member = User(
             id = 2L,
             name = "김모범",
-            role = com.attendly.domain.entity.Role.MEMBER,
+            role = Role.MEMBER,
             department = department,
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()

@@ -5,8 +5,8 @@ import com.attendly.api.dto.AttendanceResponse
 import com.attendly.api.dto.AttendanceUpdateRequestDto
 import com.attendly.api.dto.GbsMemberResponse
 import com.attendly.api.dto.VillageGbsInfoResponse
-import com.attendly.domain.entity.MinistryStatus
-import com.attendly.domain.entity.WorshipStatus
+import com.attendly.enums.MinistryStatus
+import com.attendly.enums.WorshipStatus
 import com.attendly.service.AttendanceService
 import com.attendly.service.OrganizationService
 import io.mockk.every

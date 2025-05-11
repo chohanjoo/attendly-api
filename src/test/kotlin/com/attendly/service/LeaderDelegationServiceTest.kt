@@ -4,6 +4,7 @@ import com.attendly.domain.entity.*
 import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.LeaderDelegationRepository
 import com.attendly.domain.repository.UserRepository
+import com.attendly.enums.Role
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import io.mockk.every

@@ -2,9 +2,9 @@ package com.attendly.domain.repository
 
 import com.attendly.config.TestQuerydslConfig
 import com.attendly.domain.entity.*
-import com.querydsl.jpa.impl.JPAQueryFactory
-import jakarta.persistence.EntityManager
-import jakarta.persistence.PersistenceContext
+import com.attendly.enums.MinistryStatus
+import com.attendly.enums.Role
+import com.attendly.enums.WorshipStatus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.TestPropertySource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.test.assertEquals

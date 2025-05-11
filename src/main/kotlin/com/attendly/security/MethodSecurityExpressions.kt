@@ -1,6 +1,6 @@
 package com.attendly.security
 
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.domain.repository.VillageRepository
 import com.attendly.service.AttendanceService
 import org.springframework.security.core.Authentication

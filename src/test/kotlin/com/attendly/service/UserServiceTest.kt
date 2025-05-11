@@ -2,12 +2,10 @@ package com.attendly.service
 
 import com.attendly.api.dto.SignupRequest
 import com.attendly.api.dto.UserListByRolesRequest
-import com.attendly.api.dto.UserResponse
-import com.attendly.api.dto.UserVillageResponse
 import com.attendly.domain.entity.Department
 import com.attendly.domain.entity.GbsGroup
 import com.attendly.domain.entity.GbsMemberHistory
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
 import com.attendly.domain.entity.VillageLeader
@@ -19,7 +17,6 @@ import com.attendly.exception.ErrorMessage
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
-import io.mockk.impl.annotations.SpyK
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

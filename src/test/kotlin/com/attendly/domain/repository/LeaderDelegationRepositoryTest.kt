@@ -2,6 +2,7 @@ package com.attendly.domain.repository
 
 import com.attendly.config.TestQuerydslConfig
 import com.attendly.domain.entity.*
+import com.attendly.enums.Role
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull

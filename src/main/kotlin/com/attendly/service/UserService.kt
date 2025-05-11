@@ -5,13 +5,11 @@ import com.attendly.api.dto.SignupResponse
 import com.attendly.api.dto.UserResponse
 import com.attendly.api.dto.UserListByRolesRequest
 import com.attendly.api.dto.UserVillageResponse
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.domain.entity.User
-import com.attendly.domain.entity.Village
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.GbsMemberHistoryRepository
 import com.attendly.domain.repository.UserRepository
-import com.attendly.domain.repository.VillageRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
@@ -19,8 +17,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.Optional
 
 @Service

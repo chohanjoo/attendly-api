@@ -3,7 +3,7 @@ package com.attendly.api.dto
 import com.attendly.domain.entity.Department
 import com.attendly.domain.entity.GbsGroup
 import com.attendly.domain.entity.LeaderDelegation
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
 import org.junit.jupiter.api.Assertions.assertEquals

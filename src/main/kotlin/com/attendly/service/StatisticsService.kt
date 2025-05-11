@@ -4,7 +4,6 @@ import com.attendly.api.dto.DepartmentStatistics
 import com.attendly.api.dto.GbsStatistics
 import com.attendly.api.dto.VillageStatistics
 import com.attendly.api.dto.WeeklyStatistics
-import com.attendly.domain.entity.WorshipStatus
 import com.attendly.domain.repository.AttendanceRepository
 import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.GbsLeaderHistoryRepository

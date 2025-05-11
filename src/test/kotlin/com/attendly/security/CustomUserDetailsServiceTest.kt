@@ -1,7 +1,7 @@
 package com.attendly.security
 
 import com.attendly.domain.entity.Department
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.repository.UserRepository
 import io.mockk.every

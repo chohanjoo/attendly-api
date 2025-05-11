@@ -5,13 +5,12 @@ import com.attendly.api.dto.LeaderGbsHistoryListResponse
 import com.attendly.api.dto.LeaderGbsHistoryResponse
 import com.attendly.api.dto.LeaderGbsResponse
 import com.attendly.domain.entity.GbsLeaderHistory
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.LeaderDelegationRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
-import com.attendly.service.OrganizationService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate

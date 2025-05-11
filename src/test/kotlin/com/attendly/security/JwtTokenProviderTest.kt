@@ -1,25 +1,14 @@
 package com.attendly.security
 
-import com.attendly.domain.entity.Department
-import com.attendly.domain.entity.Role
 import com.attendly.domain.entity.User
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.security.Keys
 import io.mockk.*
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.test.util.ReflectionTestUtils
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class JwtTokenProviderTest {

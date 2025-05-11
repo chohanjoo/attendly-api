@@ -7,9 +7,8 @@ import com.attendly.api.dto.GbsAttendanceSummary
 import com.attendly.api.dto.VillageAttendanceResponse
 import com.attendly.domain.entity.Attendance
 import com.attendly.domain.entity.GbsGroup
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.domain.entity.User
-import com.attendly.domain.entity.WorshipStatus
 import com.attendly.domain.model.GbsMemberHistorySearchCondition
 import com.attendly.domain.repository.AttendanceRepository
 import com.attendly.domain.repository.GbsGroupRepository

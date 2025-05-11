@@ -1,7 +1,7 @@
 package com.attendly.api.dto
 
-import com.attendly.domain.entity.MinistryStatus
-import com.attendly.domain.entity.WorshipStatus
+import com.attendly.enums.MinistryStatus
+import com.attendly.enums.WorshipStatus
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Max

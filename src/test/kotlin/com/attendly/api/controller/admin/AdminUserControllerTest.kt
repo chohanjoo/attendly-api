@@ -1,9 +1,7 @@
 package com.attendly.api.controller.admin
 
 import com.attendly.api.dto.*
-import com.attendly.api.controller.admin.AdminUserController
-import com.attendly.api.util.ResponseUtil
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.service.AdminUserService
 import io.mockk.every
 import io.mockk.justRun
@@ -19,7 +17,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 @ExtendWith(SpringExtension::class)
 class AdminUserControllerTest {

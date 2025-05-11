@@ -7,6 +7,9 @@ import com.attendly.api.dto.AttendanceUpdateRequestDto
 import com.attendly.domain.entity.*
 import com.attendly.domain.model.GbsMemberHistorySearchCondition
 import com.attendly.domain.repository.*
+import com.attendly.enums.MinistryStatus
+import com.attendly.enums.Role
+import com.attendly.enums.WorshipStatus
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.security.UserDetailsAdapter
@@ -14,12 +17,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.anyList
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.mockito.junit.jupiter.MockitoExtension
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder

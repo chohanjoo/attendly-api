@@ -4,7 +4,6 @@ import com.attendly.domain.entity.Attendance
 import com.attendly.domain.entity.QAttendance
 import com.attendly.domain.entity.QGbsGroup
 import com.attendly.domain.entity.QUser
-import com.attendly.domain.entity.WorshipStatus
 import com.querydsl.jpa.impl.JPAQueryFactory
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import java.time.LocalDate

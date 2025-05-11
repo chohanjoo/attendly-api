@@ -3,6 +3,9 @@ package com.attendly.service
 import com.attendly.api.dto.VillageAttendanceResponse
 import com.attendly.domain.entity.*
 import com.attendly.domain.repository.*
+import com.attendly.enums.MinistryStatus
+import com.attendly.enums.Role
+import com.attendly.enums.WorshipStatus
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -14,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @ExtendWith(MockKExtension::class)
 class AttendanceServiceTimeBasedTest {

@@ -1,8 +1,6 @@
 package com.attendly.api.dto
 
-import com.attendly.domain.entity.Role
 import jakarta.validation.constraints.NotEmpty
-import java.util.*
 
 /**
  * 역할 목록으로 사용자 조회 요청 DTO

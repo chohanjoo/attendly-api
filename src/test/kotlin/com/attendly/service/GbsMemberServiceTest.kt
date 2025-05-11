@@ -2,10 +2,10 @@ package com.attendly.service
 
 import com.attendly.api.dto.GbsMemberResponse
 import com.attendly.api.dto.GbsMembersListResponse
-import com.attendly.api.dto.LeaderGbsResponse
 import com.attendly.domain.entity.*
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.LeaderDelegationRepository
+import com.attendly.enums.Role
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import io.mockk.every
@@ -20,11 +20,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.Optional
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContext
-import org.springframework.security.core.context.SecurityContextHolder
 
 @ExtendWith(MockKExtension::class)
 class GbsMemberServiceTest {

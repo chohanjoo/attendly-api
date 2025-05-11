@@ -1,5 +1,6 @@
 package com.attendly.domain.entity
 
+import com.attendly.enums.Role
 import jakarta.persistence.*
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -76,6 +77,3 @@ class User(
     }
 }
 
-enum class Role {
-    ADMIN, MINISTER, VILLAGE_LEADER, LEADER, MEMBER
-} 

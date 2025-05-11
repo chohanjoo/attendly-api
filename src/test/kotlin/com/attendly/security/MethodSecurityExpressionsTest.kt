@@ -1,6 +1,6 @@
 package com.attendly.security
 
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
 import com.attendly.domain.entity.VillageLeader
@@ -8,7 +8,6 @@ import com.attendly.domain.repository.VillageRepository
 import com.attendly.service.AttendanceService
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
-import java.time.LocalDate
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.assertFalse
 

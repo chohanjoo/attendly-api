@@ -3,6 +3,7 @@ package com.attendly.service
 import com.attendly.api.dto.*
 import com.attendly.domain.entity.*
 import com.attendly.domain.repository.*
+import com.attendly.enums.Role
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
@@ -10,12 +11,9 @@ import io.mockk.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Optional
 import org.junit.jupiter.api.Assertions.*

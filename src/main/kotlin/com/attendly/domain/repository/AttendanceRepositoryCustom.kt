@@ -1,7 +1,6 @@
 package com.attendly.domain.repository
 
 import com.attendly.domain.entity.Attendance
-import com.attendly.domain.entity.WorshipStatus
 import java.time.LocalDate
 
 interface AttendanceRepositoryCustom {

@@ -1,11 +1,9 @@
 package com.attendly.api.controller
 
-import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.UserListByRolesRequest
-import com.attendly.api.dto.UserListByRolesResponse
 import com.attendly.api.dto.UserResponse
 import com.attendly.api.dto.UserVillageResponse
-import com.attendly.domain.entity.Role
+import com.attendly.enums.Role
 import com.attendly.service.UserService
 import io.mockk.every
 import io.mockk.verify

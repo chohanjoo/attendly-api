@@ -6,8 +6,7 @@ import com.attendly.api.dto.LeaderGbsHistoryListResponse
 import com.attendly.api.dto.LeaderGbsHistoryResponse
 import com.attendly.api.dto.LeaderGbsResponse
 import com.attendly.domain.entity.*
-import com.attendly.domain.repository.GbsLeaderHistoryRepository
-import com.attendly.domain.repository.LeaderDelegationRepository
+import com.attendly.enums.Role
 import com.attendly.service.GbsMemberService
 import com.attendly.service.UserService
 import io.mockk.every
