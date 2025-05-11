@@ -1,4 +1,4 @@
-package com.attendly.api
+package com.attendly.api.controller.admin
 
 import com.attendly.util.DiscordLogger
 import org.springframework.http.ResponseEntity
@@ -63,4 +63,4 @@ class LogTestController {
         DiscordLogger.securityEvent("보안 이벤트 테스트: $message")
         return ResponseEntity.ok("보안 이벤트 로그가 생성되어 Discord로 전송되었습니다.")
     }
-} 
+}

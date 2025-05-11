@@ -11,8 +11,12 @@ import io.mockk.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.domain.Example
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.LocalDateTime
 import java.util.Optional
@@ -297,7 +301,12 @@ class AdminUserServiceTest {
             )
         )
         
-        every { userRepository.findAll(pageable) } returns PageImpl(users, pageable, 2)
+        val pagedResult = PageImpl(users, pageable, 2)
+        
+        // findAll(Pageable)를 직접 모킹
+        justRun { userRepository.findAll(any<Sort>()) }
+        justRun { userRepository.findAll(any<Example<User>>()) }
+        every { userRepository.findAll(eq(pageable)) } returns pagedResult
         
         // when
         val result = adminUserService.getAllUsers(pageable)
@@ -310,7 +319,82 @@ class AdminUserServiceTest {
         assertEquals("홍길동", result.content[0].name)
         assertEquals(2L, result.content[1].id)
         assertEquals("김철수", result.content[1].name)
+    }
+
+    @Test
+    fun `searchUsersByName should return all users when name is null`() {
+        // given
+        val pageable = PageRequest.of(0, 10)
+        val department = Department(id = 1L, name = "청년부")
+        val users = listOf(
+            User(
+                id = 1L,
+                name = "홍길동",
+                email = "hong@example.com",
+                password = "encodedPassword",
+                role = Role.LEADER,
+                department = department
+            ),
+            User(
+                id = 2L,
+                name = "김철수",
+                email = "kim@example.com",
+                password = "encodedPassword",
+                role = Role.MEMBER,
+                department = department
+            )
+        )
         
-        verify { userRepository.findAll(pageable) }
+        val pagedUsers = PageImpl(users, pageable, users.size.toLong())
+        
+        // userRepository를 다시 mock 설정
+        clearMocks(userRepository)
+        
+        // 각 오버로드된 메서드에 대해 기본 동작 설정
+        justRun { userRepository.findAll(any<Sort>()) }
+        justRun { userRepository.findAll(any<Example<User>>()) }
+        every { userRepository.findAll(eq(pageable)) } returns pagedUsers
+        
+        // when
+        val result = adminUserService.searchUsersByName(null, pageable)
+        
+        // then
+        assertNotNull(result)
+        assertEquals(2, result.content.size)
+        assertEquals(1L, result.content[0].id)
+        assertEquals("홍길동", result.content[0].name)
+        assertEquals(2L, result.content[1].id)
+        assertEquals("김철수", result.content[1].name)
+    }
+    
+    @Test
+    fun `searchUsersByName should return filtered users when name is provided`() {
+        // given
+        val pageable = PageRequest.of(0, 10)
+        val searchName = "홍길"
+        val department = Department(id = 1L, name = "청년부")
+        val users = listOf(
+            User(
+                id = 1L,
+                name = "홍길동",
+                email = "hong@example.com",
+                password = "encodedPassword",
+                role = Role.LEADER,
+                department = department
+            )
+        )
+        
+        val pagedUsers = PageImpl(users, pageable, users.size.toLong())
+        
+        every { userRepository.findByNameContainingIgnoreCase(searchName, pageable) } returns pagedUsers
+        
+        // when
+        val result = adminUserService.searchUsersByName(searchName, pageable)
+        
+        // then
+        assertNotNull(result)
+        assertEquals(1, result.content.size)
+        assertEquals(1L, result.content[0].id)
+        assertEquals("홍길동", result.content[0].name)
     }
 } 

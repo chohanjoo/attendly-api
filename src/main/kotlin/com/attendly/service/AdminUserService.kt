@@ -203,6 +203,32 @@ class AdminUserService(
     }
 
     /**
+     * 사용자 이름으로 검색
+     */
+    fun searchUsersByName(name: String?, pageable: Pageable): Page<UserResponse> {
+        val users = if (name.isNullOrBlank()) {
+            userRepository.findAll(pageable)
+        } else {
+            userRepository.findByNameContainingIgnoreCase(name, pageable)
+        }
+        
+        return users.map { user ->
+            UserResponse(
+                id = user.id ?: 0L,
+                name = user.name,
+                email = user.email,
+                phoneNumber = user.phoneNumber,
+                role = user.role,
+                departmentId = user.department.id ?: 0L,
+                departmentName = user.department.name,
+                birthDate = user.birthDate,
+                createdAt = user.createdAt,
+                updatedAt = user.updatedAt
+            )
+        }
+    }
+
+    /**
      * 사용자 일괄 등록
      */
     @Transactional

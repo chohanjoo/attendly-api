@@ -74,14 +74,15 @@ class AdminUserController(
 
     @Operation(
         summary = "사용자 목록 조회", 
-        description = "사용자 목록을 페이징하여 조회합니다",
+        description = "사용자 목록을 페이징하여 조회합니다. name 파라미터를 통해 이름으로 검색이 가능합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @GetMapping
     fun getAllUsers(
+        @RequestParam(required = false) name: String?,
         @PageableDefault(size = 20, sort = ["id"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<ApiResponse<PageResponse<UserResponse>>> {
-        val response = adminUserService.getAllUsers(pageable)
+        val response = adminUserService.searchUsersByName(name, pageable)
         return ResponseUtil.successList(response.content, response.totalElements, response.hasNext())
     }
 

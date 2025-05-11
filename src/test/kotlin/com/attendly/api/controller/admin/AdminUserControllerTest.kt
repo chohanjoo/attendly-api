@@ -183,10 +183,10 @@ class AdminUserControllerTest {
         
         val pagedResponse = PageImpl(users, pageable, 2)
         
-        every { adminUserService.getAllUsers(any()) } returns pagedResponse
+        every { adminUserService.searchUsersByName(null, pageable) } returns pagedResponse
         
         // when
-        val result = controller.getAllUsers(pageable)
+        val result = controller.getAllUsers(null, pageable)
         
         // then
         assertEquals(HttpStatus.OK, result.statusCode)
@@ -195,7 +195,44 @@ class AdminUserControllerTest {
         assertEquals(users, result.body?.data?.items)
         assertEquals(2L, result.body?.data?.totalCount)
         
-        verify { adminUserService.getAllUsers(any()) }
+        verify { adminUserService.searchUsersByName(null, pageable) }
+    }
+
+    @Test
+    fun `getAllUsers with name parameter should return filtered users`() {
+        // given
+        val pageable = PageRequest.of(0, 10)
+        val searchName = "홍길동"
+        val users = listOf(
+            UserResponse(
+                id = 1L,
+                name = "홍길동",
+                email = "hong@example.com",
+                phoneNumber = "010-1234-5678",
+                role = Role.LEADER,
+                departmentId = 1L,
+                departmentName = "청년부",
+                birthDate = null,
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now()
+            )
+        )
+        
+        val pagedResponse = PageImpl(users, pageable, 1)
+        
+        every { adminUserService.searchUsersByName(searchName, pageable) } returns pagedResponse
+        
+        // when
+        val result = controller.getAllUsers(searchName, pageable)
+        
+        // then
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertNotNull(result.body?.data)
+        assertEquals(users, result.body?.data?.items)
+        assertEquals(1L, result.body?.data?.totalCount)
+        
+        verify { adminUserService.searchUsersByName(searchName, pageable) }
     }
 
     @Test
