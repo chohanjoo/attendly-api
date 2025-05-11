@@ -1,8 +1,11 @@
 package com.attendly.api.controller
 
+import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.AttendanceResponse
 import com.attendly.api.dto.AttendanceUpdateRequestDto
+import com.attendly.api.dto.PageResponse
 import com.attendly.api.dto.VillageGbsInfoResponse
+import com.attendly.api.util.ResponseUtil
 import com.attendly.service.AttendanceService
 import com.attendly.service.OrganizationService
 import io.swagger.v3.oas.annotations.Operation
@@ -37,12 +40,12 @@ class VillageLeaderController(
     fun getVillageGbsInfo(
         @PathVariable villageId: Long,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) date: LocalDate?
-    ): ResponseEntity<VillageGbsInfoResponse> {
+    ): ResponseEntity<ApiResponse<VillageGbsInfoResponse>> {
         val response = organizationService.getVillageGbsInfo(
             villageId = villageId,
             date = date ?: LocalDate.now()
         )
-        return ResponseEntity.ok(response)
+        return ResponseUtil.success(response)
     }
     
     @PostMapping("/{villageId}/attendance")
@@ -55,8 +58,8 @@ class VillageLeaderController(
     fun updateVillageGbsAttendance(
         @PathVariable villageId: Long,
         @Valid @RequestBody request: AttendanceUpdateRequestDto
-    ): ResponseEntity<List<AttendanceResponse>> {
-        val response = attendanceService.updateVillageGbsAttendance(villageId, request)
-        return ResponseEntity.ok(response)
+    ): ResponseEntity<ApiResponse<PageResponse<AttendanceResponse>>> {
+        val responses = attendanceService.updateVillageGbsAttendance(villageId, request)
+        return ResponseUtil.successList(responses)
     }
 } 

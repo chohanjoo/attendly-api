@@ -1,5 +1,6 @@
 package com.attendly.api.controller
 
+import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.LoginRequest
 import com.attendly.api.dto.LoginResponse
 import com.attendly.api.dto.SignupRequest
@@ -7,6 +8,7 @@ import com.attendly.api.dto.SignupResponse
 import com.attendly.api.dto.TokenRefreshRequest
 import com.attendly.api.dto.TokenRefreshResponse
 import com.attendly.api.dto.UserResponse
+import com.attendly.api.util.ResponseUtil
 import com.attendly.security.JwtTokenProvider
 import com.attendly.security.UserDetailsAdapter
 import com.attendly.service.UserService
@@ -38,14 +40,14 @@ class AuthController(
 
     @PostMapping("/signup")
     @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
-    fun signup(@Valid @RequestBody request: SignupRequest): ResponseEntity<SignupResponse> {
+    fun signup(@Valid @RequestBody request: SignupRequest): ResponseEntity<ApiResponse<SignupResponse>> {
         val response = userService.signup(request)
-        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+        return ResponseUtil.created(response)
     }
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하여 JWT 토큰을 발급받습니다.")
-    fun login(@Valid @RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> {
+    fun login(@Valid @RequestBody loginRequest: LoginRequest): ResponseEntity<ApiResponse<LoginResponse>> {
         val authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(loginRequest.email, loginRequest.password)
         )
@@ -64,12 +66,12 @@ class AuthController(
             refreshToken = refreshToken
         )
         
-        return ResponseEntity.ok(response)
+        return ResponseUtil.success(response)
     }
     
     @PostMapping("/refresh")
     @Operation(summary = "토큰 갱신", description = "리프레시 토큰을 사용하여 새로운 엑세스 토큰과 리프레시 토큰을 발급받습니다.")
-    fun refreshToken(@Valid @RequestBody request: TokenRefreshRequest): ResponseEntity<TokenRefreshResponse> {
+    fun refreshToken(@Valid @RequestBody request: TokenRefreshRequest): ResponseEntity<ApiResponse<TokenRefreshResponse>> {
         val username = jwtTokenProvider.extractUsername(request.refreshToken)
         val userDetails = userDetailsService.loadUserByUsername(username)
         
@@ -77,15 +79,15 @@ class AuthController(
             val accessToken = jwtTokenProvider.generateToken(userDetails)
             val refreshToken = jwtTokenProvider.generateRefreshToken(userDetails)
             
-            return ResponseEntity.ok(TokenRefreshResponse(accessToken, refreshToken))
+            return ResponseUtil.success(TokenRefreshResponse(accessToken, refreshToken))
         }
         
-        return ResponseEntity.badRequest().build()
+        return ResponseUtil.error("유효하지 않은 리프레시 토큰입니다.", 401, HttpStatus.UNAUTHORIZED)
     }
     
     @GetMapping("/me")
     @Operation(summary = "현재 사용자 정보 조회", description = "현재 인증된 사용자의 정보를 조회합니다.")
-    fun getCurrentUser(@AuthenticationPrincipal userDetails: UserDetailsAdapter): ResponseEntity<UserResponse> {
+    fun getCurrentUser(@AuthenticationPrincipal userDetails: UserDetailsAdapter): ResponseEntity<ApiResponse<UserResponse>> {
         val user = userDetails.getUser()
         
         val response = UserResponse(
@@ -101,6 +103,6 @@ class AuthController(
             updatedAt = user.updatedAt
         )
         
-        return ResponseEntity.ok(response)
+        return ResponseUtil.success(response)
     }
 } 

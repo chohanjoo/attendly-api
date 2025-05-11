@@ -1,8 +1,11 @@
 package com.attendly.api.controller
 
+import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.AttendanceBatchRequest
 import com.attendly.api.dto.AttendanceResponse
+import com.attendly.api.dto.PageResponse
 import com.attendly.api.dto.VillageAttendanceResponse
+import com.attendly.api.util.ResponseUtil
 import com.attendly.service.AttendanceService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -30,9 +33,9 @@ class AttendanceController(
     @PreAuthorize("@securityUtils.canManageGbsAttendance(#request.gbsId)")
     fun createAttendances(
         @Valid @RequestBody request: AttendanceBatchRequest
-    ): ResponseEntity<List<AttendanceResponse>> {
+    ): ResponseEntity<ApiResponse<PageResponse<AttendanceResponse>>> {
         val attendances = attendanceService.createAttendances(request)
-        return ResponseEntity.ok(attendances)
+        return ResponseUtil.successList(attendances)
     }
 
     @GetMapping("/attendance")
@@ -45,9 +48,9 @@ class AttendanceController(
     fun getAttendancesByGbs(
         @RequestParam gbsId: Long,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) weekStart: LocalDate
-    ): ResponseEntity<List<AttendanceResponse>> {
+    ): ResponseEntity<ApiResponse<PageResponse<AttendanceResponse>>> {
         val attendances = attendanceService.getAttendancesByGbs(gbsId, weekStart)
-        return ResponseEntity.ok(attendances)
+        return ResponseUtil.successList(attendances)
     }
 
     @GetMapping("/village/{id}/attendance")
@@ -60,8 +63,8 @@ class AttendanceController(
     fun getVillageAttendance(
         @PathVariable id: Long,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) weekStart: LocalDate
-    ): ResponseEntity<VillageAttendanceResponse> {
+    ): ResponseEntity<ApiResponse<VillageAttendanceResponse>> {
         val villageAttendance = attendanceService.getVillageAttendance(id, weekStart)
-        return ResponseEntity.ok(villageAttendance)
+        return ResponseUtil.success(villageAttendance)
     }
 } 

@@ -1,7 +1,9 @@
 package com.attendly.api.controller
 
+import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.VillageLeaderAssignRequest
 import com.attendly.api.dto.VillageLeaderResponse
+import com.attendly.api.util.ResponseUtil
 import com.attendly.service.AdminVillageLeaderService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -28,9 +30,9 @@ class AdminVillageLeaderController(
     @PreAuthorize("hasRole('ADMIN')")
     fun assignVillageLeader(
         @Valid @RequestBody request: VillageLeaderAssignRequest
-    ): ResponseEntity<VillageLeaderResponse> {
+    ): ResponseEntity<ApiResponse<VillageLeaderResponse>> {
         val response = adminVillageLeaderService.assignVillageLeader(request)
-        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+        return ResponseUtil.created(response)
     }
 
     @GetMapping("/{villageId}")
@@ -41,12 +43,12 @@ class AdminVillageLeaderController(
     @PreAuthorize("hasRole('ADMIN')")
     fun getVillageLeader(
         @PathVariable villageId: Long
-    ): ResponseEntity<VillageLeaderResponse> {
+    ): ResponseEntity<ApiResponse<VillageLeaderResponse>> {
         val response = adminVillageLeaderService.getVillageLeader(villageId)
         return if (response != null) {
-            ResponseEntity.ok(response)
+            ResponseUtil.success(response)
         } else {
-            ResponseEntity.notFound().build()
+            ResponseUtil.error("해당 마을에 마을장이 존재하지 않습니다.", 404, HttpStatus.NOT_FOUND)
         }
     }
 
@@ -59,11 +61,11 @@ class AdminVillageLeaderController(
     fun terminateVillageLeader(
         @PathVariable villageId: Long,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) endDate: LocalDate?
-    ): ResponseEntity<VillageLeaderResponse> {
+    ): ResponseEntity<ApiResponse<VillageLeaderResponse>> {
         val response = adminVillageLeaderService.terminateVillageLeader(
             villageId = villageId,
             endDate = endDate ?: LocalDate.now()
         )
-        return ResponseEntity.ok(response)
+        return ResponseUtil.success(response)
     }
 } 

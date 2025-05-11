@@ -1,8 +1,10 @@
 package com.attendly.api.controller
 
+import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.UserListByRolesRequest
 import com.attendly.api.dto.UserListByRolesResponse
 import com.attendly.api.dto.UserVillageResponse
+import com.attendly.api.util.ResponseUtil
 import com.attendly.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -32,9 +34,9 @@ class UserController(
     )
     @PostMapping("/by-roles")
     @PreAuthorize("isAuthenticated()")
-    fun getUsersByRoles(@Valid @RequestBody request: UserListByRolesRequest): ResponseEntity<UserListByRolesResponse> {
+    fun getUsersByRoles(@Valid @RequestBody request: UserListByRolesRequest): ResponseEntity<ApiResponse<UserListByRolesResponse>> {
         val users = userService.getUsersByRoles(request)
-        return ResponseEntity.ok(UserListByRolesResponse(users))
+        return ResponseUtil.success(UserListByRolesResponse(users))
     }
     
     @Operation(
@@ -44,8 +46,8 @@ class UserController(
     )
     @GetMapping("/my-village")
     @PreAuthorize("isAuthenticated()")
-    fun getCurrentUserVillage(authentication: Authentication): ResponseEntity<UserVillageResponse> {
+    fun getCurrentUserVillage(authentication: Authentication): ResponseEntity<ApiResponse<UserVillageResponse>> {
         val villageResponse = userService.getCurrentUserVillage(authentication)
-        return ResponseEntity.ok(villageResponse)
+        return ResponseUtil.success(villageResponse)
     }
 } 

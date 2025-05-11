@@ -1,6 +1,7 @@
 package com.attendly.api.controller.admin
 
 import com.attendly.api.dto.*
+import com.attendly.api.util.ResponseUtil
 import com.attendly.service.AdminBatchService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -32,9 +33,9 @@ class AdminBatchController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/jobs")
-    fun createBatchJob(@Valid @RequestBody request: BatchJobRequest): ResponseEntity<BatchJobResponse> {
+    fun createBatchJob(@Valid @RequestBody request: BatchJobRequest): ResponseEntity<ApiResponse<BatchJobResponse>> {
         val response = adminBatchService.createBatchJob(request)
-        return ResponseEntity(response, HttpStatus.CREATED)
+        return ResponseUtil.created(response, "배치 작업이 성공적으로 생성되었습니다")
     }
 
     @Operation(
@@ -46,9 +47,9 @@ class AdminBatchController(
     fun cancelBatchJob(
         @PathVariable jobId: Long,
         @RequestBody request: BatchJobCancelRequest?
-    ): ResponseEntity<BatchJobResponse> {
+    ): ResponseEntity<ApiResponse<BatchJobResponse>> {
         val response = adminBatchService.cancelBatchJob(jobId, request)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response, "배치 작업이 성공적으로 취소되었습니다")
     }
 
     @Operation(
@@ -60,9 +61,9 @@ class AdminBatchController(
     fun restartBatchJob(
         @PathVariable jobId: Long,
         @RequestBody request: BatchJobRestartRequest?
-    ): ResponseEntity<BatchJobResponse> {
+    ): ResponseEntity<ApiResponse<BatchJobResponse>> {
         val response = adminBatchService.restartBatchJob(jobId, request)
-        return ResponseEntity(response, HttpStatus.CREATED)
+        return ResponseUtil.created(response, "배치 작업이 성공적으로 재시작되었습니다")
     }
 
     @Operation(
@@ -71,9 +72,9 @@ class AdminBatchController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @GetMapping("/jobs/{jobId}")
-    fun getBatchJob(@PathVariable jobId: Long): ResponseEntity<BatchJobResponse> {
+    fun getBatchJob(@PathVariable jobId: Long): ResponseEntity<ApiResponse<BatchJobResponse>> {
         val response = adminBatchService.getBatchJob(jobId)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response)
     }
 
     @Operation(
@@ -90,7 +91,7 @@ class AdminBatchController(
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) endDateFrom: LocalDateTime?,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) endDateTo: LocalDateTime?,
         @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
-    ): ResponseEntity<Page<BatchJobResponse>> {
+    ): ResponseEntity<ApiResponse<PageResponse<BatchJobResponse>>> {
         val response = adminBatchService.getBatchJobs(
             jobType = jobType,
             status = status,
@@ -100,7 +101,15 @@ class AdminBatchController(
             endDateTo = endDateTo,
             pageable = pageable
         )
-        return ResponseEntity(response, HttpStatus.OK)
+        
+        // Page 객체를 PageResponse로 변환
+        val pageResponse = PageResponse(
+            items = response.content,
+            totalCount = response.totalElements,
+            hasMore = response.hasNext()
+        )
+        
+        return ResponseUtil.success(pageResponse)
     }
 
     @Operation(
@@ -109,8 +118,8 @@ class AdminBatchController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @GetMapping("/jobs/{jobId}/logs")
-    fun getBatchJobLogs(@PathVariable jobId: Long): ResponseEntity<List<BatchLogResponse>> {
+    fun getBatchJobLogs(@PathVariable jobId: Long): ResponseEntity<ApiResponse<PageResponse<BatchLogResponse>>> {
         val response = adminBatchService.getBatchJobLogs(jobId)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.successList(response)
     }
 } 

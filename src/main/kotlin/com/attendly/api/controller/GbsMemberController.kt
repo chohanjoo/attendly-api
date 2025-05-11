@@ -1,8 +1,10 @@
 package com.attendly.api.controller
 
+import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.GbsMembersListResponse
 import com.attendly.api.dto.LeaderGbsHistoryListResponse
 import com.attendly.api.dto.LeaderGbsResponse
+import com.attendly.api.util.ResponseUtil
 import com.attendly.service.GbsMemberService
 import com.attendly.service.UserService
 import io.swagger.v3.oas.annotations.Operation
@@ -32,21 +34,21 @@ class GbsMemberController(
         @PathVariable gbsId: Long,
         @RequestParam(required = false) date: LocalDate?,
         authentication: Authentication
-    ): ResponseEntity<GbsMembersListResponse> {
+    ): ResponseEntity<ApiResponse<GbsMembersListResponse>> {
         val currentUser = userService.getCurrentUser(authentication)
         val targetDate = date ?: LocalDate.now()
         
         val response = gbsMemberService.getGbsMembers(gbsId, targetDate, currentUser)
-        return ResponseEntity.ok(response)
+        return ResponseUtil.success(response)
     }
     
     @GetMapping("/my-gbs")
     @Operation(summary = "로그인한 리더의 GBS 조회", description = "현재 로그인한 리더가 담당하는 GBS 정보를 조회합니다.")
     @PreAuthorize("hasRole('LEADER')")
-    fun getMyGbs(authentication: Authentication): ResponseEntity<LeaderGbsResponse> {
+    fun getMyGbs(authentication: Authentication): ResponseEntity<ApiResponse<LeaderGbsResponse>> {
         val currentUser = userService.getCurrentUser(authentication)
         val response = gbsMemberService.getGbsForLeader(currentUser.id!!)
-        return ResponseEntity.ok(response)
+        return ResponseUtil.success(response)
     }
     
     @GetMapping("/leaders/{leaderId}/history")
@@ -58,9 +60,9 @@ class GbsMemberController(
     fun getLeaderGbsHistories(
         @PathVariable leaderId: Long,
         authentication: Authentication
-    ): ResponseEntity<LeaderGbsHistoryListResponse> {
+    ): ResponseEntity<ApiResponse<LeaderGbsHistoryListResponse>> {
         val currentUser = userService.getCurrentUser(authentication)
         val response = gbsMemberService.getLeaderGbsHistories(leaderId, currentUser)
-        return ResponseEntity.ok(response)
+        return ResponseUtil.success(response)
     }
 } 

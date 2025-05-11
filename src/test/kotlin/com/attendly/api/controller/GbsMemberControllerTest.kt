@@ -21,6 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @ExtendWith(SpringExtension::class)
 class GbsMemberControllerTest {
@@ -93,8 +94,9 @@ class GbsMemberControllerTest {
         // Then
         assertEquals(HttpStatus.OK, result.statusCode)
         assertNotNull(result.body)
-        assertEquals(2, result.body?.memberCount)
-        assertEquals(gbsId, result.body?.gbsId)
+        assertTrue(result.body?.success == true)
+        assertEquals(2, result.body?.data?.memberCount)
+        assertEquals(gbsId, result.body?.data?.gbsId)
     }
 
     @Test
@@ -144,8 +146,9 @@ class GbsMemberControllerTest {
         // Then
         assertEquals(HttpStatus.OK, result.statusCode)
         assertNotNull(result.body)
-        assertEquals(2, result.body?.memberCount)
-        assertEquals(gbsId, result.body?.gbsId)
+        assertTrue(result.body?.success == true)
+        assertEquals(2, result.body?.data?.memberCount)
+        assertEquals(gbsId, result.body?.data?.gbsId)
     }
 
     @Test
@@ -195,8 +198,9 @@ class GbsMemberControllerTest {
         // Then
         assertEquals(HttpStatus.OK, result.statusCode)
         assertNotNull(result.body)
-        assertEquals(2, result.body?.memberCount)
-        assertEquals(gbsId, result.body?.gbsId)
+        assertTrue(result.body?.success == true)
+        assertEquals(2, result.body?.data?.memberCount)
+        assertEquals(gbsId, result.body?.data?.gbsId)
     }
 
     @Test
@@ -230,8 +234,9 @@ class GbsMemberControllerTest {
         // then
         val response = controller.getMyGbs(authentication)
         
-        assertEquals(HttpStatus.OK.value(), response.statusCodeValue)
-        assertEquals(expectedResponse, response.body)
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertTrue(response.body?.success == true)
+        assertEquals(expectedResponse, response.body?.data)
     }
 
     @Test
@@ -307,18 +312,19 @@ class GbsMemberControllerTest {
         // Then
         assertEquals(HttpStatus.OK, result.statusCode)
         assertNotNull(result.body)
-        assertEquals(leaderId, result.body?.leaderId)
-        assertEquals("홍길동", result.body?.leaderName)
-        assertEquals(2, result.body?.historyCount)
-        assertEquals(2, result.body?.histories?.size)
+        assertTrue(result.body?.success == true)
+        assertEquals(leaderId, result.body?.data?.leaderId)
+        assertEquals("홍길동", result.body?.data?.leaderName)
+        assertEquals(2, result.body?.data?.historyCount)
+        assertEquals(2, result.body?.data?.histories?.size)
         
         // 첫 번째 히스토리 검증 (현재 활성 GBS)
-        val firstHistory = result.body?.histories?.get(0)
+        val firstHistory = result.body?.data?.histories?.get(0)
         assertEquals(2L, firstHistory?.historyId)
         assertEquals(true, firstHistory?.isActive)
         
         // 두 번째 히스토리 검증 (과거 GBS)
-        val secondHistory = result.body?.histories?.get(1)
+        val secondHistory = result.body?.data?.histories?.get(1)
         assertEquals(1L, secondHistory?.historyId)
         assertEquals(false, secondHistory?.isActive)
         assertEquals(LocalDate.of(2022, 12, 31), secondHistory?.endDate)
@@ -369,8 +375,9 @@ class GbsMemberControllerTest {
         // Then
         assertEquals(HttpStatus.OK, result.statusCode)
         assertNotNull(result.body)
-        assertEquals(leaderId, result.body?.leaderId)
-        assertEquals("홍길동", result.body?.leaderName)
-        assertEquals(1, result.body?.historyCount)
+        assertTrue(result.body?.success == true)
+        assertEquals(leaderId, result.body?.data?.leaderId)
+        assertEquals("홍길동", result.body?.data?.leaderName)
+        assertEquals(1, result.body?.data?.historyCount)
     }
 } 

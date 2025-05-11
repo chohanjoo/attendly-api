@@ -1,16 +1,17 @@
 package com.attendly.api.controller.admin
 
+import com.attendly.api.dto.ApiResponse
+import com.attendly.api.dto.PageResponse
 import com.attendly.api.dto.SystemLogResponseDto
-import com.attendly.api.dto.SystemLogSearchDto
-import com.attendly.domain.entity.SystemLog
+import com.attendly.api.util.ResponseUtil
 import com.attendly.service.SystemLogService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -41,7 +42,7 @@ class AdminLogController(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "20") size: Int,
         @RequestParam(defaultValue = "timestamp,desc") sort: String
-    ): ResponseEntity<Page<SystemLogResponseDto>> {
+    ): ResponseEntity<ApiResponse<PageResponse<SystemLogResponseDto>>> {
         val sortParams = sort.split(",")
         val direction = if (sortParams.size > 1 && sortParams[1] == "asc") Sort.Direction.ASC else Sort.Direction.DESC
         val sortProperty = sortParams[0]
@@ -50,7 +51,11 @@ class AdminLogController(
         val logs = systemLogService.getLogs(level, category, startTime, endTime, userId, keyword, pageable)
         val responseDto = logs.map { SystemLogResponseDto.from(it) }
         
-        return ResponseEntity.ok(responseDto)
+        return ResponseUtil.successList(
+            responseDto.content,
+            responseDto.totalElements,
+            responseDto.hasNext()
+        )
     }
 
     @GetMapping("/{id}")
@@ -59,11 +64,11 @@ class AdminLogController(
         description = "특정 ID의 시스템 로그를 조회합니다 (관리자 전용)",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getLogById(@PathVariable id: Long): ResponseEntity<SystemLogResponseDto> {
+    fun getLogById(@PathVariable id: Long): ResponseEntity<ApiResponse<SystemLogResponseDto>> {
         val log = systemLogService.getLogById(id)
-            ?: return ResponseEntity.notFound().build()
+            ?: return ResponseUtil.error("로그를 찾을 수 없습니다.", 404, HttpStatus.NOT_FOUND)
         
-        return ResponseEntity.ok(SystemLogResponseDto.from(log))
+        return ResponseUtil.success(SystemLogResponseDto.from(log))
     }
 
     @GetMapping("/categories")
@@ -72,8 +77,8 @@ class AdminLogController(
         description = "시스템에 등록된 모든 로그 카테고리를 조회합니다 (관리자 전용)",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getLogCategories(): ResponseEntity<List<String>> {
-        return ResponseEntity.ok(systemLogService.getLogCategories())
+    fun getLogCategories(): ResponseEntity<ApiResponse<List<String>>> {
+        return ResponseUtil.success(systemLogService.getLogCategories())
     }
 
     @GetMapping("/levels")
@@ -82,7 +87,7 @@ class AdminLogController(
         description = "시스템에 등록된 모든 로그 레벨을 조회합니다 (관리자 전용)",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getLogLevels(): ResponseEntity<List<String>> {
-        return ResponseEntity.ok(listOf("INFO", "WARN", "ERROR", "DEBUG", "TRACE"))
+    fun getLogLevels(): ResponseEntity<ApiResponse<List<String>>> {
+        return ResponseUtil.success(listOf("INFO", "WARN", "ERROR", "DEBUG", "TRACE"))
     }
 } 

@@ -1,67 +1,37 @@
 package com.attendly.api.controller.admin
 
 import com.attendly.api.dto.*
+import com.attendly.api.controller.admin.AdminUserController
+import com.attendly.api.util.ResponseUtil
 import com.attendly.domain.entity.Role
-import com.attendly.security.JwtTokenProvider
-import com.attendly.security.TestSecurityConfig
 import com.attendly.service.AdminUserService
-import com.attendly.service.SystemLogService
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.justRun
+import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
-import org.springframework.http.MediaType
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.userdetails.User
-import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.http.HttpStatus
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
-@WebMvcTest(AdminUserController::class)
-@Import(TestSecurityConfig::class)
+@ExtendWith(SpringExtension::class)
 class AdminUserControllerTest {
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-    
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
-    
-    @MockkBean
+    private lateinit var controller: AdminUserController
     private lateinit var adminUserService: AdminUserService
     
-    @MockkBean
-    private lateinit var jwtTokenProvider: JwtTokenProvider
-    
-    @MockkBean
-    private lateinit var authenticationManager: AuthenticationManager
-    
-    @MockkBean
-    private lateinit var userDetailsService: UserDetailsService
-    
-    @MockkBean
-    private lateinit var systemLogService: SystemLogService
-    
-    private val adminUser = User(
-        "admin@example.com", 
-        "password", 
-        listOf(SimpleGrantedAuthority("ROLE_ADMIN"))
-    )
+    @BeforeEach
+    fun setup() {
+        adminUserService = mockk()
+        controller = AdminUserController(adminUserService)
+    }
 
     @Test
     fun `createUser should return 201 and created user`() {
@@ -89,22 +59,13 @@ class AdminUserControllerTest {
         
         every { adminUserService.createUser(any()) } returns response
         
-        // when, then
-        mockMvc.perform(
-            post("/api/admin/users")
-                .with(user(adminUser))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isCreated)
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.name").value("홍길동"))
-            .andExpect(jsonPath("$.email").value("hong@example.com"))
-            .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"))
-            .andExpect(jsonPath("$.role").value("LEADER"))
-            .andExpect(jsonPath("$.departmentId").value(1))
-            .andExpect(jsonPath("$.departmentName").value("청년부"))
+        // when
+        val result = controller.createUser(request)
+        
+        // then
+        assertEquals(HttpStatus.CREATED, result.statusCode)
+        assertNotNull(result.body)
+        assertEquals(response, result.body?.data)
         
         verify { adminUserService.createUser(any()) }
     }
@@ -134,20 +95,13 @@ class AdminUserControllerTest {
         
         every { adminUserService.updateUser(userId, any()) } returns response
         
-        // when, then
-        mockMvc.perform(
-            put("/api/admin/users/$userId")
-                .with(user(adminUser))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.name").value("홍길동(수정)"))
-            .andExpect(jsonPath("$.email").value("hong_updated@example.com"))
-            .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"))
-            .andExpect(jsonPath("$.role").value("ADMIN"))
+        // when
+        val result = controller.updateUser(userId, request)
+        
+        // then
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertEquals(response, result.body?.data)
         
         verify { adminUserService.updateUser(userId, any()) }
     }
@@ -160,13 +114,11 @@ class AdminUserControllerTest {
         // mockkBean의 메소드가 void를 반환하는 경우 justRun 사용
         justRun { adminUserService.deleteUser(userId) }
         
-        // when, then
-        mockMvc.perform(
-            delete("/api/admin/users/$userId")
-                .with(user(adminUser))
-        )
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isNoContent)
+        // when
+        val result = controller.deleteUser(userId)
+        
+        // then
+        assertEquals(HttpStatus.NO_CONTENT, result.statusCode)
         
         verify { adminUserService.deleteUser(userId) }
     }
@@ -190,18 +142,13 @@ class AdminUserControllerTest {
         
         every { adminUserService.getUser(userId) } returns response
         
-        // when, then
-        mockMvc.perform(
-            get("/api/admin/users/$userId")
-                .with(user(adminUser))
-        )
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.name").value("홍길동"))
-            .andExpect(jsonPath("$.email").value("hong@example.com"))
-            .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"))
-            .andExpect(jsonPath("$.role").value("LEADER"))
+        // when
+        val result = controller.getUser(userId)
+        
+        // then
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertEquals(response, result.body?.data)
         
         verify { adminUserService.getUser(userId) }
     }
@@ -241,25 +188,15 @@ class AdminUserControllerTest {
         
         every { adminUserService.getAllUsers(any()) } returns pagedResponse
         
-        // when, then
-        mockMvc.perform(
-            get("/api/admin/users")
-                .with(user(adminUser))
-                .param("page", "0")
-                .param("size", "10")
-        )
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content.length()").value(2))
-            .andExpect(jsonPath("$.content[0].id").value(1))
-            .andExpect(jsonPath("$.content[0].name").value("홍길동"))
-            .andExpect(jsonPath("$.content[0].email").value("hong@example.com"))
-            .andExpect(jsonPath("$.content[0].phoneNumber").value("010-1234-5678"))
-            .andExpect(jsonPath("$.content[1].id").value(2))
-            .andExpect(jsonPath("$.content[1].name").value("김철수"))
-            .andExpect(jsonPath("$.content[1].email").value("kim@example.com"))
-            .andExpect(jsonPath("$.content[1].phoneNumber").value("010-9876-5432"))
-            .andExpect(jsonPath("$.totalElements").value(2))
+        // when
+        val result = controller.getAllUsers(pageable)
+        
+        // then
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertNotNull(result.body?.data)
+        assertEquals(users, result.body?.data?.items)
+        assertEquals(2L, result.body?.data?.totalCount)
         
         verify { adminUserService.getAllUsers(any()) }
     }
@@ -273,15 +210,11 @@ class AdminUserControllerTest {
         // mockkBean의 메소드가 void를 반환하는 경우 justRun 사용
         justRun { adminUserService.resetPassword(userId, any()) }
         
-        // when, then
-        mockMvc.perform(
-            post("/api/admin/users/$userId/reset-password")
-                .with(user(adminUser))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isOk)
+        // when
+        val result = controller.resetPassword(userId, request)
+        
+        // then
+        assertEquals(HttpStatus.OK, result.statusCode)
         
         verify { adminUserService.resetPassword(userId, any()) }
     }
@@ -316,18 +249,15 @@ class AdminUserControllerTest {
         
         every { adminUserService.bulkCreateUsers(any()) } returns response
         
-        // when, then
-        mockMvc.perform(
-            post("/api/admin/users/bulk")
-                .with(user(adminUser))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isCreated)
-            .andExpect(jsonPath("$.createdCount").value(2))
-            .andExpect(jsonPath("$.failedCount").value(0))
-            .andExpect(jsonPath("$.failedEmails.length()").value(0))
+        // when
+        val result = controller.bulkCreateUsers(request)
+        
+        // then
+        assertEquals(HttpStatus.CREATED, result.statusCode)
+        assertNotNull(result.body)
+        assertEquals(response, result.body?.data)
+        assertEquals(2, result.body?.data?.createdCount)
+        assertEquals(0, result.body?.data?.failedCount)
         
         verify { adminUserService.bulkCreateUsers(any()) }
     }

@@ -7,56 +7,35 @@ import com.attendly.api.dto.GbsMemberResponse
 import com.attendly.api.dto.VillageGbsInfoResponse
 import com.attendly.domain.entity.MinistryStatus
 import com.attendly.domain.entity.WorshipStatus
-import com.attendly.security.JwtTokenProvider
 import com.attendly.service.AttendanceService
 import com.attendly.service.OrganizationService
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.http.MediaType
-import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.http.HttpStatus
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
-@ExtendWith(MockKExtension::class)
+@ExtendWith(SpringExtension::class)
 class VillageLeaderControllerTest {
 
-    @MockK
+    private lateinit var controller: VillageLeaderController
     private lateinit var organizationService: OrganizationService
-
-    @MockK
     private lateinit var attendanceService: AttendanceService
 
-    @MockK
-    private lateinit var jwtTokenProvider: JwtTokenProvider
-
-    @InjectMockKs
-    private lateinit var villageLeaderController: VillageLeaderController
-
-    private lateinit var objectMapper: ObjectMapper
-
-    private fun setupMockMvc(): MockMvc {
-        return MockMvcBuilders.standaloneSetup(villageLeaderController).build()
-    }
-
     @BeforeEach
-    fun setUp() {
-        objectMapper = ObjectMapper().registerModule(JavaTimeModule())
+    fun setup() {
+        organizationService = mockk()
+        attendanceService = mockk()
+        controller = VillageLeaderController(organizationService, attendanceService)
     }
 
     @Test
-    @WithMockUser(roles = ["VILLAGE_LEADER"])
     fun `마을의 모든 GBS 정보 조회`() {
         // given
         val villageId = 1L
@@ -106,30 +85,30 @@ class VillageLeaderControllerTest {
         
         every { organizationService.getVillageGbsInfo(villageId, date) } returns response
         
-        // when & then
-        val mockMvc = setupMockMvc()
-        mockMvc.perform(
-            get("/api/village-leader/{villageId}/gbs", villageId)
-                .param("date", date.toString())
-                .contentType(MediaType.APPLICATION_JSON)
-        )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.villageId").value(villageId))
-            .andExpect(jsonPath("$.villageName").value("1마을"))
-            .andExpect(jsonPath("$.gbsCount").value(2))
-            .andExpect(jsonPath("$.totalMemberCount").value(2))
-            .andExpect(jsonPath("$.gbsList.length()").value(2))
-            .andExpect(jsonPath("$.gbsList[0].gbsId").value(1))
-            .andExpect(jsonPath("$.gbsList[0].gbsName").value("1GBS"))
-            .andExpect(jsonPath("$.gbsList[0].leaderName").value("홍길동"))
-            .andExpect(jsonPath("$.gbsList[0].memberCount").value(2))
-            .andExpect(jsonPath("$.gbsList[0].members.length()").value(2))
-            .andExpect(jsonPath("$.gbsList[1].gbsId").value(2))
-            .andExpect(jsonPath("$.gbsList[1].gbsName").value("2GBS"))
+        // when
+        val result = controller.getVillageGbsInfo(villageId, date)
+        
+        // then
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertTrue(result.body?.success == true)
+        
+        val responseData = result.body?.data
+        assertEquals(villageId, responseData?.villageId)
+        assertEquals("1마을", responseData?.villageName)
+        assertEquals(2, responseData?.gbsCount)
+        assertEquals(2, responseData?.totalMemberCount)
+        assertEquals(2, responseData?.gbsList?.size)
+        assertEquals(1L, responseData?.gbsList?.get(0)?.gbsId)
+        assertEquals("1GBS", responseData?.gbsList?.get(0)?.gbsName)
+        assertEquals("홍길동", responseData?.gbsList?.get(0)?.leaderName)
+        assertEquals(2, responseData?.gbsList?.get(0)?.memberCount)
+        assertEquals(2, responseData?.gbsList?.get(0)?.members?.size)
+        assertEquals(2L, responseData?.gbsList?.get(1)?.gbsId)
+        assertEquals("2GBS", responseData?.gbsList?.get(1)?.gbsName)
     }
 
     @Test
-    @WithMockUser(roles = ["VILLAGE_LEADER"])
     fun `마을 내 GBS 출석 데이터 수정`() {
         // given
         val villageId = 1L
@@ -168,26 +147,27 @@ class VillageLeaderControllerTest {
         
         every { attendanceService.updateVillageGbsAttendance(villageId, request) } returns response
         
-        // when & then
-        val mockMvc = setupMockMvc()
-        mockMvc.perform(
-            post("/api/village-leader/{villageId}/attendance", villageId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].id").value(1))
-            .andExpect(jsonPath("$[0].memberId").value(1))
-            .andExpect(jsonPath("$[0].memberName").value("김조원"))
-            .andExpect(jsonPath("$[0].worship").value("O"))
-            .andExpect(jsonPath("$[0].qtCount").value(5))
-            .andExpect(jsonPath("$[0].ministry").value("A"))
-            .andExpect(jsonPath("$[1].id").value(2))
-            .andExpect(jsonPath("$[1].memberId").value(2))
-            .andExpect(jsonPath("$[1].memberName").value("이조원"))
-            .andExpect(jsonPath("$[1].worship").value("X"))
-            .andExpect(jsonPath("$[1].qtCount").value(2))
-            .andExpect(jsonPath("$[1].ministry").value("B"))
+        // when
+        val result = controller.updateVillageGbsAttendance(villageId, request)
+        
+        // then
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertTrue(result.body?.success == true)
+        
+        val responseData = result.body?.data
+        assertEquals(2, responseData?.items?.size)
+        assertEquals(1L, responseData?.items?.get(0)?.id)
+        assertEquals(1L, responseData?.items?.get(0)?.memberId)
+        assertEquals("김조원", responseData?.items?.get(0)?.memberName)
+        assertEquals(WorshipStatus.O, responseData?.items?.get(0)?.worship)
+        assertEquals(5, responseData?.items?.get(0)?.qtCount)
+        assertEquals(MinistryStatus.A, responseData?.items?.get(0)?.ministry)
+        assertEquals(2L, responseData?.items?.get(1)?.id)
+        assertEquals(2L, responseData?.items?.get(1)?.memberId)
+        assertEquals("이조원", responseData?.items?.get(1)?.memberName)
+        assertEquals(WorshipStatus.X, responseData?.items?.get(1)?.worship)
+        assertEquals(2, responseData?.items?.get(1)?.qtCount)
+        assertEquals(MinistryStatus.B, responseData?.items?.get(1)?.ministry)
     }
 } 

@@ -1,6 +1,7 @@
 package com.attendly.api.controller.admin
 
 import com.attendly.api.dto.*
+import com.attendly.api.util.ResponseUtil
 import com.attendly.service.AdminOrganizationService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -27,9 +28,9 @@ class AdminOrganizationController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/departments")
-    fun createDepartment(@Valid @RequestBody request: DepartmentCreateRequest): ResponseEntity<DepartmentResponse> {
+    fun createDepartment(@Valid @RequestBody request: DepartmentCreateRequest): ResponseEntity<ApiResponse<DepartmentResponse>> {
         val response = adminOrganizationService.createDepartment(request)
-        return ResponseEntity(response, HttpStatus.CREATED)
+        return ResponseUtil.created(response, "부서가 성공적으로 생성되었습니다")
     }
 
     @Operation(
@@ -41,9 +42,9 @@ class AdminOrganizationController(
     fun updateDepartment(
         @PathVariable departmentId: Long,
         @Valid @RequestBody request: DepartmentUpdateRequest
-    ): ResponseEntity<DepartmentResponse> {
+    ): ResponseEntity<ApiResponse<DepartmentResponse>> {
         val response = adminOrganizationService.updateDepartment(departmentId, request)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response, "부서 정보가 수정되었습니다")
     }
 
     @Operation(
@@ -52,9 +53,9 @@ class AdminOrganizationController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @DeleteMapping("/departments/{departmentId}")
-    fun deleteDepartment(@PathVariable departmentId: Long): ResponseEntity<Void> {
+    fun deleteDepartment(@PathVariable departmentId: Long): ResponseEntity<ApiResponse<Void>> {
         adminOrganizationService.deleteDepartment(departmentId)
-        return ResponseEntity(HttpStatus.NO_CONTENT)
+        return ResponseUtil.successNoData(message = "부서가 성공적으로 삭제되었습니다", status = HttpStatus.NO_CONTENT)
     }
 
     @Operation(
@@ -63,9 +64,9 @@ class AdminOrganizationController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @GetMapping("/departments/{departmentId}")
-    fun getDepartment(@PathVariable departmentId: Long): ResponseEntity<DepartmentResponse> {
+    fun getDepartment(@PathVariable departmentId: Long): ResponseEntity<ApiResponse<DepartmentResponse>> {
         val response = adminOrganizationService.getDepartment(departmentId)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response)
     }
 
     @Operation(
@@ -74,9 +75,9 @@ class AdminOrganizationController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @GetMapping("/departments")
-    fun getAllDepartments(): ResponseEntity<List<DepartmentResponse>> {
+    fun getAllDepartments(): ResponseEntity<ApiResponse<PageResponse<DepartmentResponse>>> {
         val response = adminOrganizationService.getAllDepartments()
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.successList(response)
     }
 
     // 마을 관리 API
@@ -86,9 +87,9 @@ class AdminOrganizationController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/villages")
-    fun createVillage(@Valid @RequestBody request: VillageCreateRequest): ResponseEntity<VillageResponse> {
+    fun createVillage(@Valid @RequestBody request: VillageCreateRequest): ResponseEntity<ApiResponse<VillageResponse>> {
         val response = adminOrganizationService.createVillage(request)
-        return ResponseEntity(response, HttpStatus.CREATED)
+        return ResponseUtil.created(response, "마을이 성공적으로 생성되었습니다")
     }
 
     @Operation(
@@ -100,9 +101,9 @@ class AdminOrganizationController(
     fun updateVillage(
         @PathVariable villageId: Long,
         @Valid @RequestBody request: VillageUpdateRequest
-    ): ResponseEntity<VillageResponse> {
+    ): ResponseEntity<ApiResponse<VillageResponse>> {
         val response = adminOrganizationService.updateVillage(villageId, request)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response, "마을 정보가 수정되었습니다")
     }
 
     // GBS 그룹 관리 API
@@ -112,9 +113,9 @@ class AdminOrganizationController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/gbs-groups")
-    fun createGbsGroup(@Valid @RequestBody request: GbsGroupCreateRequest): ResponseEntity<GbsGroupResponse> {
+    fun createGbsGroup(@Valid @RequestBody request: GbsGroupCreateRequest): ResponseEntity<ApiResponse<GbsGroupResponse>> {
         val response = adminOrganizationService.createGbsGroup(request)
-        return ResponseEntity(response, HttpStatus.CREATED)
+        return ResponseUtil.created(response, "GBS 그룹이 성공적으로 생성되었습니다")
     }
 
     @Operation(
@@ -126,9 +127,9 @@ class AdminOrganizationController(
     fun updateGbsGroup(
         @PathVariable gbsGroupId: Long,
         @Valid @RequestBody request: GbsGroupUpdateRequest
-    ): ResponseEntity<GbsGroupResponse> {
+    ): ResponseEntity<ApiResponse<GbsGroupResponse>> {
         val response = adminOrganizationService.updateGbsGroup(gbsGroupId, request)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response, "GBS 그룹 정보가 수정되었습니다")
     }
 
     @Operation(
@@ -140,9 +141,9 @@ class AdminOrganizationController(
     fun assignLeaderToGbs(
         @PathVariable gbsGroupId: Long,
         @Valid @RequestBody request: GbsLeaderAssignRequest
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<ApiResponse<Void>> {
         adminOrganizationService.assignLeaderToGbs(gbsGroupId, request)
-        return ResponseEntity(HttpStatus.OK)
+        return ResponseUtil.successNoData(message = "GBS 그룹에 리더가 성공적으로 배정되었습니다")
     }
 
     @Operation(
@@ -154,9 +155,9 @@ class AdminOrganizationController(
     fun assignMemberToGbs(
         @PathVariable gbsGroupId: Long,
         @Valid @RequestBody request: GbsMemberAssignRequest
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<ApiResponse<Void>> {
         adminOrganizationService.assignMemberToGbs(gbsGroupId, request)
-        return ResponseEntity(HttpStatus.OK)
+        return ResponseUtil.successNoData(message = "GBS 그룹에 조원이 성공적으로 배정되었습니다")
     }
 
     @Operation(
@@ -167,8 +168,8 @@ class AdminOrganizationController(
     @PostMapping("/reorganization")
     fun executeGbsReorganization(
         @Valid @RequestBody request: GbsReorganizationRequest
-    ): ResponseEntity<GbsReorganizationResponse> {
+    ): ResponseEntity<ApiResponse<GbsReorganizationResponse>> {
         val response = adminOrganizationService.executeGbsReorganization(request)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response, "GBS 그룹 재편성이 성공적으로 실행되었습니다")
     }
 } 

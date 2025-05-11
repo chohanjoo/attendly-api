@@ -1,6 +1,7 @@
 package com.attendly.api.controller.admin
 
 import com.attendly.api.dto.*
+import com.attendly.api.util.ResponseUtil
 import com.attendly.service.AdminSystemService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -26,9 +27,9 @@ class AdminSystemController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/settings")
-    fun saveSystemSetting(@Valid @RequestBody request: SystemSettingRequest): ResponseEntity<SystemSettingResponse> {
+    fun saveSystemSetting(@Valid @RequestBody request: SystemSettingRequest): ResponseEntity<ApiResponse<SystemSettingResponse>> {
         val response = adminSystemService.saveSystemSetting(request)
-        return ResponseEntity(response, HttpStatus.CREATED)
+        return ResponseUtil.created(response)
     }
 
     @Operation(
@@ -37,9 +38,9 @@ class AdminSystemController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @DeleteMapping("/settings/{key}")
-    fun deleteSystemSetting(@PathVariable key: String): ResponseEntity<Void> {
+    fun deleteSystemSetting(@PathVariable key: String): ResponseEntity<ApiResponse<Void>> {
         adminSystemService.deleteSystemSetting(key)
-        return ResponseEntity(HttpStatus.NO_CONTENT)
+        return ResponseUtil.successNoData(message = "시스템 설정이 삭제되었습니다", status = HttpStatus.NO_CONTENT)
     }
 
     @Operation(
@@ -48,9 +49,9 @@ class AdminSystemController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @GetMapping("/settings/{key}")
-    fun getSystemSetting(@PathVariable key: String): ResponseEntity<SystemSettingResponse> {
+    fun getSystemSetting(@PathVariable key: String): ResponseEntity<ApiResponse<SystemSettingResponse>> {
         val response = adminSystemService.getSystemSetting(key)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response)
     }
 
     @Operation(
@@ -59,9 +60,9 @@ class AdminSystemController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @GetMapping("/settings")
-    fun getAllSystemSettings(): ResponseEntity<SystemSettingListResponse> {
+    fun getAllSystemSettings(): ResponseEntity<ApiResponse<SystemSettingListResponse>> {
         val response = adminSystemService.getAllSystemSettings()
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response)
     }
 
     @Operation(
@@ -70,9 +71,9 @@ class AdminSystemController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/email-settings")
-    fun saveEmailSettings(@Valid @RequestBody request: EmailSettingRequest): ResponseEntity<Void> {
+    fun saveEmailSettings(@Valid @RequestBody request: EmailSettingRequest): ResponseEntity<ApiResponse<Void>> {
         adminSystemService.saveEmailSettings(request)
-        return ResponseEntity(HttpStatus.OK)
+        return ResponseUtil.successNoData(message = "이메일 설정이 저장되었습니다")
     }
 
     @Operation(
@@ -81,9 +82,9 @@ class AdminSystemController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @GetMapping("/email-settings")
-    fun getEmailSettings(): ResponseEntity<EmailSettingRequest> {
+    fun getEmailSettings(): ResponseEntity<ApiResponse<EmailSettingRequest>> {
         val response = adminSystemService.getEmailSettings()
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response)
     }
 
     @Operation(
@@ -92,9 +93,9 @@ class AdminSystemController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/slack-settings")
-    fun saveSlackSettings(@Valid @RequestBody request: SlackSettingRequest): ResponseEntity<Void> {
+    fun saveSlackSettings(@Valid @RequestBody request: SlackSettingRequest): ResponseEntity<ApiResponse<Void>> {
         adminSystemService.saveSlackSettings(request)
-        return ResponseEntity(HttpStatus.OK)
+        return ResponseUtil.successNoData(message = "Slack 설정이 저장되었습니다")
     }
 
     @Operation(
@@ -103,9 +104,9 @@ class AdminSystemController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/security-policies")
-    fun saveSecurityPolicies(@Valid @RequestBody request: SecurityPolicyRequest): ResponseEntity<Void> {
+    fun saveSecurityPolicies(@Valid @RequestBody request: SecurityPolicyRequest): ResponseEntity<ApiResponse<Void>> {
         adminSystemService.saveSecurityPolicies(request)
-        return ResponseEntity(HttpStatus.OK)
+        return ResponseUtil.successNoData(message = "보안 정책 설정이 저장되었습니다")
     }
 
     @Operation(
@@ -114,9 +115,9 @@ class AdminSystemController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/attendance-settings")
-    fun saveAttendanceSettings(@Valid @RequestBody request: AttendanceSettingRequest): ResponseEntity<Void> {
+    fun saveAttendanceSettings(@Valid @RequestBody request: AttendanceSettingRequest): ResponseEntity<ApiResponse<Void>> {
         adminSystemService.saveAttendanceSettings(request)
-        return ResponseEntity(HttpStatus.OK)
+        return ResponseUtil.successNoData(message = "출석 입력 설정이 저장되었습니다")
     }
 
     @Operation(
@@ -125,8 +126,8 @@ class AdminSystemController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/batch-settings")
-    fun saveBatchSettings(@Valid @RequestBody request: BatchSettingRequest): ResponseEntity<Void> {
+    fun saveBatchSettings(@Valid @RequestBody request: BatchSettingRequest): ResponseEntity<ApiResponse<Void>> {
         adminSystemService.saveBatchSettings(request)
-        return ResponseEntity(HttpStatus.OK)
+        return ResponseUtil.successNoData(message = "배치 작업 설정이 저장되었습니다")
     }
 } 

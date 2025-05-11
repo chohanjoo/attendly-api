@@ -1,8 +1,10 @@
 package com.attendly.api.controller
 
+import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.DepartmentStatistics
 import com.attendly.api.dto.GbsStatistics
 import com.attendly.api.dto.VillageStatistics
+import com.attendly.api.util.ResponseUtil
 import com.attendly.service.StatisticsService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -35,9 +37,9 @@ class StatisticsController(
         @PathVariable id: Long,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) startDate: LocalDate,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) endDate: LocalDate
-    ): ResponseEntity<DepartmentStatistics> {
+    ): ResponseEntity<ApiResponse<DepartmentStatistics>> {
         val statistics = statisticsService.getDepartmentStatistics(id, startDate, endDate)
-        return ResponseEntity.ok(statistics)
+        return ResponseUtil.success(statistics)
     }
 
     @GetMapping("/villages/{id}/report")
@@ -51,9 +53,9 @@ class StatisticsController(
         @PathVariable id: Long,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) startDate: LocalDate,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) endDate: LocalDate
-    ): ResponseEntity<VillageStatistics> {
+    ): ResponseEntity<ApiResponse<VillageStatistics>> {
         val statistics = statisticsService.getVillageStatistics(id, startDate, endDate)
-        return ResponseEntity.ok(statistics)
+        return ResponseUtil.success(statistics)
     }
 
     @GetMapping("/gbs/{id}/report")
@@ -67,8 +69,8 @@ class StatisticsController(
         @PathVariable id: Long,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) startDate: LocalDate,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) endDate: LocalDate
-    ): ResponseEntity<GbsStatistics> {
+    ): ResponseEntity<ApiResponse<GbsStatistics>> {
         val statistics = statisticsService.getGbsStatistics(id, startDate, endDate)
-        return ResponseEntity.ok(statistics)
+        return ResponseUtil.success(statistics)
     }
 } 

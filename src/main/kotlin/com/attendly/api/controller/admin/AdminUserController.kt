@@ -1,6 +1,7 @@
 package com.attendly.api.controller.admin
 
 import com.attendly.api.dto.*
+import com.attendly.api.util.ResponseUtil
 import com.attendly.service.AdminUserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -30,9 +31,9 @@ class AdminUserController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping
-    fun createUser(@Valid @RequestBody request: UserCreateRequest): ResponseEntity<UserResponse> {
+    fun createUser(@Valid @RequestBody request: UserCreateRequest): ResponseEntity<ApiResponse<UserResponse>> {
         val response = adminUserService.createUser(request)
-        return ResponseEntity(response, HttpStatus.CREATED)
+        return ResponseUtil.created(response)
     }
 
     @Operation(
@@ -44,9 +45,9 @@ class AdminUserController(
     fun updateUser(
         @PathVariable userId: Long,
         @Valid @RequestBody request: UserUpdateRequest
-    ): ResponseEntity<UserResponse> {
+    ): ResponseEntity<ApiResponse<UserResponse>> {
         val response = adminUserService.updateUser(userId, request)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response)
     }
 
     @Operation(
@@ -55,9 +56,9 @@ class AdminUserController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @DeleteMapping("/{userId}")
-    fun deleteUser(@PathVariable userId: Long): ResponseEntity<Void> {
+    fun deleteUser(@PathVariable userId: Long): ResponseEntity<ApiResponse<Void>> {
         adminUserService.deleteUser(userId)
-        return ResponseEntity(HttpStatus.NO_CONTENT)
+        return ResponseUtil.successNoData(status = HttpStatus.NO_CONTENT)
     }
 
     @Operation(
@@ -66,9 +67,9 @@ class AdminUserController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @GetMapping("/{userId}")
-    fun getUser(@PathVariable userId: Long): ResponseEntity<UserResponse> {
+    fun getUser(@PathVariable userId: Long): ResponseEntity<ApiResponse<UserResponse>> {
         val response = adminUserService.getUser(userId)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.success(response)
     }
 
     @Operation(
@@ -79,9 +80,9 @@ class AdminUserController(
     @GetMapping
     fun getAllUsers(
         @PageableDefault(size = 20, sort = ["id"], direction = Sort.Direction.DESC) pageable: Pageable
-    ): ResponseEntity<Page<UserResponse>> {
+    ): ResponseEntity<ApiResponse<PageResponse<UserResponse>>> {
         val response = adminUserService.getAllUsers(pageable)
-        return ResponseEntity(response, HttpStatus.OK)
+        return ResponseUtil.successList(response.content, response.totalElements, response.hasNext())
     }
 
     @Operation(
@@ -93,9 +94,9 @@ class AdminUserController(
     fun resetPassword(
         @PathVariable userId: Long,
         @Valid @RequestBody request: UserPasswordResetRequest
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<ApiResponse<Void>> {
         adminUserService.resetPassword(userId, request)
-        return ResponseEntity(HttpStatus.OK)
+        return ResponseUtil.successNoData()
     }
 
     @Operation(
@@ -104,8 +105,8 @@ class AdminUserController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/bulk")
-    fun bulkCreateUsers(@Valid @RequestBody request: UserBulkCreateRequest): ResponseEntity<UserBulkCreateResponse> {
+    fun bulkCreateUsers(@Valid @RequestBody request: UserBulkCreateRequest): ResponseEntity<ApiResponse<UserBulkCreateResponse>> {
         val response = adminUserService.bulkCreateUsers(request)
-        return ResponseEntity(response, HttpStatus.CREATED)
+        return ResponseUtil.created(response)
     }
 } 

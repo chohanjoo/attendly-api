@@ -74,7 +74,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SignupResponse"
+                                    "$ref": "#/components/schemas/ApiResponseSignupResponse"
                                 }
                             }
                         }
@@ -113,7 +113,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/TokenRefreshResponse"
+                                    "$ref": "#/components/schemas/ApiResponseTokenRefreshResponse"
                                 }
                             }
                         }
@@ -152,7 +152,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/LoginResponse"
+                                    "$ref": "#/components/schemas/ApiResponseLoginResponse"
                                 }
                             }
                         }
@@ -200,10 +200,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/AttendanceResponse"
-                                    }
+                                    "$ref": "#/components/schemas/ApiResponsePageResponseAttendanceResponse"
                                 }
                             }
                         }
@@ -247,7 +244,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/UserListByRolesResponse"
+                                    "$ref": "#/components/schemas/ApiResponseUserListByRolesResponse"
                                 }
                             }
                         }
@@ -289,7 +286,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/LeaderDelegationResponse"
+                                    "$ref": "#/components/schemas/ApiResponseLeaderDelegationResponse"
                                 }
                             }
                         }
@@ -336,10 +333,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/AttendanceResponse"
-                                    }
+                                    "$ref": "#/components/schemas/ApiResponsePageResponseAttendanceResponse"
                                 }
                             }
                         }
@@ -381,10 +375,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/AttendanceResponse"
-                                    }
+                                    "$ref": "#/components/schemas/ApiResponsePageResponseAttendanceResponse"
                                 }
                             }
                         }
@@ -418,7 +409,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/UserResponse"
+                                    "$ref": "#/components/schemas/ApiResponseUserResponse"
                                 }
                             }
                         }
@@ -474,7 +465,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/VillageStatistics"
+                                    "$ref": "#/components/schemas/ApiResponseVillageStatistics"
                                 }
                             }
                         }
@@ -526,7 +517,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/VillageAttendanceResponse"
+                                    "$ref": "#/components/schemas/ApiResponseVillageAttendanceResponse"
                                 }
                             }
                         }
@@ -578,7 +569,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/VillageGbsInfoResponse"
+                                    "$ref": "#/components/schemas/ApiResponseVillageGbsInfoResponse"
                                 }
                             }
                         }
@@ -625,7 +616,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/GbsMembersListResponse"
+                                    "$ref": "#/components/schemas/ApiResponseGbsMembersListResponse"
                                 }
                             }
                         }
@@ -654,7 +645,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/LeaderGbsResponse"
+                                    "$ref": "#/components/schemas/ApiResponseLeaderGbsResponse"
                                 }
                             }
                         }
@@ -692,7 +683,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/LeaderGbsHistoryListResponse"
+                                    "$ref": "#/components/schemas/ApiResponseLeaderGbsHistoryListResponse"
                                 }
                             }
                         }
@@ -721,7 +712,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/UserVillageResponse"
+                                    "$ref": "#/components/schemas/ApiResponseUserVillageResponse"
                                 }
                             }
                         }
@@ -957,7 +948,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/GbsStatistics"
+                                    "$ref": "#/components/schemas/ApiResponseGbsStatistics"
                                 }
                             }
                         }
@@ -1018,7 +1009,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DepartmentStatistics"
+                                    "$ref": "#/components/schemas/ApiResponseDepartmentStatistics"
                                 }
                             }
                         }
@@ -1068,10 +1059,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/LeaderDelegationResponse"
-                                    }
+                                    "$ref": "#/components/schemas/ApiResponsePageResponseLeaderDelegationResponse"
                                 }
                             }
                         }
@@ -1121,6 +1109,34 @@
                     }
                 }
             },
+            "ApiResponseSignupResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/SignupResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
             "SignupResponse": {
                 "required": [
                     "email",
@@ -1159,6 +1175,34 @@
                     }
                 }
             },
+            "ApiResponseTokenRefreshResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/TokenRefreshResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
             "TokenRefreshResponse": {
                 "required": [
                     "accessToken",
@@ -1186,6 +1230,34 @@
                     },
                     "password": {
                         "type": "string"
+                    }
+                }
+            },
+            "ApiResponseLoginResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/LoginResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -1297,6 +1369,34 @@
                 },
                 "description": "마을장의 출석 수정 요청"
             },
+            "ApiResponsePageResponseAttendanceResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/PageResponseAttendanceResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
             "AttendanceResponse": {
                 "required": [
                     "id",
@@ -1360,6 +1460,29 @@
                 },
                 "description": "출석 목록 응답"
             },
+            "PageResponseAttendanceResponse": {
+                "required": [
+                    "hasMore",
+                    "items",
+                    "totalCount"
+                ],
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AttendanceResponse"
+                        }
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "hasMore": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "UserListByRolesRequest": {
                 "required": [
                     "roles"
@@ -1371,6 +1494,34 @@
                         "items": {
                             "type": "string"
                         }
+                    }
+                }
+            },
+            "ApiResponseUserListByRolesResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/UserListByRolesResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -1473,6 +1624,34 @@
                     "endDate": {
                         "type": "string",
                         "format": "date"
+                    }
+                }
+            },
+            "ApiResponseLeaderDelegationResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/LeaderDelegationResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -1603,6 +1782,62 @@
                     }
                 },
                 "description": "개별 조원 출석 데이터"
+            },
+            "ApiResponseUserResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/UserResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "ApiResponseVillageStatistics": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/VillageStatistics"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
             },
             "GbsStatistics": {
                 "required": [
@@ -1767,6 +2002,34 @@
                 },
                 "description": "주별 통계"
             },
+            "ApiResponseVillageAttendanceResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/VillageAttendanceResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
             "GbsAttendanceSummary": {
                 "required": [
                     "attendanceRate",
@@ -1858,6 +2121,34 @@
                     }
                 },
                 "description": "마을 출석 현황 응답"
+            },
+            "ApiResponseVillageGbsInfoResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/VillageGbsInfoResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
             },
             "GbsInfo": {
                 "required": [
@@ -1973,6 +2264,34 @@
                 },
                 "description": "마을내 모든 GBS 정보 응답"
             },
+            "ApiResponseGbsMembersListResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/GbsMembersListResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
             "GbsMembersListResponse": {
                 "required": [
                     "gbsId",
@@ -1998,6 +2317,34 @@
                         "items": {
                             "$ref": "#/components/schemas/GbsMemberResponse"
                         }
+                    }
+                }
+            },
+            "ApiResponseLeaderGbsResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/LeaderGbsResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -2037,6 +2384,34 @@
                     "startDate": {
                         "type": "string",
                         "format": "date"
+                    }
+                }
+            },
+            "ApiResponseLeaderGbsHistoryListResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/LeaderGbsHistoryListResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -2118,6 +2493,34 @@
                     }
                 }
             },
+            "ApiResponseUserVillageResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/UserVillageResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
             "UserVillageResponse": {
                 "required": [
                     "departmentId",
@@ -2153,6 +2556,62 @@
                     },
                     "isVillageLeader": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "ApiResponseGbsStatistics": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/GbsStatistics"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "ApiResponseDepartmentStatistics": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/DepartmentStatistics"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -2226,6 +2685,57 @@
                     }
                 },
                 "description": "부서별 출석 통계"
+            },
+            "ApiResponsePageResponseLeaderDelegationResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/PageResponseLeaderDelegationResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "PageResponseLeaderDelegationResponse": {
+                "required": [
+                    "hasMore",
+                    "items",
+                    "totalCount"
+                ],
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LeaderDelegationResponse"
+                        }
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "hasMore": {
+                        "type": "boolean"
+                    }
+                }
             }
         },
         "parameters": {

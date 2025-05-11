@@ -131,10 +131,11 @@ class AdminLogControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.content").isArray)
-            .andExpect(jsonPath("$.content.length()").value(2))
-            .andExpect(jsonPath("$.content[0].level").value("INFO"))
-            .andExpect(jsonPath("$.content[1].level").value("ERROR"))
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data.items").isArray)
+            .andExpect(jsonPath("$.data.items.length()").value(2))
+            .andExpect(jsonPath("$.data.items[0].level").value("INFO"))
+            .andExpect(jsonPath("$.data.items[1].level").value("ERROR"))
             
         verify { systemLogService.getLogs(null, null, null, null, null, null, any()) }
     }
@@ -150,6 +151,7 @@ class AdminLogControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
+            .andExpect(jsonPath("$.success").value(true))
             
         verify { systemLogService.getLogs("ERROR", null, null, null, null, null, any()) }
     }
@@ -164,8 +166,9 @@ class AdminLogControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.level").value("INFO"))
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data.id").value(1))
+            .andExpect(jsonPath("$.data.level").value("INFO"))
             
         verify { systemLogService.getLogById(1L) }
     }
@@ -180,6 +183,7 @@ class AdminLogControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isNotFound)
+            .andExpect(jsonPath("$.success").value(false))
             
         verify { systemLogService.getLogById(999L) }
     }
@@ -194,9 +198,10 @@ class AdminLogControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$[0]").value("APPLICATION"))
-            .andExpect(jsonPath("$[1]").value("SECURITY"))
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data").isArray)
+            .andExpect(jsonPath("$.data[0]").value("APPLICATION"))
+            .andExpect(jsonPath("$.data[1]").value("SECURITY"))
             
         verify { systemLogService.getLogCategories() }
     }
@@ -211,10 +216,11 @@ class AdminLogControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$[0]").value("INFO"))
-            .andExpect(jsonPath("$[1]").value("WARN"))
-            .andExpect(jsonPath("$[2]").value("ERROR"))
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data").isArray)
+            .andExpect(jsonPath("$.data[0]").value("INFO"))
+            .andExpect(jsonPath("$.data[1]").value("WARN"))
+            .andExpect(jsonPath("$.data[2]").value("ERROR"))
             
         // getLevels는 하드코딩된 값이므로 서비스 호출이 없음
     }

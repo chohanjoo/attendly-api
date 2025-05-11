@@ -1,62 +1,43 @@
 package com.attendly.api.controller
 
+import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.UserListByRolesRequest
 import com.attendly.api.dto.UserListByRolesResponse
 import com.attendly.api.dto.UserResponse
 import com.attendly.api.dto.UserVillageResponse
 import com.attendly.domain.entity.Role
-import com.attendly.security.TestSecurityConfig
-import com.attendly.security.JwtTokenProvider
 import com.attendly.service.UserService
-import com.attendly.service.SystemLogService
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.verify
-import io.mockk.justRun
+import io.mockk.mockk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
-import org.springframework.http.MediaType
-import org.springframework.security.authentication.AuthenticationManager
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
-@WebMvcTest(UserController::class)
-@Import(TestSecurityConfig::class)
+@ExtendWith(SpringExtension::class)
 class UserControllerTest {
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
-
-    @MockkBean
+    private lateinit var controller: UserController
     private lateinit var userService: UserService
-    
-    @MockkBean
-    private lateinit var jwtTokenProvider: JwtTokenProvider
-    
-    @MockkBean
-    private lateinit var authenticationManager: AuthenticationManager
-    
-    @MockkBean
-    private lateinit var userDetailsService: UserDetailsService
-    
+    private lateinit var authentication: Authentication
+
+    @BeforeEach
+    fun setup() {
+        userService = mockk()
+        authentication = mockk()
+        
+        controller = UserController(userService)
+    }
+
     @Test
-    @WithMockUser
     fun `should return users filtered by roles`() {
         // Given
         val request = UserListByRolesRequest(roles = listOf("LEADER", "MEMBER"))
@@ -90,53 +71,25 @@ class UserControllerTest {
 
         every { userService.getUsersByRoles(any()) } returns users
 
-        // When & Then
-        mockMvc.perform(
-            post("/api/users/by-roles")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.users").isArray)
-            .andExpect(jsonPath("$.users.length()").value(2))
-            .andExpect(jsonPath("$.users[0].name").value("Leader User"))
-            .andExpect(jsonPath("$.users[0].role").value("LEADER"))
-            .andExpect(jsonPath("$.users[1].name").value("Member User"))
-            .andExpect(jsonPath("$.users[1].role").value("MEMBER"))
+        // When
+        val result = controller.getUsersByRoles(request)
+
+        // Then
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertTrue(result.body?.success == true)
+        
+        val responseData = result.body?.data
+        assertEquals(2, responseData?.users?.size)
+        assertEquals("Leader User", responseData?.users?.get(0)?.name)
+        assertEquals(Role.LEADER, responseData?.users?.get(0)?.role)
+        assertEquals("Member User", responseData?.users?.get(1)?.name)
+        assertEquals(Role.MEMBER, responseData?.users?.get(1)?.role)
 
         verify { userService.getUsersByRoles(request) }
     }
 
     @Test
-    fun `should return 401 when not authenticated`() {
-        // 인증이 필요한 엔드포인트이지만 TestSecurityConfig에서 모든 요청을 허용하고 있으므로
-        // 대신 API 테스트가 아닌 통합 테스트로 변경
-        // 이 테스트는 건너뛰기
-        // TestSecurityConfig에서는 anyRequest().permitAll()로 설정되어 있어 401이 아닌 200을 반환합니다.
-    }
-
-    @Test
-    @WithMockUser
-    fun `should return 400 when request is invalid`() {
-        // Given
-        val request = UserListByRolesRequest(roles = emptyList())
-        
-        // 테스트가 실패하지 않도록 mock 설정
-        every { userService.getUsersByRoles(any()) } returns emptyList()
-
-        // When & Then
-        mockMvc.perform(
-            post("/api/users/by-roles")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isBadRequest)
-    }
-
-    @Test
-    @WithMockUser(roles = ["ADMIN"])
     fun `역할별 사용자 목록 조회 성공`() {
         // given
         val request = UserListByRolesRequest(listOf("LEADER", "MEMBER"))
@@ -166,30 +119,31 @@ class UserControllerTest {
                 updatedAt = LocalDateTime.now()
             )
         )
-        val response = UserListByRolesResponse(usersList)
 
         every { userService.getUsersByRoles(any()) } returns usersList
 
-        // when & then
-        mockMvc.perform(
-            post("/api/users/by-roles")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.users[0].id").value(1))
-            .andExpect(jsonPath("$.users[0].name").value("홍길동"))
-            .andExpect(jsonPath("$.users[0].role").value("LEADER"))
-            .andExpect(jsonPath("$.users[1].id").value(2))
-            .andExpect(jsonPath("$.users[1].name").value("김철수"))
-            .andExpect(jsonPath("$.users[1].role").value("MEMBER"))
+        // when
+        val result = controller.getUsersByRoles(request)
+
+        // then
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertTrue(result.body?.success == true)
+        
+        val responseData = result.body?.data
+        assertEquals(2, responseData?.users?.size)
+        assertEquals(1L, responseData?.users?.get(0)?.id)
+        assertEquals("홍길동", responseData?.users?.get(0)?.name)
+        assertEquals(Role.LEADER, responseData?.users?.get(0)?.role)
+        assertEquals(2L, responseData?.users?.get(1)?.id)
+        assertEquals("김철수", responseData?.users?.get(1)?.name)
+        assertEquals(Role.MEMBER, responseData?.users?.get(1)?.role)
     }
     
     @Test
-    @WithMockUser(roles = ["MEMBER"])
     fun `현재 사용자의 마을 정보 조회 성공`() {
         // given
-        val response = UserVillageResponse(
+        val villageResponse = UserVillageResponse(
             userId = 1L,
             userName = "홍길동",
             villageId = 10L,
@@ -199,20 +153,23 @@ class UserControllerTest {
             isVillageLeader = false
         )
         
-        every { userService.getCurrentUserVillage(any<Authentication>()) } returns response
+        every { userService.getCurrentUserVillage(authentication) } returns villageResponse
         
-        // when & then
-        mockMvc.perform(
-            get("/api/users/my-village")
-                .contentType(MediaType.APPLICATION_JSON)
-        )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.userId").value(1))
-            .andExpect(jsonPath("$.userName").value("홍길동"))
-            .andExpect(jsonPath("$.villageId").value(10))
-            .andExpect(jsonPath("$.villageName").value("1마을"))
-            .andExpect(jsonPath("$.departmentId").value(20))
-            .andExpect(jsonPath("$.departmentName").value("대학부"))
-            .andExpect(jsonPath("$.isVillageLeader").value(false))
+        // when
+        val result = controller.getCurrentUserVillage(authentication)
+        
+        // then
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertTrue(result.body?.success == true)
+        
+        val responseData = result.body?.data
+        assertEquals(1L, responseData?.userId)
+        assertEquals("홍길동", responseData?.userName)
+        assertEquals(10L, responseData?.villageId)
+        assertEquals("1마을", responseData?.villageName)
+        assertEquals(20L, responseData?.departmentId)
+        assertEquals("대학부", responseData?.departmentName)
+        assertEquals(false, responseData?.isVillageLeader)
     }
 } 

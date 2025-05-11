@@ -4,51 +4,28 @@ import com.attendly.api.dto.LeaderDelegationResponse
 import com.attendly.domain.entity.*
 import com.attendly.service.DelegationCreateRequest
 import com.attendly.service.LeaderDelegationService
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.mockk.MockKAnnotations
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.http.MediaType
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.http.HttpStatus
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-import java.time.LocalDateTime
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
+@ExtendWith(SpringExtension::class)
 class LeaderDelegationControllerTest {
     
-    @MockK
+    private lateinit var controller: LeaderDelegationController
     private lateinit var leaderDelegationService: LeaderDelegationService
     
-    private lateinit var mockMvc: MockMvc
-    private lateinit var objectMapper: ObjectMapper
-    
     @BeforeEach
-    fun setUp() {
-        MockKAnnotations.init(this)
-        
-        objectMapper = Jackson2ObjectMapperBuilder.json()
-            .modules(JavaTimeModule())
-            .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .build()
-        
-        val converter = MappingJackson2HttpMessageConverter(objectMapper)
-        
-        val controller = LeaderDelegationController(leaderDelegationService)
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
-            .setMessageConverters(converter)
-            .build()
+    fun setup() {
+        leaderDelegationService = mockk()
+        controller = LeaderDelegationController(leaderDelegationService)
     }
     
     @Test
@@ -82,22 +59,26 @@ class LeaderDelegationControllerTest {
         // When
         every { leaderDelegationService.findActiveDelegations(userId, today) } returns delegations
         
+        val result = controller.getActiveDelegations(userId, today)
+        
         // Then
-        mockMvc.perform(
-            get("/api/delegations/active")
-                .param("userId", userId.toString())
-                .param("date", today.toString())
-        )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$[0].id").value(1))
-            .andExpect(jsonPath("$[0].delegatorId").value(1))
-            .andExpect(jsonPath("$[0].delegatorName").value("김위임자"))
-            .andExpect(jsonPath("$[0].delegateeId").value(2))
-            .andExpect(jsonPath("$[0].delegateeName").value("이수임자"))
-            .andExpect(jsonPath("$[0].gbsGroupId").value(1))
-            .andExpect(jsonPath("$[0].gbsGroupName").value("테스트 소그룹"))
-            .andExpect(jsonPath("$[0].startDate").value(today.minusDays(1).toString()))
-            .andExpect(jsonPath("$[0].endDate").value(today.plusDays(5).toString()))
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertTrue(result.body?.success == true)
+        
+        val responseData = result.body?.data
+        assertEquals(1, responseData?.items?.size)
+        
+        val delegationResponse = responseData?.items?.get(0)
+        assertEquals(1L, delegationResponse?.id)
+        assertEquals(1L, delegationResponse?.delegatorId)
+        assertEquals("김위임자", delegationResponse?.delegatorName)
+        assertEquals(2L, delegationResponse?.delegateeId)
+        assertEquals("이수임자", delegationResponse?.delegateeName)
+        assertEquals(1L, delegationResponse?.gbsGroupId)
+        assertEquals("테스트 소그룹", delegationResponse?.gbsGroupName)
+        assertEquals(today.minusDays(1), delegationResponse?.startDate)
+        assertEquals(today.plusDays(5), delegationResponse?.endDate)
     }
     
     @Test
@@ -129,15 +110,73 @@ class LeaderDelegationControllerTest {
         val delegations = listOf(delegation)
         
         // When
-        every { leaderDelegationService.findActiveDelegations(any(), any()) } returns delegations
+        every { leaderDelegationService.findActiveDelegations(userId, any()) } returns delegations
+        
+        val result = controller.getActiveDelegations(userId, null)
         
         // Then
-        mockMvc.perform(
-            get("/api/delegations/active")
-                .param("userId", userId.toString())
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertNotNull(result.body)
+        assertTrue(result.body?.success == true)
+        
+        val responseData = result.body?.data
+        assertEquals(1, responseData?.items?.size)
+        
+        val delegationResponse = responseData?.items?.get(0)
+        assertEquals(1L, delegationResponse?.id)
+        assertEquals("김위임자", delegationResponse?.delegatorName)
+    }
+    
+    @Test
+    fun `should create delegation and return created response`() {
+        // Given
+        val request = DelegationCreateRequest(
+            delegatorId = 1L,
+            delegateId = 2L,
+            gbsGroupId = 1L,
+            startDate = LocalDate.now(),
+            endDate = LocalDate.now().plusDays(7)
         )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$[0].id").value(1))
-            .andExpect(jsonPath("$[0].delegatorName").value("김위임자"))
+        
+        val delegator = mockk<User>()
+        every { delegator.id } returns 1L
+        every { delegator.name } returns "김위임자"
+        
+        val delegatee = mockk<User>()
+        every { delegatee.id } returns 2L
+        every { delegatee.name } returns "이수임자"
+        
+        val gbsGroup = mockk<GbsGroup>()
+        every { gbsGroup.id } returns 1L
+        every { gbsGroup.name } returns "테스트 소그룹"
+        
+        val createdDelegation = mockk<LeaderDelegation>()
+        every { createdDelegation.id } returns 1L
+        every { createdDelegation.delegator } returns delegator
+        every { createdDelegation.delegatee } returns delegatee
+        every { createdDelegation.gbsGroup } returns gbsGroup
+        every { createdDelegation.startDate } returns request.startDate
+        every { createdDelegation.endDate } returns request.endDate
+        
+        // When
+        every { leaderDelegationService.createDelegation(request) } returns createdDelegation
+        
+        val result = controller.createDelegation(request)
+        
+        // Then
+        assertEquals(HttpStatus.CREATED, result.statusCode)
+        assertNotNull(result.body)
+        assertTrue(result.body?.success == true)
+        
+        val delegationResponse = result.body?.data
+        assertEquals(1L, delegationResponse?.id)
+        assertEquals(1L, delegationResponse?.delegatorId)
+        assertEquals("김위임자", delegationResponse?.delegatorName)
+        assertEquals(2L, delegationResponse?.delegateeId)
+        assertEquals("이수임자", delegationResponse?.delegateeName)
+        assertEquals(1L, delegationResponse?.gbsGroupId)
+        assertEquals("테스트 소그룹", delegationResponse?.gbsGroupName)
+        assertEquals(request.startDate, delegationResponse?.startDate)
+        assertEquals(request.endDate, delegationResponse?.endDate)
     }
 } 

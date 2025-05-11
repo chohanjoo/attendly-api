@@ -73,7 +73,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/UserResponse"
+                                    "$ref": "#/components/schemas/ApiResponseUserResponse"
                                 }
                             }
                         }
@@ -124,7 +124,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/UserResponse"
+                                    "$ref": "#/components/schemas/ApiResponseUserResponse"
                                 }
                             }
                         }
@@ -161,7 +161,14 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -211,7 +218,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/VillageResponse"
+                                    "$ref": "#/components/schemas/ApiResponseVillageResponse"
                                 }
                             }
                         }
@@ -264,7 +271,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/GbsGroupResponse"
+                                    "$ref": "#/components/schemas/ApiResponseGbsGroupResponse"
                                 }
                             }
                         }
@@ -307,7 +314,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DepartmentResponse"
+                                    "$ref": "#/components/schemas/ApiResponseDepartmentResponse"
                                 }
                             }
                         }
@@ -358,7 +365,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DepartmentResponse"
+                                    "$ref": "#/components/schemas/ApiResponseDepartmentResponse"
                                 }
                             }
                         }
@@ -395,7 +402,14 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -436,7 +450,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/VillageLeaderResponse"
+                                    "$ref": "#/components/schemas/ApiResponseVillageLeaderResponse"
                                 }
                             }
                         }
@@ -473,7 +487,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PageUserResponse"
+                                    "$ref": "#/components/schemas/ApiResponsePageResponseUserResponse"
                                 }
                             }
                         }
@@ -515,7 +529,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/UserResponse"
+                                    "$ref": "#/components/schemas/ApiResponseUserResponse"
                                 }
                             }
                         }
@@ -564,7 +578,14 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -605,7 +626,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/UserBulkCreateResponse"
+                                    "$ref": "#/components/schemas/ApiResponseUserBulkCreateResponse"
                                 }
                             }
                         }
@@ -645,7 +666,14 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -676,7 +704,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SystemSettingListResponse"
+                                    "$ref": "#/components/schemas/ApiResponseSystemSettingListResponse"
                                 }
                             }
                         }
@@ -718,7 +746,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SystemSettingResponse"
+                                    "$ref": "#/components/schemas/ApiResponseSystemSettingResponse"
                                 }
                             }
                         }
@@ -758,7 +786,14 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -789,7 +824,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/EmailSettingRequest"
+                                    "$ref": "#/components/schemas/ApiResponseEmailSettingRequest"
                                 }
                             }
                         }
@@ -827,7 +862,14 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -864,7 +906,14 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -901,7 +950,14 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -942,7 +998,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/VillageResponse"
+                                    "$ref": "#/components/schemas/ApiResponseVillageResponse"
                                 }
                             }
                         }
@@ -986,7 +1042,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/GbsReorganizationResponse"
+                                    "$ref": "#/components/schemas/ApiResponseGbsReorganizationResponse"
                                 }
                             }
                         }
@@ -1030,7 +1086,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/GbsGroupResponse"
+                                    "$ref": "#/components/schemas/ApiResponseGbsGroupResponse"
                                 }
                             }
                         }
@@ -1079,7 +1135,14 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -1125,7 +1188,14 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -1156,10 +1226,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/DepartmentResponse"
-                                    }
+                                    "$ref": "#/components/schemas/ApiResponsePageResponseDepartmentResponse"
                                 }
                             }
                         }
@@ -1201,7 +1268,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DepartmentResponse"
+                                    "$ref": "#/components/schemas/ApiResponseDepartmentResponse"
                                 }
                             }
                         }
@@ -1308,7 +1375,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PageBatchJobResponse"
+                                    "$ref": "#/components/schemas/ApiResponsePageResponseBatchJobResponse"
                                 }
                             }
                         }
@@ -1350,7 +1417,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/BatchJobResponse"
+                                    "$ref": "#/components/schemas/ApiResponseBatchJobResponse"
                                 }
                             }
                         }
@@ -1402,7 +1469,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/BatchJobResponse"
+                                    "$ref": "#/components/schemas/ApiResponseBatchJobResponse"
                                 }
                             }
                         }
@@ -1454,7 +1521,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/BatchJobResponse"
+                                    "$ref": "#/components/schemas/ApiResponseBatchJobResponse"
                                 }
                             }
                         }
@@ -1497,7 +1564,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/VillageLeaderResponse"
+                                    "$ref": "#/components/schemas/ApiResponseVillageLeaderResponse"
                                 }
                             }
                         }
@@ -1542,7 +1609,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/VillageLeaderResponse"
+                                    "$ref": "#/components/schemas/ApiResponseVillageLeaderResponse"
                                 }
                             }
                         }
@@ -1579,7 +1646,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SystemSettingResponse"
+                                    "$ref": "#/components/schemas/ApiResponseSystemSettingResponse"
                                 }
                             }
                         }
@@ -1615,7 +1682,14 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -1726,7 +1800,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PageSystemLogResponseDto"
+                                    "$ref": "#/components/schemas/ApiResponsePageResponseSystemLogResponseDto"
                                 }
                             }
                         }
@@ -1769,7 +1843,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SystemLogResponseDto"
+                                    "$ref": "#/components/schemas/ApiResponseSystemLogResponseDto"
                                 }
                             }
                         }
@@ -1803,10 +1877,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/ApiResponseListString"
                                 }
                             }
                         }
@@ -1840,10 +1911,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
+                                    "$ref": "#/components/schemas/ApiResponseListString"
                                 }
                             }
                         }
@@ -1886,7 +1954,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/BatchJobResponse"
+                                    "$ref": "#/components/schemas/ApiResponseBatchJobResponse"
                                 }
                             }
                         }
@@ -1929,10 +1997,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/BatchLogResponse"
-                                    }
+                                    "$ref": "#/components/schemas/ApiResponsePageResponseBatchLogResponse"
                                 }
                             }
                         }
@@ -1983,6 +2048,34 @@
                     "departmentId": {
                         "type": "integer",
                         "format": "int64"
+                    }
+                }
+            },
+            "ApiResponseUserResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/UserResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -2063,6 +2156,34 @@
                     }
                 }
             },
+            "ApiResponseVillageResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/VillageResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
             "VillageResponse": {
                 "required": [
                     "createdAt",
@@ -2127,6 +2248,34 @@
                     "termEndDate": {
                         "type": "string",
                         "format": "date"
+                    }
+                }
+            },
+            "ApiResponseGbsGroupResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/GbsGroupResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -2195,6 +2344,34 @@
                     }
                 }
             },
+            "ApiResponseDepartmentResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/DepartmentResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
             "DepartmentResponse": {
                 "required": [
                     "createdAt",
@@ -2255,6 +2432,34 @@
                     }
                 },
                 "description": "마을장 할당 요청"
+            },
+            "ApiResponseVillageLeaderResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/VillageLeaderResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
             },
             "VillageLeaderResponse": {
                 "required": [
@@ -2373,6 +2578,34 @@
                     }
                 }
             },
+            "ApiResponseVoid": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "type": "object"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
             "UserBulkCreateRequest": {
                 "required": [
                     "users"
@@ -2384,6 +2617,34 @@
                         "items": {
                             "$ref": "#/components/schemas/UserCreateRequest"
                         }
+                    }
+                }
+            },
+            "ApiResponseUserBulkCreateResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/UserBulkCreateResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -2452,6 +2713,34 @@
                         "maxLength": 200,
                         "minLength": 0,
                         "type": "string"
+                    }
+                }
+            },
+            "ApiResponseSystemSettingResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/SystemSettingResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -2701,6 +2990,34 @@
                     }
                 }
             },
+            "ApiResponseGbsReorganizationResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/GbsReorganizationResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
             "GbsReorganizationResponse": {
                 "required": [
                     "affectedGbsCount",
@@ -2862,6 +3179,34 @@
                     }
                 }
             },
+            "ApiResponseBatchJobResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/BatchJobResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
             "BatchJobResponse": {
                 "required": [
                     "createdAt",
@@ -2958,89 +3303,82 @@
                     }
                 }
             },
-            "PageUserResponse": {
+            "ApiResponsePageResponseUserResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
+                    "success": {
+                        "type": "boolean"
                     },
-                    "totalPages": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/PageResponseUserResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "size": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "content": {
+                    }
+                }
+            },
+            "PageResponseUserResponse": {
+                "required": [
+                    "hasMore",
+                    "items",
+                    "totalCount"
+                ],
+                "type": "object",
+                "properties": {
+                    "items": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/UserResponse"
                         }
                     },
-                    "number": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "numberOfElements": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "empty": {
-                        "type": "boolean"
-                    }
-                }
-            },
-            "PageableObject": {
-                "type": "object",
-                "properties": {
-                    "offset": {
+                    "totalCount": {
                         "type": "integer",
                         "format": "int64"
                     },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
-                    "paged": {
-                        "type": "boolean"
-                    },
-                    "pageNumber": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "pageSize": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "unpaged": {
+                    "hasMore": {
                         "type": "boolean"
                     }
                 }
             },
-            "SortObject": {
+            "ApiResponseSystemSettingListResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
                 "type": "object",
                 "properties": {
-                    "empty": {
+                    "success": {
                         "type": "boolean"
                     },
-                    "sorted": {
-                        "type": "boolean"
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
                     },
-                    "unsorted": {
-                        "type": "boolean"
+                    "data": {
+                        "$ref": "#/components/schemas/SystemSettingListResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -3063,48 +3401,132 @@
                     }
                 }
             },
-            "PageSystemLogResponseDto": {
+            "ApiResponseEmailSettingRequest": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
                 "type": "object",
                 "properties": {
-                    "totalElements": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/EmailSettingRequest"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "ApiResponsePageResponseDepartmentResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/PageResponseDepartmentResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "PageResponseDepartmentResponse": {
+                "required": [
+                    "hasMore",
+                    "items",
+                    "totalCount"
+                ],
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DepartmentResponse"
+                        }
+                    },
+                    "totalCount": {
                         "type": "integer",
                         "format": "int64"
                     },
-                    "totalPages": {
+                    "hasMore": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "ApiResponsePageResponseSystemLogResponseDto": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/PageResponseSystemLogResponseDto"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "size": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "content": {
+                    }
+                }
+            },
+            "PageResponseSystemLogResponseDto": {
+                "required": [
+                    "hasMore",
+                    "items",
+                    "totalCount"
+                ],
+                "type": "object",
+                "properties": {
+                    "items": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/SystemLogResponseDto"
                         }
                     },
-                    "number": {
+                    "totalCount": {
                         "type": "integer",
-                        "format": "int32"
+                        "format": "int64"
                     },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "numberOfElements": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "empty": {
+                    "hasMore": {
                         "type": "boolean"
                     }
                 }
@@ -3153,49 +3575,141 @@
                     }
                 }
             },
-            "PageBatchJobResponse": {
+            "ApiResponseSystemLogResponseDto": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
+                    "success": {
+                        "type": "boolean"
                     },
-                    "totalPages": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/SystemLogResponseDto"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
                         "type": "integer",
                         "format": "int32"
+                    }
+                }
+            },
+            "ApiResponseListString": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
                     },
-                    "size": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
                         "type": "integer",
                         "format": "int32"
+                    }
+                }
+            },
+            "ApiResponsePageResponseBatchJobResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
                     },
-                    "content": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/PageResponseBatchJobResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "PageResponseBatchJobResponse": {
+                "required": [
+                    "hasMore",
+                    "items",
+                    "totalCount"
+                ],
+                "type": "object",
+                "properties": {
+                    "items": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/BatchJobResponse"
                         }
                     },
-                    "number": {
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "hasMore": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "ApiResponsePageResponseBatchLogResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/PageResponseBatchLogResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "numberOfElements": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "empty": {
-                        "type": "boolean"
                     }
                 }
             },
@@ -3226,6 +3740,29 @@
                     "timestamp": {
                         "type": "string",
                         "format": "date-time"
+                    }
+                }
+            },
+            "PageResponseBatchLogResponse": {
+                "required": [
+                    "hasMore",
+                    "items",
+                    "totalCount"
+                ],
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BatchLogResponse"
+                        }
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "hasMore": {
+                        "type": "boolean"
                     }
                 }
             }
