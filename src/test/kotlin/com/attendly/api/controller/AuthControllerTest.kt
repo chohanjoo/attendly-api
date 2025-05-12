@@ -6,6 +6,7 @@ import com.attendly.api.dto.SignupResponse
 import com.attendly.domain.entity.Department
 import com.attendly.enums.Role
 import com.attendly.domain.entity.User
+import com.attendly.enums.UserStatus
 import com.attendly.security.JwtTokenProvider
 import com.attendly.security.UserDetailsAdapter
 import com.attendly.service.UserService
@@ -144,6 +145,7 @@ class AuthControllerTest {
         every { user.email } returns "test@example.com"
         every { user.phoneNumber } returns "010-1234-5678"
         every { user.role } returns Role.MEMBER
+        every { user.status } returns UserStatus.ACTIVE
         every { user.department } returns department
         every { user.birthDate } returns LocalDate.of(1990, 1, 1)
         every { user.createdAt } returns now
@@ -165,6 +167,7 @@ class AuthControllerTest {
         assertEquals("test@example.com", result.body?.data?.email)
         assertEquals("010-1234-5678", result.body?.data?.phoneNumber)
         assertEquals(Role.MEMBER, result.body?.data?.role)
+        assertEquals(UserStatus.ACTIVE, result.body?.data?.status)
         assertEquals(1L, result.body?.data?.departmentId)
         assertEquals("테스트 부서", result.body?.data?.departmentName)
     }

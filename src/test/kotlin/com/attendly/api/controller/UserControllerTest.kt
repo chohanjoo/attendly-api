@@ -4,6 +4,7 @@ import com.attendly.api.dto.UserListByRolesRequest
 import com.attendly.api.dto.UserResponse
 import com.attendly.api.dto.UserVillageResponse
 import com.attendly.enums.Role
+import com.attendly.enums.UserStatus
 import com.attendly.service.UserService
 import io.mockk.every
 import io.mockk.verify
@@ -47,6 +48,7 @@ class UserControllerTest {
                 email = "leader@example.com",
                 phoneNumber = "010-1234-5678",
                 role = Role.LEADER,
+                status = UserStatus.ACTIVE,
                 departmentId = 1L,
                 departmentName = "IT 부서",
                 birthDate = LocalDate.of(1990, 1, 1),
@@ -59,6 +61,7 @@ class UserControllerTest {
                 email = "member@example.com",
                 phoneNumber = "010-9876-5432",
                 role = Role.MEMBER,
+                status = UserStatus.ACTIVE,
                 departmentId = 1L,
                 departmentName = "IT 부서",
                 birthDate = LocalDate.of(1995, 5, 5),
@@ -98,6 +101,7 @@ class UserControllerTest {
                 email = "hong@example.com",
                 phoneNumber = "010-1234-5678",
                 role = Role.LEADER,
+                status = UserStatus.ACTIVE,
                 departmentId = 1L,
                 departmentName = "대학부",
                 birthDate = LocalDate.of(1990, 1, 1),
@@ -110,6 +114,7 @@ class UserControllerTest {
                 email = "kim@example.com",
                 phoneNumber = "010-2345-6789",
                 role = Role.MEMBER,
+                status = UserStatus.ACTIVE,
                 departmentId = 1L,
                 departmentName = "대학부",
                 birthDate = LocalDate.of(1995, 5, 5),

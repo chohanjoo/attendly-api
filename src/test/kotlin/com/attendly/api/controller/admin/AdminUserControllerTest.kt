@@ -2,6 +2,7 @@ package com.attendly.api.controller.admin
 
 import com.attendly.api.dto.*
 import com.attendly.enums.Role
+import com.attendly.enums.UserStatus
 import com.attendly.service.AdminUserService
 import io.mockk.every
 import io.mockk.justRun
@@ -47,6 +48,7 @@ class AdminUserControllerTest {
             email = "hong@example.com",
             phoneNumber = "010-1234-5678",
             role = Role.LEADER,
+            status = UserStatus.ACTIVE,
             departmentId = 1L,
             departmentName = "청년부",
             birthDate = null,
@@ -83,6 +85,7 @@ class AdminUserControllerTest {
             email = "hong_updated@example.com",
             phoneNumber = "010-1234-5678",
             role = Role.ADMIN,
+            status = UserStatus.ACTIVE,
             departmentId = 1L,
             departmentName = "청년부",
             birthDate = null,
@@ -130,6 +133,7 @@ class AdminUserControllerTest {
             email = "hong@example.com",
             phoneNumber = "010-1234-5678",
             role = Role.LEADER,
+            status = UserStatus.ACTIVE,
             departmentId = 1L,
             departmentName = "청년부",
             birthDate = null,
@@ -161,6 +165,7 @@ class AdminUserControllerTest {
                 email = "hong@example.com",
                 phoneNumber = "010-1234-5678",
                 role = Role.LEADER,
+                status = UserStatus.ACTIVE,
                 departmentId = 1L,
                 departmentName = "청년부",
                 birthDate = null,
@@ -173,6 +178,7 @@ class AdminUserControllerTest {
                 email = "kim@example.com",
                 phoneNumber = "010-9876-5432",
                 role = Role.MEMBER,
+                status = UserStatus.ACTIVE,
                 departmentId = 1L,
                 departmentName = "청년부",
                 birthDate = null,
@@ -210,6 +216,7 @@ class AdminUserControllerTest {
                 email = "hong@example.com",
                 phoneNumber = "010-1234-5678",
                 role = Role.LEADER,
+                status = UserStatus.ACTIVE,
                 departmentId = 1L,
                 departmentName = "청년부",
                 birthDate = null,

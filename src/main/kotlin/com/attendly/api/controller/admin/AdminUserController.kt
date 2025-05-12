@@ -110,4 +110,18 @@ class AdminUserController(
         val response = adminUserService.bulkCreateUsers(request)
         return ResponseUtil.created(response)
     }
+
+    @Operation(
+        summary = "사용자 상태 변경", 
+        description = "사용자의 상태(활성/비활성)를 변경합니다",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @PatchMapping("/{userId}/status")
+    fun updateUserStatus(
+        @PathVariable userId: Long,
+        @Valid @RequestBody request: UserStatusUpdateRequest
+    ): ResponseEntity<ApiResponse<UserResponse>> {
+        val response = adminUserService.updateUserStatus(userId, request)
+        return ResponseUtil.success(response)
+    }
 } 

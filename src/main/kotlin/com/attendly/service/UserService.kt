@@ -116,6 +116,7 @@ class UserService(
                 email = user.email,
                 phoneNumber = user.phoneNumber,
                 role = user.role,
+                status = user.status,
                 departmentId = user.department.id ?: 0L,
                 departmentName = user.department.name,
                 birthDate = user.birthDate,

@@ -1,6 +1,7 @@
 package com.attendly.domain.entity
 
 import com.attendly.enums.Role
+import com.attendly.enums.UserStatus
 import jakarta.persistence.*
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -21,6 +22,10 @@ class User(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     val role: Role,
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    val status: UserStatus = UserStatus.ACTIVE,
 
     @Column(unique = true, length = 100)
     val email: String? = null,

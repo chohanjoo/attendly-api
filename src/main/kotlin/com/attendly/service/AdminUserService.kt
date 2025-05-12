@@ -4,6 +4,7 @@ import com.attendly.api.dto.*
 import com.attendly.domain.entity.User
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.UserRepository
+import com.attendly.enums.UserStatus
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
@@ -46,6 +47,7 @@ class AdminUserService(
             phoneNumber = request.phoneNumber,
             password = encodedPassword,
             role = request.role,
+            status = request.status,
             birthDate = request.birthDate,
             department = department
         )
@@ -60,6 +62,7 @@ class AdminUserService(
             email = savedUser.email,
             phoneNumber = savedUser.phoneNumber,
             role = savedUser.role,
+            status = savedUser.status,
             departmentId = savedUser.department.id ?: 0L,
             departmentName = savedUser.department.name,
             birthDate = savedUser.birthDate,
@@ -101,6 +104,7 @@ class AdminUserService(
             phoneNumber = request.phoneNumber ?: user.phoneNumber,
             password = user.password,
             role = request.role ?: user.role,
+            status = request.status ?: user.status,
             birthDate = request.birthDate ?: user.birthDate,
             department = department,
             createdAt = user.createdAt
@@ -116,6 +120,7 @@ class AdminUserService(
             email = savedUser.email,
             phoneNumber = savedUser.phoneNumber,
             role = savedUser.role,
+            status = savedUser.status,
             departmentId = savedUser.department.id ?: 0L,
             departmentName = savedUser.department.name,
             birthDate = savedUser.birthDate,
@@ -142,6 +147,7 @@ class AdminUserService(
             phoneNumber = user.phoneNumber,
             password = encodedPassword,
             role = user.role,
+            status = user.status,
             birthDate = user.birthDate,
             department = user.department,
             createdAt = user.createdAt
@@ -174,6 +180,7 @@ class AdminUserService(
             email = user.email,
             phoneNumber = user.phoneNumber,
             role = user.role,
+            status = user.status,
             departmentId = user.department.id ?: 0L,
             departmentName = user.department.name,
             birthDate = user.birthDate,
@@ -193,6 +200,7 @@ class AdminUserService(
                 email = user.email,
                 phoneNumber = user.phoneNumber,
                 role = user.role,
+                status = user.status,
                 departmentId = user.department.id ?: 0L,
                 departmentName = user.department.name,
                 birthDate = user.birthDate,
@@ -219,6 +227,7 @@ class AdminUserService(
                 email = user.email,
                 phoneNumber = user.phoneNumber,
                 role = user.role,
+                status = user.status,
                 departmentId = user.department.id ?: 0L,
                 departmentName = user.department.name,
                 birthDate = user.birthDate,
@@ -249,6 +258,47 @@ class AdminUserService(
             createdCount = createdCount,
             failedCount = request.users.size - createdCount,
             failedEmails = failedEmails
+        )
+    }
+
+    /**
+     * 사용자 상태 변경
+     */
+    @Transactional
+    fun updateUserStatus(userId: Long, request: UserStatusUpdateRequest): UserResponse {
+        val user = userRepository.findById(userId)
+            .orElseThrow { AttendlyApiException(ErrorMessage.USER_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.USER_NOT_FOUND, userId)) }
+
+        // 새 사용자 객체 생성 (불변성 유지)
+        val updatedUser = User(
+            id = user.id,
+            name = user.name,
+            email = user.email,
+            phoneNumber = user.phoneNumber,
+            password = user.password,
+            role = user.role,
+            status = request.status,
+            birthDate = user.birthDate,
+            department = user.department,
+            createdAt = user.createdAt
+        )
+
+        // 저장
+        val savedUser = userRepository.save(updatedUser)
+
+        // 응답 생성
+        return UserResponse(
+            id = savedUser.id ?: 0L,
+            name = savedUser.name,
+            email = savedUser.email,
+            phoneNumber = savedUser.phoneNumber,
+            role = savedUser.role,
+            status = savedUser.status,
+            departmentId = savedUser.department.id ?: 0L,
+            departmentName = savedUser.department.name,
+            birthDate = savedUser.birthDate,
+            createdAt = savedUser.createdAt,
+            updatedAt = savedUser.updatedAt
         )
     }
 } 

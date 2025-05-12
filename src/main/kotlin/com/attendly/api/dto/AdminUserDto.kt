@@ -1,6 +1,7 @@
 package com.attendly.api.dto
 
 import com.attendly.enums.Role
+import com.attendly.enums.UserStatus
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -31,6 +32,8 @@ data class UserCreateRequest(
     @field:NotNull(message = "역할은 필수입니다")
     val role: Role,
 
+    val status: UserStatus = UserStatus.ACTIVE,
+
     val birthDate: LocalDate? = null,
 
     @field:NotNull(message = "부서 ID는 필수입니다")
@@ -51,6 +54,8 @@ data class UserUpdateRequest(
     val birthDate: LocalDate? = null,
 
     val role: Role? = null,
+    
+    val status: UserStatus? = null,
 
     val departmentId: Long? = null
 )
@@ -70,6 +75,7 @@ data class UserResponse(
     val email: String?,
     val phoneNumber: String?,
     val role: Role,
+    val status: UserStatus,
     val departmentId: Long,
     val departmentName: String,
     val birthDate: LocalDate?,
@@ -93,4 +99,9 @@ data class UserBulkCreateResponse(
     val createdCount: Int,
     val failedCount: Int,
     val failedEmails: List<String>
+)
+
+data class UserStatusUpdateRequest(
+    @field:NotNull(message = "상태는 필수입니다")
+    val status: UserStatus
 ) 
