@@ -65,7 +65,7 @@ VILLAGE_LEADER_RESPONSE=$(curl -s -X POST "$BASE_URL/api/admin/users" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -d "{
     \"name\": \"Emma Wilson\",
-    \"email\": \"unit5Qvillage_new_$(date +%s)@example.com\",
+    \"email\": \"unit5Qvillage@example.com\",
     \"password\": \"test123!@#\",
     \"role\": \"VILLAGE_LEADER\",
     \"departmentId\": $DEPARTMENT_ID,
@@ -95,8 +95,6 @@ VILLAGE_RESPONSE=$(curl -s -X POST "$BASE_URL/api/admin/organization/villages" \
     \"villageLeaderId\": $VILLAGE_LEADER_ID
   }")
 
-  
-
 # 마을 ID 추출
 VILLAGE_ID=$(echo "$VILLAGE_RESPONSE" | grep -o '"id":[0-9]*' | cut -d':' -f2)
 
@@ -107,6 +105,24 @@ if [ -z "$VILLAGE_ID" ]; then
 fi
 
 echo "M village 마을 ID: $VILLAGE_ID"
+
+# 마을장 등록
+echo "4-1. 마을장 등록"
+VILLAGE_LEADER_ASSIGN_RESPONSE=$(curl -s -X POST "$BASE_URL/api/admin/village-leader" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -d "{
+    \"villageId\": $VILLAGE_ID,
+    \"villageLeaderId\": $VILLAGE_LEADER_ID,
+    \"startDate\": \"2025-01-01\"
+  }")
+
+if [[ "$VILLAGE_LEADER_ASSIGN_RESPONSE" == *"id"* ]]; then
+  echo "✅ 마을장 등록 성공"
+else
+  echo "❌ 마을장 등록 실패"
+  echo "응답: $VILLAGE_LEADER_ASSIGN_RESPONSE"
+fi
 
 # 4. univ5 부서에 속한 LEADER 조회
 echo "5. 'univ5' 부서에 속한 LEADER 조회"

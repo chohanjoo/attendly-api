@@ -1542,6 +1542,59 @@
                 ]
             }
         },
+        "/api/admin/users/{userId}/status": {
+            "patch": {
+                "tags": [
+                    "관리자-사용자"
+                ],
+                "summary": "사용자 상태 변경",
+                "description": "사용자의 상태(활성/비활성)를 변경합니다",
+                "operationId": "updateUserStatus",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserStatusUpdateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseUserResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/village-leader/{villageId}": {
             "get": {
                 "tags": [
@@ -2053,6 +2106,14 @@
                             "MEMBER"
                         ]
                     },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "ACTIVE",
+                            "INACTIVE",
+                            "PENDING"
+                        ]
+                    },
                     "departmentId": {
                         "type": "integer",
                         "format": "int64"
@@ -2095,6 +2156,7 @@
                     "id",
                     "name",
                     "role",
+                    "status",
                     "updatedAt"
                 ],
                 "type": "object",
@@ -2120,6 +2182,14 @@
                             "VILLAGE_LEADER",
                             "LEADER",
                             "MEMBER"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "ACTIVE",
+                            "INACTIVE",
+                            "PENDING"
                         ]
                     },
                     "departmentId": {
@@ -2534,7 +2604,8 @@
                     "email",
                     "name",
                     "password",
-                    "role"
+                    "role",
+                    "status"
                 ],
                 "type": "object",
                 "properties": {
@@ -2562,6 +2633,14 @@
                             "VILLAGE_LEADER",
                             "LEADER",
                             "MEMBER"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "ACTIVE",
+                            "INACTIVE",
+                            "PENDING"
                         ]
                     },
                     "birthDate": {
@@ -3287,6 +3366,22 @@
                 "properties": {
                     "reason": {
                         "type": "string"
+                    }
+                }
+            },
+            "UserStatusUpdateRequest": {
+                "required": [
+                    "status"
+                ],
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "ACTIVE",
+                            "INACTIVE",
+                            "PENDING"
+                        ]
                     }
                 }
             },
