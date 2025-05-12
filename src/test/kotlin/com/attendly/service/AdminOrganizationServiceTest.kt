@@ -17,15 +17,51 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import com.attendly.api.dto.PageResponse
+import com.attendly.api.dto.VillageResponse
+import com.attendly.domain.entity.Department
+import com.attendly.domain.entity.User
+import com.attendly.domain.entity.Village
+import com.attendly.domain.entity.VillageLeader
+import com.attendly.domain.repository.DepartmentRepository
+import com.attendly.domain.repository.GbsGroupRepository
+import com.attendly.domain.repository.GbsLeaderHistoryRepository
+import com.attendly.domain.repository.GbsMemberHistoryRepository
+import com.attendly.domain.repository.UserRepository
+import com.attendly.domain.repository.VillageRepository
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.junit.jupiter.api.DisplayName
+import com.attendly.enums.Role
+import com.attendly.enums.UserStatus
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(MockKExtension::class)
 class AdminOrganizationServiceTest {
 
+    @MockK
     private lateinit var departmentRepository: DepartmentRepository
+
+    @MockK
     private lateinit var villageRepository: VillageRepository
+
+    @MockK
     private lateinit var gbsGroupRepository: GbsGroupRepository
+
+    @MockK
     private lateinit var userRepository: UserRepository
+
+    @MockK
     private lateinit var gbsLeaderHistoryRepository: GbsLeaderHistoryRepository
+
+    @MockK
     private lateinit var gbsMemberHistoryRepository: GbsMemberHistoryRepository
+
+    @InjectMockKs
     private lateinit var adminOrganizationService: AdminOrganizationService
 
     @BeforeEach
@@ -261,5 +297,201 @@ class AdminOrganizationServiceTest {
         assertEquals(ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, request.departmentId), exception.message)
         
         verify { departmentRepository.findById(request.departmentId) }
+    }
+
+    @Test
+    @DisplayName("마을 목록 조회 - 필터 없음")
+    fun getAllVillagesWithoutFilter() {
+        // given
+        val now = LocalDateTime.now()
+        val department = Department(id = 1L, name = "청년부", createdAt = now, updatedAt = now)
+        
+        val user1 = User(
+            id = 101L, 
+            name = "김철수", 
+            email = "user1@example.com", 
+            password = "password", 
+            role = Role.VILLAGE_LEADER,
+            department = department,
+            createdAt = now, 
+            updatedAt = now
+        )
+        
+        val user2 = User(
+            id = 102L, 
+            name = "이영희", 
+            email = "user2@example.com", 
+            password = "password", 
+            role = Role.VILLAGE_LEADER,
+            department = department,
+            createdAt = now, 
+            updatedAt = now
+        )
+        
+        // 목(mock) 객체로 생성
+        val village1 = mockk<Village>()
+        val village2 = mockk<Village>()
+        
+        val villageLeader1 = mockk<VillageLeader>()
+        val villageLeader2 = mockk<VillageLeader>()
+        
+        // 필요한 속성 설정
+        every { village1.id } returns 1L
+        every { village1.name } returns "동문마을"
+        every { village1.department } returns department
+        every { village1.villageLeader } returns villageLeader1
+        every { village1.createdAt } returns now
+        every { village1.updatedAt } returns now
+        
+        every { village2.id } returns 2L
+        every { village2.name } returns "서문마을"
+        every { village2.department } returns department
+        every { village2.villageLeader } returns villageLeader2
+        every { village2.createdAt } returns now
+        every { village2.updatedAt } returns now
+        
+        every { villageLeader1.user } returns user1
+        every { villageLeader2.user } returns user2
+        
+        val pageable = PageRequest.of(0, 20, Sort.by("name").ascending())
+        val page = PageImpl(listOf(village1, village2), pageable, 2)
+        
+        every { 
+            villageRepository.findVillagesWithParams(null, null, pageable) 
+        } returns page
+        
+        // when
+        val result = adminOrganizationService.getAllVillages(null, null, pageable)
+        
+        // then
+        assertNotNull(result)
+        assertEquals(2, result.items.size)
+        assertEquals(2, result.totalCount)
+        assertFalse(result.hasMore)
+        
+        val firstVillage = result.items[0]
+        assertEquals(1L, firstVillage.id)
+        assertEquals("동문마을", firstVillage.name)
+        assertEquals(1L, firstVillage.departmentId)
+        assertEquals("청년부", firstVillage.departmentName)
+        assertEquals(101L, firstVillage.villageLeaderId)
+        assertEquals("김철수", firstVillage.villageLeaderName)
+        
+        verify(exactly = 1) { villageRepository.findVillagesWithParams(null, null, pageable) }
+    }
+    
+    @Test
+    @DisplayName("마을 목록 조회 - 부서 ID 필터링")
+    fun getAllVillagesWithDepartmentFilter() {
+        // given
+        val departmentId = 1L
+        val now = LocalDateTime.now()
+        val department = Department(id = departmentId, name = "청년부", createdAt = now, updatedAt = now)
+        
+        val user = User(
+            id = 101L, 
+            name = "김철수", 
+            email = "user1@example.com", 
+            password = "password", 
+            role = Role.VILLAGE_LEADER,
+            department = department,
+            createdAt = now, 
+            updatedAt = now
+        )
+        
+        // 목(mock) 객체로 생성
+        val village = mockk<Village>()
+        val villageLeader = mockk<VillageLeader>()
+        
+        // 필요한 속성 설정
+        every { village.id } returns 1L
+        every { village.name } returns "동문마을"
+        every { village.department } returns department
+        every { village.villageLeader } returns villageLeader
+        every { village.createdAt } returns now
+        every { village.updatedAt } returns now
+        
+        every { villageLeader.user } returns user
+        
+        val pageable = PageRequest.of(0, 20, Sort.by("name").ascending())
+        val page = PageImpl(listOf(village), pageable, 1)
+        
+        every { 
+            villageRepository.findVillagesWithParams(departmentId, null, pageable) 
+        } returns page
+        
+        // when
+        val result = adminOrganizationService.getAllVillages(departmentId, null, pageable)
+        
+        // then
+        assertNotNull(result)
+        assertEquals(1, result.items.size)
+        assertEquals(1, result.totalCount)
+        assertFalse(result.hasMore)
+        
+        val villageResponse = result.items[0]
+        assertEquals(1L, villageResponse.id)
+        assertEquals("동문마을", villageResponse.name)
+        assertEquals(departmentId, villageResponse.departmentId)
+        assertEquals("청년부", villageResponse.departmentName)
+        
+        verify(exactly = 1) { villageRepository.findVillagesWithParams(departmentId, null, pageable) }
+    }
+    
+    @Test
+    @DisplayName("마을 목록 조회 - 이름 필터링")
+    fun getAllVillagesWithNameFilter() {
+        // given
+        val name = "동문"
+        val now = LocalDateTime.now()
+        val department = Department(id = 1L, name = "청년부", createdAt = now, updatedAt = now)
+        
+        val user = User(
+            id = 101L, 
+            name = "김철수", 
+            email = "user1@example.com", 
+            password = "password", 
+            role = Role.VILLAGE_LEADER,
+            department = department,
+            createdAt = now, 
+            updatedAt = now
+        )
+        
+        // 목(mock) 객체로 생성
+        val village = mockk<Village>()
+        val villageLeader = mockk<VillageLeader>()
+        
+        // 필요한 속성 설정
+        every { village.id } returns 1L
+        every { village.name } returns "동문마을"
+        every { village.department } returns department
+        every { village.villageLeader } returns villageLeader
+        every { village.createdAt } returns now
+        every { village.updatedAt } returns now
+        
+        every { villageLeader.user } returns user
+        
+        val pageable = PageRequest.of(0, 20, Sort.by("name").ascending())
+        val page = PageImpl(listOf(village), pageable, 1)
+        
+        every { 
+            villageRepository.findVillagesWithParams(null, name, pageable) 
+        } returns page
+        
+        // when
+        val result = adminOrganizationService.getAllVillages(null, name, pageable)
+        
+        // then
+        assertNotNull(result)
+        assertEquals(1, result.items.size)
+        assertEquals(1, result.totalCount)
+        assertFalse(result.hasMore)
+        
+        val villageResponse = result.items[0]
+        assertEquals(1L, villageResponse.id)
+        assertEquals("동문마을", villageResponse.name)
+        assertEquals("김철수", villageResponse.villageLeaderName)
+        
+        verify(exactly = 1) { villageRepository.findVillagesWithParams(null, name, pageable) }
     }
 } 

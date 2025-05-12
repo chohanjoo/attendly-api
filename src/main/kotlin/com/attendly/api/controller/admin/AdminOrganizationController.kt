@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -90,6 +92,25 @@ class AdminOrganizationController(
     fun createVillage(@Valid @RequestBody request: VillageCreateRequest): ResponseEntity<ApiResponse<VillageResponse>> {
         val response = adminOrganizationService.createVillage(request)
         return ResponseUtil.created(response, "마을이 성공적으로 생성되었습니다")
+    }
+
+    @Operation(
+        summary = "마을 목록 조회", 
+        description = "모든 마을 목록을 조회합니다. 부서별, 이름으로 필터링이 가능합니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @GetMapping("/villages")
+    fun getAllVillages(
+        @RequestParam(required = false) departmentId: Long?,
+        @RequestParam(required = false) name: String?,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int
+    ): ResponseEntity<ApiResponse<PageResponse<VillageResponse>>> {
+        val pageable = PageRequest.of(page, size, Sort.by("name").ascending())
+        val response = adminOrganizationService.getAllVillages(departmentId, name, pageable)
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "마을 목록 조회 성공"))
     }
 
     @Operation(

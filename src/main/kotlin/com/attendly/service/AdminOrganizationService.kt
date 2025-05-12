@@ -7,6 +7,7 @@ import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -385,6 +386,37 @@ class AdminOrganizationService(
             affectedMemberCount = affectedMemberCount,
             affectedLeaderCount = affectedLeaderCount,
             completedAt = LocalDateTime.now()
+        )
+    }
+
+    /**
+     * 마을 목록 조회
+     * 부서별, 이름으로 필터링이 가능합니다.
+     */
+    @Transactional(readOnly = true)
+    fun getAllVillages(departmentId: Long?, name: String?, pageable: Pageable = PageRequest.of(0, 20)): PageResponse<VillageResponse> {
+        val villages = villageRepository.findVillagesWithParams(departmentId, name, pageable)
+        
+        val items = villages.content.map { village ->
+            // 마을장 정보 가져오기
+            val villageLeader = village.villageLeader
+            
+            VillageResponse(
+                id = village.id ?: 0L,
+                name = village.name,
+                departmentId = village.department.id ?: 0L,
+                departmentName = village.department.name,
+                villageLeaderId = villageLeader?.user?.id,
+                villageLeaderName = villageLeader?.user?.name,
+                createdAt = village.createdAt,
+                updatedAt = village.updatedAt
+            )
+        }
+        
+        return PageResponse(
+            items = items,
+            totalCount = villages.totalElements,
+            hasMore = villages.hasNext()
         )
     }
 } 
