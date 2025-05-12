@@ -1547,6 +1547,7 @@
                     "id",
                     "name",
                     "role",
+                    "status",
                     "updatedAt"
                 ],
                 "type": "object",
@@ -1572,6 +1573,14 @@
                             "VILLAGE_LEADER",
                             "LEADER",
                             "MEMBER"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "ACTIVE",
+                            "INACTIVE",
+                            "PENDING"
                         ]
                     },
                     "departmentId": {
