@@ -1,4 +1,4 @@
-FROM amazoncorretto:21 AS builder
+FROM amazoncorretto:21-alpine AS builder
 WORKDIR /app
 COPY . .
 
@@ -9,13 +9,15 @@ RUN chmod +x ./gradlew
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx512m"
 RUN ./gradlew clean bootJar --no-daemon -x test
 
-FROM amazoncorretto:21
+FROM amazoncorretto:21-alpine
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 타임존 설정
 ENV TZ=Asia/Seoul
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apk add --no-cache tzdata && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
 
 # 실행
 EXPOSE 8080
