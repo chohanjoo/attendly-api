@@ -4,6 +4,7 @@ import com.attendly.api.dto.*
 import com.attendly.domain.entity.User
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.UserRepository
+import com.attendly.enums.Role
 import com.attendly.enums.UserStatus
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
@@ -300,5 +301,34 @@ class AdminUserService(
             createdAt = savedUser.createdAt,
             updatedAt = savedUser.updatedAt
         )
+    }
+
+    /**
+     * 사용자 필터링 검색
+     */
+    fun searchUsers(name: String?, departmentId: Long?, roles: List<Role>?, pageable: Pageable): Page<UserResponse> {
+        val users = if (name.isNullOrBlank() && departmentId == null && roles.isNullOrEmpty()) {
+            // 필터 조건이 없는 경우
+            userRepository.findAll(pageable)
+        } else {
+            // 필터링 조건이 있는 경우
+            userRepository.findByFilters(name, departmentId, roles, pageable)
+        }
+        
+        return users.map { user ->
+            UserResponse(
+                id = user.id ?: 0L,
+                name = user.name,
+                email = user.email,
+                phoneNumber = user.phoneNumber,
+                role = user.role,
+                status = user.status,
+                departmentId = user.department.id ?: 0L,
+                departmentName = user.department.name,
+                birthDate = user.birthDate,
+                createdAt = user.createdAt,
+                updatedAt = user.updatedAt
+            )
+        }
     }
 } 

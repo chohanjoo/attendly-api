@@ -10,9 +10,13 @@ import org.springframework.stereotype.Repository
 import java.util.Optional
 
 @Repository
-interface UserRepository : JpaRepository<User, Long> {
+interface UserRepository : JpaRepository<User, Long>, UserRepositoryCustom {
     fun findByEmail(email: String): Optional<User>
     fun findByRole(role: Role): List<User>
     fun findByDepartmentAndRole(department: Department, role: Role): List<User>
     fun findByNameContainingIgnoreCase(name: String, pageable: Pageable): Page<User>
+}
+
+interface UserRepositoryCustom {
+    fun findByFilters(name: String?, departmentId: Long?, roles: List<Role>?, pageable: Pageable): Page<User>
 } 

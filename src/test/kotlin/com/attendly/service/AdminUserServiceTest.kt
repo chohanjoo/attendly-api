@@ -397,4 +397,85 @@ class AdminUserServiceTest {
         assertEquals(1L, result.content[0].id)
         assertEquals("홍길동", result.content[0].name)
     }
+
+    @Test
+    fun `searchUsers should return filtered users when all filters provided`() {
+        // given
+        val pageable = PageRequest.of(0, 10)
+        val searchName = "홍길"
+        val departmentId = 1L
+        val roles = listOf(Role.LEADER)
+        val department = Department(id = departmentId, name = "청년부")
+        val users = listOf(
+            User(
+                id = 1L,
+                name = "홍길동",
+                email = "hong@example.com",
+                password = "encodedPassword",
+                role = Role.LEADER,
+                department = department
+            )
+        )
+        
+        val pagedUsers = PageImpl(users, pageable, users.size.toLong())
+        
+        every { userRepository.findByFilters(searchName, departmentId, roles, pageable) } returns pagedUsers
+        
+        // when
+        val result = adminUserService.searchUsers(searchName, departmentId, roles, pageable)
+        
+        // then
+        assertNotNull(result)
+        assertEquals(1, result.content.size)
+        assertEquals(1L, result.content[0].id)
+        assertEquals("홍길동", result.content[0].name)
+        assertEquals(Role.LEADER, result.content[0].role)
+        assertEquals(departmentId, result.content[0].departmentId)
+        assertEquals("청년부", result.content[0].departmentName)
+        
+        verify { userRepository.findByFilters(searchName, departmentId, roles, pageable) }
+    }
+    
+    @Test
+    fun `searchUsers should return all users when no filters provided`() {
+        // given
+        val pageable = PageRequest.of(0, 10)
+        val department = Department(id = 1L, name = "청년부")
+        val users = listOf(
+            User(
+                id = 1L,
+                name = "홍길동",
+                email = "hong@example.com",
+                password = "encodedPassword",
+                role = Role.LEADER,
+                department = department
+            ),
+            User(
+                id = 2L,
+                name = "김철수",
+                email = "kim@example.com",
+                password = "encodedPassword",
+                role = Role.MEMBER,
+                department = department
+            )
+        )
+        
+        val pagedUsers = PageImpl(users, pageable, users.size.toLong())
+        
+        every { userRepository.findAll(pageable) } returns pagedUsers
+        
+        // when
+        val result = adminUserService.searchUsers(null, null, null, pageable)
+        
+        // then
+        assertNotNull(result)
+        assertEquals(2, result.content.size)
+        assertEquals(1L, result.content[0].id)
+        assertEquals("홍길동", result.content[0].name)
+        assertEquals(2L, result.content[1].id)
+        assertEquals("김철수", result.content[1].name)
+        
+        verify { userRepository.findAll(pageable) }
+        verify(exactly = 0) { userRepository.findByFilters(any(), any(), any(), any()) }
+    }
 } 

@@ -2,6 +2,7 @@ package com.attendly.api.controller.admin
 
 import com.attendly.api.dto.*
 import com.attendly.api.util.ResponseUtil
+import com.attendly.enums.Role
 import com.attendly.service.AdminUserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -74,15 +75,17 @@ class AdminUserController(
 
     @Operation(
         summary = "사용자 목록 조회", 
-        description = "사용자 목록을 페이징하여 조회합니다. name 파라미터를 통해 이름으로 검색이 가능합니다.",
+        description = "사용자 목록을 페이징하여 조회합니다. name 파라미터를 통해 이름으로 검색이 가능합니다. departmentId로 부서별 필터링, roles로 역할 필터링이 가능합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @GetMapping
     fun getAllUsers(
         @RequestParam(required = false) name: String?,
+        @RequestParam(required = false) departmentId: Long?,
+        @RequestParam(required = false) roles: List<Role>?,
         @PageableDefault(size = 20, sort = ["id"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<ApiResponse<PageResponse<UserResponse>>> {
-        val response = adminUserService.searchUsersByName(name, pageable)
+        val response = adminUserService.searchUsers(name, departmentId, roles, pageable)
         return ResponseUtil.successList(response.content, response.totalElements, response.hasNext())
     }
 
