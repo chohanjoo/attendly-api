@@ -21,7 +21,8 @@ class AdminOrganizationService(
     private val gbsGroupRepository: GbsGroupRepository,
     private val userRepository: UserRepository,
     private val gbsLeaderHistoryRepository: GbsLeaderHistoryRepository,
-    private val gbsMemberHistoryRepository: GbsMemberHistoryRepository
+    private val gbsMemberHistoryRepository: GbsMemberHistoryRepository,
+    private val villageLeaderRepository: VillageLeaderRepository
 ) {
 
     /**
@@ -130,10 +131,49 @@ class AdminOrganizationService(
             val leader = userRepository.findById(request.villageLeaderId)
                 .orElseThrow { AttendlyApiException(ErrorMessage.USER_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.USER_NOT_FOUND, request.villageLeaderId)) }
 
-            // TODO: 마을장 정보 조회 및 업데이트 로직 추가
+            // 현재 마을장이 있는지 확인
+            val existingVillageLeader = villageLeaderRepository.findByVillageIdAndEndDateIsNull(savedVillage.id!!)
+            
+            if (existingVillageLeader != null) {
+                if (existingVillageLeader.user.id != request.villageLeaderId) {
+                    // 기존 마을장과 새 마을장이 다르면 기존 마을장 종료 처리
+                    val updatedVillageLeader = VillageLeader(
+                        user = existingVillageLeader.user,
+                        village = existingVillageLeader.village,
+                        startDate = existingVillageLeader.startDate,
+                        endDate = LocalDate.now(),
+                        createdAt = existingVillageLeader.createdAt,
+                        updatedAt = LocalDateTime.now()
+                    )
+                    villageLeaderRepository.save(updatedVillageLeader)
+                    
+                    // 새 마을장 등록
+                    val villageLeader = VillageLeader(
+                        user = leader,
+                        village = savedVillage,
+                        startDate = LocalDate.now()
+                    )
+                    villageLeaderRepository.save(villageLeader)
+                }
+            } else {
+                // 마을장이 없으면 새로 등록
+                val villageLeader = VillageLeader(
+                    user = leader,
+                    village = savedVillage,
+                    startDate = LocalDate.now()
+                )
+                villageLeaderRepository.save(villageLeader)
+            }
 
             villageLeaderId = leader.id
             villageLeaderName = leader.name
+        } else {
+            // 현재 마을장 정보 조회
+            val existingVillageLeader = villageLeaderRepository.findByVillageIdAndEndDateIsNull(savedVillage.id!!)
+            if (existingVillageLeader != null) {
+                villageLeaderId = existingVillageLeader.user.id
+                villageLeaderName = existingVillageLeader.user.name
+            }
         }
 
         return VillageResponse(
@@ -176,7 +216,55 @@ class AdminOrganizationService(
         var villageLeaderId: Long? = null
         var villageLeaderName: String? = null
 
-        // TODO: 마을장 정보 조회 및 업데이트 로직 추가
+        // 마을장 정보 조회 및 업데이트
+        if (request.villageLeaderId != null) {
+            val leader = userRepository.findById(request.villageLeaderId)
+                .orElseThrow { AttendlyApiException(ErrorMessage.USER_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.USER_NOT_FOUND, request.villageLeaderId)) }
+
+            // 현재 마을장이 있는지 확인
+            val existingVillageLeader = villageLeaderRepository.findByVillageIdAndEndDateIsNull(villageId)
+            
+            if (existingVillageLeader != null) {
+                if (existingVillageLeader.user.id != request.villageLeaderId) {
+                    // 기존 마을장과 새 마을장이 다르면 기존 마을장 종료 처리
+                    val updatedVillageLeader = VillageLeader(
+                        user = existingVillageLeader.user,
+                        village = existingVillageLeader.village,
+                        startDate = existingVillageLeader.startDate,
+                        endDate = LocalDate.now(),
+                        createdAt = existingVillageLeader.createdAt,
+                        updatedAt = LocalDateTime.now()
+                    )
+                    villageLeaderRepository.save(updatedVillageLeader)
+                    
+                    // 새 마을장 등록
+                    val villageLeader = VillageLeader(
+                        user = leader,
+                        village = savedVillage,
+                        startDate = LocalDate.now()
+                    )
+                    villageLeaderRepository.save(villageLeader)
+                }
+            } else {
+                // 마을장이 없으면 새로 등록
+                val villageLeader = VillageLeader(
+                    user = leader,
+                    village = savedVillage,
+                    startDate = LocalDate.now()
+                )
+                villageLeaderRepository.save(villageLeader)
+            }
+
+            villageLeaderId = leader.id
+            villageLeaderName = leader.name
+        } else {
+            // 현재 마을장 정보 조회
+            val existingVillageLeader = villageLeaderRepository.findByVillageIdAndEndDateIsNull(villageId)
+            if (existingVillageLeader != null) {
+                villageLeaderId = existingVillageLeader.user.id
+                villageLeaderName = existingVillageLeader.user.name
+            }
+        }
 
         return VillageResponse(
             id = savedVillage.id ?: 0L,

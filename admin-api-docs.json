@@ -40,6 +40,10 @@
         {
             "name": "관리자-사용자",
             "description": "관리자 전용 사용자 관리 API"
+        },
+        {
+            "name": "관리자 출석 API",
+            "description": "관리자용 출석 데이터 관리 API"
         }
     ],
     "paths": {
@@ -2166,6 +2170,106 @@
                     }
                 ]
             }
+        },
+        "/api/admin/attendance": {
+            "get": {
+                "tags": [
+                    "관리자 출석 API"
+                ],
+                "summary": "출석 데이터 관리자용 조회",
+                "description": "관리자 권한으로 출석 데이터를 다양한 조건으로 조회합니다.",
+                "operationId": "getAttendances",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "페이지 번호 (0부터 시작)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "페이지 크기",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "검색어 (이름)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "description": "시작 날짜 (yyyy-MM-dd)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "description": "종료 날짜 (yyyy-MM-dd)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "출석 상태 (PRESENT, ABSENT, LATE, EXCUSED)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "PRESENT",
+                                "ABSENT",
+                                "LATE",
+                                "EXCUSED"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponsePageResponseAdminAttendanceResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -4005,6 +4109,115 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/BatchLogResponse"
+                        }
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "hasMore": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "AdminAttendanceResponse": {
+                "required": [
+                    "date",
+                    "eventType",
+                    "id",
+                    "status",
+                    "userId",
+                    "userName"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "출석 ID",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "userId": {
+                        "type": "integer",
+                        "description": "사용자 ID",
+                        "format": "int64",
+                        "example": 5
+                    },
+                    "userName": {
+                        "type": "string",
+                        "description": "사용자 이름",
+                        "example": "홍길동"
+                    },
+                    "date": {
+                        "type": "string",
+                        "description": "날짜",
+                        "format": "date",
+                        "example": "2025-01-05"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "출석 상태",
+                        "example": "PRESENT",
+                        "enum": [
+                            "PRESENT",
+                            "ABSENT",
+                            "LATE",
+                            "EXCUSED"
+                        ]
+                    },
+                    "eventType": {
+                        "type": "string",
+                        "description": "이벤트 유형",
+                        "example": "주일예배"
+                    },
+                    "note": {
+                        "type": "string",
+                        "description": "비고",
+                        "example": "병가"
+                    }
+                },
+                "description": "관리자용 출석 기록 응답"
+            },
+            "ApiResponsePageResponseAdminAttendanceResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/PageResponseAdminAttendanceResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "PageResponseAdminAttendanceResponse": {
+                "required": [
+                    "hasMore",
+                    "items",
+                    "totalCount"
+                ],
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AdminAttendanceResponse"
                         }
                     },
                     "totalCount": {

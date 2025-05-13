@@ -39,6 +39,7 @@ import org.junit.jupiter.api.DisplayName
 import com.attendly.enums.Role
 import com.attendly.enums.UserStatus
 import org.junit.jupiter.api.extension.ExtendWith
+import io.mockk.MockKAnnotations
 
 @ExtendWith(MockKExtension::class)
 class AdminOrganizationServiceTest {
@@ -61,6 +62,9 @@ class AdminOrganizationServiceTest {
     @MockK
     private lateinit var gbsMemberHistoryRepository: GbsMemberHistoryRepository
 
+    @MockK
+    private lateinit var villageLeaderRepository: VillageLeaderRepository
+
     @InjectMockKs
     private lateinit var adminOrganizationService: AdminOrganizationService
 
@@ -72,6 +76,7 @@ class AdminOrganizationServiceTest {
         userRepository = mockk(relaxed = true)
         gbsLeaderHistoryRepository = mockk(relaxed = true)
         gbsMemberHistoryRepository = mockk(relaxed = true)
+        villageLeaderRepository = mockk(relaxed = true)
         
         adminOrganizationService = AdminOrganizationService(
             departmentRepository,
@@ -79,7 +84,8 @@ class AdminOrganizationServiceTest {
             gbsGroupRepository,
             userRepository,
             gbsLeaderHistoryRepository,
-            gbsMemberHistoryRepository
+            gbsMemberHistoryRepository,
+            villageLeaderRepository
         )
     }
 
@@ -493,5 +499,184 @@ class AdminOrganizationServiceTest {
         assertEquals("김철수", villageResponse.villageLeaderName)
         
         verify(exactly = 1) { villageRepository.findVillagesWithParams(null, name, pageable) }
+    }
+
+    @Test
+    fun `createVillage with villageLeaderId - new leader assigned successfully`() {
+        // Given
+        val departmentId = 1L
+        val villageLeaderId = 2L
+        val request = VillageCreateRequest(
+            name = "Test Village",
+            departmentId = departmentId,
+            villageLeaderId = villageLeaderId
+        )
+
+        val department = Department(id = departmentId, name = "Test Department")
+        val village = Village(id = 1L, name = "Test Village", department = department)
+        val user = User(id = villageLeaderId, name = "Test Leader", email = "leader@test.com", role = Role.MEMBER, department = department)
+
+        every { departmentRepository.findById(departmentId) } returns Optional.of(department)
+        every { villageRepository.save(any()) } returns village
+        every { userRepository.findById(villageLeaderId) } returns Optional.of(user)
+        every { villageLeaderRepository.findByVillageIdAndEndDateIsNull(village.id!!) } returns null
+        every { villageLeaderRepository.save(any()) } returns mockk()
+
+        // When
+        val result = adminOrganizationService.createVillage(request)
+
+        // Then
+        assertEquals(village.id, result.id)
+        assertEquals(village.name, result.name)
+        assertEquals(department.id, result.departmentId)
+        assertEquals(department.name, result.departmentName)
+        assertEquals(user.id, result.villageLeaderId)
+        assertEquals(user.name, result.villageLeaderName)
+
+        verify { departmentRepository.findById(departmentId) }
+        verify { villageRepository.save(any()) }
+        verify { userRepository.findById(villageLeaderId) }
+        verify { villageLeaderRepository.findByVillageIdAndEndDateIsNull(village.id!!) }
+        verify { villageLeaderRepository.save(any()) }
+    }
+
+    @Test
+    fun `createVillage with villageLeaderId - replace existing leader`() {
+        // Given
+        val departmentId = 1L
+        val existingLeaderId = 2L
+        val newLeaderId = 3L
+        val request = VillageCreateRequest(
+            name = "Test Village",
+            departmentId = departmentId,
+            villageLeaderId = newLeaderId
+        )
+
+        val department = Department(id = departmentId, name = "Test Department")
+        val village = Village(id = 1L, name = "Test Village", department = department)
+        val existingLeader = User(id = existingLeaderId, name = "Existing Leader", email = "existing@test.com", role = Role.MEMBER, department = department)
+        val newLeader = User(id = newLeaderId, name = "New Leader", email = "new@test.com", role = Role.MEMBER, department = department)
+        
+        val existingVillageLeader = VillageLeader(
+            user = existingLeader,
+            village = village,
+            startDate = LocalDate.now().minusDays(10)
+        )
+
+        every { departmentRepository.findById(departmentId) } returns Optional.of(department)
+        every { villageRepository.save(any()) } returns village
+        every { userRepository.findById(newLeaderId) } returns Optional.of(newLeader)
+        every { villageLeaderRepository.findByVillageIdAndEndDateIsNull(village.id!!) } returns existingVillageLeader
+        every { villageLeaderRepository.save(any()) } returns mockk()
+
+        // When
+        val result = adminOrganizationService.createVillage(request)
+
+        // Then
+        assertEquals(village.id, result.id)
+        assertEquals(village.name, result.name)
+        assertEquals(department.id, result.departmentId)
+        assertEquals(department.name, result.departmentName)
+        assertEquals(newLeader.id, result.villageLeaderId)
+        assertEquals(newLeader.name, result.villageLeaderName)
+
+        verify { departmentRepository.findById(departmentId) }
+        verify { villageRepository.save(any()) }
+        verify { userRepository.findById(newLeaderId) }
+        verify { villageLeaderRepository.findByVillageIdAndEndDateIsNull(village.id!!) }
+        verify(exactly = 2) { villageLeaderRepository.save(any()) } // 기존 리더 종료 + 새 리더 추가
+    }
+
+    @Test
+    fun `updateVillage with villageLeaderId - replace existing leader`() {
+        // Given
+        val villageId = 1L
+        val departmentId = 1L
+        val existingLeaderId = 2L
+        val newLeaderId = 3L
+        val request = VillageUpdateRequest(
+            name = "Updated Village",
+            departmentId = null,
+            villageLeaderId = newLeaderId
+        )
+
+        val department = Department(id = departmentId, name = "Test Department")
+        val village = Village(id = villageId, name = "Test Village", department = department)
+        val updatedVillage = Village(id = villageId, name = "Updated Village", department = department)
+        val existingLeader = User(id = existingLeaderId, name = "Existing Leader", email = "existing@test.com", role = Role.MEMBER, department = department)
+        val newLeader = User(id = newLeaderId, name = "New Leader", email = "new@test.com", role = Role.MEMBER, department = department)
+        
+        val existingVillageLeader = VillageLeader(
+            user = existingLeader,
+            village = village,
+            startDate = LocalDate.now().minusDays(10)
+        )
+
+        every { villageRepository.findById(villageId) } returns Optional.of(village)
+        every { villageRepository.save(any()) } returns updatedVillage
+        every { userRepository.findById(newLeaderId) } returns Optional.of(newLeader)
+        every { villageLeaderRepository.findByVillageIdAndEndDateIsNull(villageId) } returns existingVillageLeader
+        every { villageLeaderRepository.save(any()) } returns mockk()
+
+        // When
+        val result = adminOrganizationService.updateVillage(villageId, request)
+
+        // Then
+        assertEquals(updatedVillage.id, result.id)
+        assertEquals(updatedVillage.name, result.name)
+        assertEquals(department.id, result.departmentId)
+        assertEquals(department.name, result.departmentName)
+        assertEquals(newLeader.id, result.villageLeaderId)
+        assertEquals(newLeader.name, result.villageLeaderName)
+
+        verify { villageRepository.findById(villageId) }
+        verify { villageRepository.save(any()) }
+        verify { userRepository.findById(newLeaderId) }
+        verify { villageLeaderRepository.findByVillageIdAndEndDateIsNull(villageId) }
+        verify(exactly = 2) { villageLeaderRepository.save(any()) } // 기존 리더 종료 + 새 리더 추가
+    }
+
+    @Test
+    fun `updateVillage with no villageLeaderId - keep existing leader`() {
+        // Given
+        val villageId = 1L
+        val departmentId = 1L
+        val existingLeaderId = 2L
+        val request = VillageUpdateRequest(
+            name = "Updated Village",
+            departmentId = null,
+            villageLeaderId = null
+        )
+
+        val department = Department(id = departmentId, name = "Test Department")
+        val village = Village(id = villageId, name = "Test Village", department = department)
+        val updatedVillage = Village(id = villageId, name = "Updated Village", department = department)
+        val existingLeader = User(id = existingLeaderId, name = "Existing Leader", email = "existing@test.com", role = Role.MEMBER, department = department)
+        
+        val existingVillageLeader = VillageLeader(
+            user = existingLeader,
+            village = village,
+            startDate = LocalDate.now().minusDays(10)
+        )
+
+        every { villageRepository.findById(villageId) } returns Optional.of(village)
+        every { villageRepository.save(any()) } returns updatedVillage
+        every { villageLeaderRepository.findByVillageIdAndEndDateIsNull(villageId) } returns existingVillageLeader
+
+        // When
+        val result = adminOrganizationService.updateVillage(villageId, request)
+
+        // Then
+        assertEquals(updatedVillage.id, result.id)
+        assertEquals(updatedVillage.name, result.name)
+        assertEquals(department.id, result.departmentId)
+        assertEquals(department.name, result.departmentName)
+        assertEquals(existingLeader.id, result.villageLeaderId)
+        assertEquals(existingLeader.name, result.villageLeaderName)
+
+        verify { villageRepository.findById(villageId) }
+        verify { villageRepository.save(any()) }
+        verify { villageLeaderRepository.findByVillageIdAndEndDateIsNull(villageId) }
+        verify(exactly = 0) { villageLeaderRepository.save(any()) } // 변경 사항 없음
     }
 } 
