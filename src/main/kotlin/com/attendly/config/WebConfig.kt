@@ -5,6 +5,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.filter.CommonsRequestLoggingFilter
+import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import jakarta.servlet.FilterChain
@@ -32,6 +33,16 @@ class WebConfig(
         registration.setName("contentCachingFilter")
         registration.order = 1
         return registration
+    }
+
+    override fun addCorsMappings(registry: CorsRegistry) {
+        registry.addMapping("/**")
+            .allowedOriginPatterns("*")
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+            .allowedHeaders("*")
+            .exposedHeaders("Authorization", "Content-Disposition")
+            .allowCredentials(true)
+            .maxAge(3600)
     }
 }
 
