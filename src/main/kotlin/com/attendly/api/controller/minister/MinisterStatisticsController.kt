@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import jakarta.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/api/minister")
@@ -63,6 +64,63 @@ class MinisterStatisticsController(
             data = statistics,
             message = "부서 통계 조회 성공"
         )
+    }
+    
+    @GetMapping("/departments/{departmentId}/statistics/download")
+    @Operation(
+        summary = "부서 통계 데이터 다운로드",
+        description = "특정 부서의 통계 데이터를 Excel 또는 CSV 형식으로 다운로드합니다. 지정된 기간 동안의 출석 현황, 마을별 통계 등을 포함합니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @ApiResponses(
+        value = [
+            io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200",
+                description = "통계 데이터 다운로드 성공",
+                content = [
+                    Content(mediaType = "application/vnd.ms-excel"),
+                    Content(mediaType = "text/csv")
+                ]
+            ),
+            io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "부서를 찾을 수 없음"),
+            io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음")
+        ]
+    )
+    @PreAuthorize("hasRole('MINISTER')")
+    fun downloadDepartmentStatistics(
+        @Parameter(description = "부서 ID", required = true)
+        @PathVariable departmentId: Long,
+        
+        @Parameter(description = "시작 날짜 (yyyy-MM-dd)", required = true)
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) startDate: LocalDate,
+        
+        @Parameter(description = "종료 날짜 (yyyy-MM-dd)", required = true)
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) endDate: LocalDate,
+        
+        @Parameter(description = "다운로드 형식 (xls, csv)", required = true)
+        @RequestParam format: String,
+        
+        response: HttpServletResponse
+    ) {
+        val departmentName = ministerStatisticsService.getDepartmentName(departmentId)
+        val fileName = "${departmentName}_통계_${startDate}_${endDate}"
+        
+        when (format.lowercase()) {
+            "xls" -> {
+                response.contentType = "application/vnd.ms-excel"
+                response.setHeader("Content-Disposition", "attachment; filename=\"$fileName.xls\"")
+                ministerStatisticsService.exportDepartmentStatisticsToExcel(departmentId, startDate, endDate, response.outputStream)
+            }
+            "csv" -> {
+                response.contentType = "text/csv; charset=UTF-8"
+                response.setHeader("Content-Disposition", "attachment; filename=\"$fileName.csv\"")
+                ministerStatisticsService.exportDepartmentStatisticsToCSV(departmentId, startDate, endDate, response.outputStream)
+            }
+            else -> {
+                throw IllegalArgumentException("지원하지 않는 포맷입니다. 'xls' 또는 'csv'만 지원합니다.")
+            }
+        }
     }
     
     @GetMapping("/departments/{departmentId}/villages/{villageId}/statistics")

@@ -29,6 +29,11 @@ dependencies {
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.flywaydb:flyway-mysql")
 	
+	// Excel 및 CSV 파일 생성을 위한 의존성
+	implementation("org.apache.poi:poi:5.2.3")
+	implementation("org.apache.poi:poi-ooxml:5.2.3")
+	implementation("com.opencsv:opencsv:5.7.1")
+	
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
 	implementation("io.jsonwebtoken:jjwt-impl:0.11.5")

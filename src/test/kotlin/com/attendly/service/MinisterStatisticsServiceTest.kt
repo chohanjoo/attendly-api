@@ -15,6 +15,8 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -26,6 +28,13 @@ import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import java.io.ByteArrayOutputStream
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import com.opencsv.CSVReader
+import java.io.InputStreamReader
+import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
+import io.mockk.spyk
 
 @ExtendWith(MockKExtension::class)
 class MinisterStatisticsServiceTest {
@@ -171,5 +180,122 @@ class MinisterStatisticsServiceTest {
         assertThrows<AttendlyApiException> {
             ministerStatisticsService.getDepartmentStatistics(1L, startDate, endDate)
         }
+    }
+    
+    @Test
+    @DisplayName("부서 이름 조회 테스트")
+    fun getDepartmentNameTest() {
+        // Given
+        every { departmentRepository.findById(1L) } returns java.util.Optional.of(department)
+        
+        // When
+        val result = ministerStatisticsService.getDepartmentName(1L)
+        
+        // Then
+        assertEquals("대학부", result)
+    }
+    
+    @Test
+    @DisplayName("존재하지 않는 부서 ID로 이름 조회 시 예외 발생")
+    fun getDepartmentName_nonExistingDepartmentId_throwsException() {
+        // Given
+        every { departmentRepository.findById(999L) } returns java.util.Optional.empty()
+        
+        // When & Then
+        assertThrows<AttendlyApiException> {
+            ministerStatisticsService.getDepartmentName(999L)
+        }
+    }
+    
+    @Test
+    @DisplayName("Excel 파일 내보내기 테스트")
+    fun exportDepartmentStatisticsToExcelTest() {
+        // Given
+        val mockDepartmentStatistics = mockk<DepartmentStatisticsResponse>(relaxed = true)
+        
+        // 모의 통계 데이터 설정
+        every { mockDepartmentStatistics.departmentId } returns 1L
+        every { mockDepartmentStatistics.departmentName } returns "대학부"
+        every { mockDepartmentStatistics.totalMembers } returns 45
+        every { mockDepartmentStatistics.attendedMembers } returns 38
+        every { mockDepartmentStatistics.attendanceRate } returns 84.44
+        every { mockDepartmentStatistics.averageQtCount } returns 4.22
+        every { mockDepartmentStatistics.villages } returns emptyList()
+        every { mockDepartmentStatistics.weeklyStats } returns emptyList()
+        
+        // spyk를 사용하여 getDepartmentStatistics 메서드를 오버라이드
+        val spyService = spyk(ministerStatisticsService)
+        every { spyService.getDepartmentStatistics(1L, startDate, endDate) } returns mockDepartmentStatistics
+        
+        // 출력 스트림
+        val outputStream = ByteArrayOutputStream()
+        
+        // When
+        spyService.exportDepartmentStatisticsToExcel(1L, startDate, endDate, outputStream)
+        
+        // Then
+        val bytes = outputStream.toByteArray()
+        assertTrue(bytes.isNotEmpty())
+        
+        // Excel 워크북으로 파싱하여 검증 (기본적인 형식 검증)
+        val workbook = XSSFWorkbook(ByteArrayInputStream(bytes))
+        
+        // 워크시트 수 확인
+        assertEquals(3, workbook.numberOfSheets)
+        
+        // 시트 이름 확인
+        assertEquals("요약", workbook.getSheetName(0))
+        assertEquals("마을별 통계", workbook.getSheetName(1))
+        assertEquals("주간 통계", workbook.getSheetName(2))
+        
+        // 요약 시트 내용 확인
+        val summarySheet = workbook.getSheet("요약")
+        assertTrue(summarySheet.getRow(1).getCell(1).stringCellValue == "대학부")
+        
+        workbook.close()
+    }
+    
+    @Test
+    @DisplayName("CSV 파일 내보내기 테스트")
+    fun exportDepartmentStatisticsToCSVTest() {
+        // Given
+        val mockDepartmentStatistics = mockk<DepartmentStatisticsResponse>(relaxed = true)
+        
+        // 모의 통계 데이터 설정
+        every { mockDepartmentStatistics.departmentId } returns 1L
+        every { mockDepartmentStatistics.departmentName } returns "대학부"
+        every { mockDepartmentStatistics.totalMembers } returns 45
+        every { mockDepartmentStatistics.attendedMembers } returns 38
+        every { mockDepartmentStatistics.attendanceRate } returns 84.44
+        every { mockDepartmentStatistics.averageQtCount } returns 4.22
+        every { mockDepartmentStatistics.villages } returns emptyList()
+        every { mockDepartmentStatistics.weeklyStats } returns emptyList()
+        
+        // spyk를 사용하여 getDepartmentStatistics 메서드를 오버라이드
+        val spyService = spyk(ministerStatisticsService)
+        every { spyService.getDepartmentStatistics(1L, startDate, endDate) } returns mockDepartmentStatistics
+        
+        // 출력 스트림
+        val outputStream = ByteArrayOutputStream()
+        
+        // When
+        spyService.exportDepartmentStatisticsToCSV(1L, startDate, endDate, outputStream)
+        
+        // Then
+        val bytes = outputStream.toByteArray()
+        assertTrue(bytes.isNotEmpty())
+        
+        // CSV 파일로 파싱하여 검증
+        val csvReader = CSVReader(InputStreamReader(ByteArrayInputStream(bytes), StandardCharsets.UTF_8))
+        val rows = csvReader.readAll()
+        
+        // 기본 행 수 확인 (최소한 헤더와 데이터가 있어야 함)
+        assertTrue(rows.size > 5)
+        
+        // 부서명 확인
+        assertEquals("부서명", rows[1][0])
+        assertEquals("대학부", rows[1][1])
+        
+        csvReader.close()
     }
 } 

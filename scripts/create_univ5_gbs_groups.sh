@@ -65,7 +65,7 @@ VILLAGE_LEADER_RESPONSE=$(curl -s -X POST "$BASE_URL/api/admin/users" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -d "{
     \"name\": \"Emma Wilson\",
-    \"email\": \"unit5Qvillage@example.com\",
+    \"email\": \"unit5Qvillage@example.co m\",
     \"password\": \"test123!@#\",
     \"role\": \"VILLAGE_LEADER\",
     \"departmentId\": $DEPARTMENT_ID,

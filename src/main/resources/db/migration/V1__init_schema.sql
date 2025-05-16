@@ -122,3 +122,7 @@ CREATE TABLE attendance (
     FOREIGN KEY (created_by) REFERENCES users(id),
     INDEX idx_attendance_gbs_week (gbs_id, week_start)
 ) ENGINE=InnoDB; 
+
+ALTER TABLE users
+ADD COLUMN village_id BIGINT,
+ADD CONSTRAINT fk_users_village FOREIGN KEY (village_id) REFERENCES village(id); 

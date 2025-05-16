@@ -149,6 +149,24 @@ class GlobalExceptionHandler {
     }
     
     /**
+     * 잘못된 인자 예외 처리
+     */
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgumentException(
+        e: IllegalArgumentException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        log.error("IllegalArgumentException: {}", e)
+        val errorResponse = ErrorResponse(
+            status = ErrorMessage.BAD_REQUEST.status.value(),
+            code = ErrorMessage.BAD_REQUEST.code,
+            message = e.message ?: ErrorMessage.BAD_REQUEST.message,
+            path = request.requestURI
+        )
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
+    }
+    
+    /**
      * 요청한 리소스를 찾을 수 없는 예외 처리
      */
     @ExceptionHandler(NoHandlerFoundException::class)

@@ -21,6 +21,17 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.ss.usermodel.FillPatternType
+import org.apache.poi.ss.usermodel.IndexedColors
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import com.opencsv.CSVWriter
+import java.io.OutputStream
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
 
 @Service
 class MinisterStatisticsService(
@@ -247,6 +258,259 @@ class MinisterStatisticsService(
             members = memberStats,
             weeklyStats = weeklyStats
         )
+    }
+    
+    /**
+     * 부서 이름 조회
+     * 부서 ID로 부서 이름을 조회합니다.
+     * 
+     * @param departmentId 부서 ID
+     * @return 부서 이름
+     */
+    @Transactional(readOnly = true)
+    fun getDepartmentName(departmentId: Long): String {
+        return departmentRepository.findById(departmentId)
+            .orElseThrow { 
+                AttendlyApiException(
+                    ErrorMessage.DEPARTMENT_NOT_FOUND,
+                    ErrorMessageUtils.withId(ErrorMessage.DEPARTMENT_NOT_FOUND, departmentId)
+                )
+            }.name
+    }
+    
+    /**
+     * 부서 통계를 Excel 파일로 내보내기
+     * 
+     * @param departmentId 부서 ID
+     * @param startDate 시작일
+     * @param endDate 종료일
+     * @param outputStream 출력 스트림
+     */
+    @Transactional(readOnly = true)
+    fun exportDepartmentStatisticsToExcel(departmentId: Long, startDate: LocalDate, endDate: LocalDate, outputStream: OutputStream) {
+        val statistics = getDepartmentStatistics(departmentId, startDate, endDate)
+        
+        XSSFWorkbook().use { workbook ->
+            // 헤더 스타일 생성
+            val headerStyle = createHeaderStyle(workbook)
+            
+            // 요약 시트 생성
+            createSummarySheet(workbook, statistics, headerStyle)
+            
+            // 마을별 통계 시트 생성
+            createVillageStatisticsSheet(workbook, statistics, headerStyle)
+            
+            // 주간 통계 시트 생성
+            createWeeklyStatisticsSheet(workbook, statistics, headerStyle)
+            
+            // 파일 작성
+            workbook.write(outputStream)
+            outputStream.flush()
+        }
+    }
+    
+    /**
+     * 부서 통계를 CSV 파일로 내보내기
+     * 
+     * @param departmentId 부서 ID
+     * @param startDate 시작일
+     * @param endDate 종료일
+     * @param outputStream 출력 스트림
+     */
+    @Transactional(readOnly = true)
+    fun exportDepartmentStatisticsToCSV(departmentId: Long, startDate: LocalDate, endDate: LocalDate, outputStream: OutputStream) {
+        val statistics = getDepartmentStatistics(departmentId, startDate, endDate)
+        
+        OutputStreamWriter(outputStream, StandardCharsets.UTF_8).use { writer ->
+            CSVWriter(writer).use { csvWriter ->
+                // 요약 정보 출력
+                csvWriter.writeNext(arrayOf("부서 통계 요약", "", "", ""), false)
+                csvWriter.writeNext(arrayOf("부서명", statistics.departmentName, "", ""), false)
+                csvWriter.writeNext(arrayOf("기간", "${startDate} ~ ${endDate}", "", ""), false)
+                csvWriter.writeNext(arrayOf("", "", "", ""), false)
+                csvWriter.writeNext(arrayOf("전체 멤버 수", statistics.totalMembers.toString(), "", ""), false)
+                csvWriter.writeNext(arrayOf("출석 멤버 수", statistics.attendedMembers.toString(), "", ""), false)
+                csvWriter.writeNext(arrayOf("출석률", String.format("%.2f%%", statistics.attendanceRate), "", ""), false)
+                csvWriter.writeNext(arrayOf("평균 QT 수", String.format("%.2f", statistics.averageQtCount), "", ""), false)
+                csvWriter.writeNext(arrayOf("", "", "", ""), false)
+                
+                // 마을별 통계 출력
+                csvWriter.writeNext(arrayOf("마을별 통계", "", "", "", ""), false)
+                csvWriter.writeNext(arrayOf("마을명", "전체 멤버 수", "출석 멤버 수", "출석률", "평균 QT 수"), false)
+                
+                statistics.villages.forEach { village ->
+                    csvWriter.writeNext(
+                        arrayOf(
+                            village.villageName,
+                            village.totalMembers.toString(),
+                            village.attendedMembers.toString(),
+                            String.format("%.2f%%", village.attendanceRate),
+                            String.format("%.2f", village.averageQtCount)
+                        ),
+                        false
+                    )
+                }
+                
+                csvWriter.writeNext(arrayOf("", "", "", "", ""), false)
+                
+                // 주간 통계 출력
+                csvWriter.writeNext(arrayOf("주간 통계", "", "", ""), false)
+                csvWriter.writeNext(arrayOf("주 시작일", "전체 멤버 수", "출석 멤버 수", "출석률"), false)
+                
+                statistics.weeklyStats.forEach { week ->
+                    csvWriter.writeNext(
+                        arrayOf(
+                            week.weekStart.toString(),
+                            week.totalMembers.toString(),
+                            week.attendedMembers.toString(),
+                            String.format("%.2f%%", week.attendanceRate)
+                        ),
+                        false
+                    )
+                }
+            }
+        }
+    }
+    
+    /**
+     * Excel 헤더 스타일 생성
+     */
+    private fun createHeaderStyle(workbook: Workbook): CellStyle {
+        val headerStyle = workbook.createCellStyle()
+        headerStyle.fillForegroundColor = IndexedColors.GREY_25_PERCENT.index
+        headerStyle.fillPattern = FillPatternType.SOLID_FOREGROUND
+        return headerStyle
+    }
+    
+    /**
+     * 요약 시트 생성
+     */
+    private fun createSummarySheet(workbook: Workbook, statistics: DepartmentStatisticsResponse, headerStyle: CellStyle) {
+        val summarySheet = workbook.createSheet("요약")
+        
+        var rowNum = 0
+        var row = summarySheet.createRow(rowNum++)
+        row.createCell(0).setCellValue("부서 통계 요약")
+        
+        row = summarySheet.createRow(rowNum++)
+        row.createCell(0).setCellValue("부서명")
+        row.createCell(1).setCellValue(statistics.departmentName)
+        
+        rowNum++
+        row = summarySheet.createRow(rowNum++)
+        row.createCell(0).setCellValue("전체 멤버 수")
+        row.createCell(1).setCellValue(statistics.totalMembers.toDouble())
+        
+        row = summarySheet.createRow(rowNum++)
+        row.createCell(0).setCellValue("출석 멤버 수")
+        row.createCell(1).setCellValue(statistics.attendedMembers.toDouble())
+        
+        row = summarySheet.createRow(rowNum++)
+        row.createCell(0).setCellValue("출석률")
+        row.createCell(1).setCellValue(statistics.attendanceRate)
+        
+        row = summarySheet.createRow(rowNum++)
+        row.createCell(0).setCellValue("평균 QT 수")
+        row.createCell(1).setCellValue(statistics.averageQtCount)
+        
+        // 열 너비 자동 조정
+        for (i in 0..1) {
+            summarySheet.autoSizeColumn(i)
+        }
+    }
+    
+    /**
+     * 마을별 통계 시트 생성
+     */
+    private fun createVillageStatisticsSheet(workbook: Workbook, statistics: DepartmentStatisticsResponse, headerStyle: CellStyle) {
+        val villageSheet = workbook.createSheet("마을별 통계")
+        
+        // 헤더 생성
+        var rowNum = 0
+        var row = villageSheet.createRow(rowNum++)
+        var cellNum = 0
+        
+        var cell = row.createCell(cellNum++)
+        cell.setCellValue("마을명")
+        cell.setCellStyle(headerStyle)
+        
+        cell = row.createCell(cellNum++)
+        cell.setCellValue("전체 멤버 수")
+        cell.setCellStyle(headerStyle)
+        
+        cell = row.createCell(cellNum++)
+        cell.setCellValue("출석 멤버 수")
+        cell.setCellStyle(headerStyle)
+        
+        cell = row.createCell(cellNum++)
+        cell.setCellValue("출석률")
+        cell.setCellStyle(headerStyle)
+        
+        cell = row.createCell(cellNum++)
+        cell.setCellValue("평균 QT 수")
+        cell.setCellStyle(headerStyle)
+        
+        // 데이터 생성
+        statistics.villages.forEach { village ->
+            row = villageSheet.createRow(rowNum++)
+            cellNum = 0
+            
+            row.createCell(cellNum++).setCellValue(village.villageName)
+            row.createCell(cellNum++).setCellValue(village.totalMembers.toDouble())
+            row.createCell(cellNum++).setCellValue(village.attendedMembers.toDouble())
+            row.createCell(cellNum++).setCellValue(village.attendanceRate)
+            row.createCell(cellNum).setCellValue(village.averageQtCount)
+        }
+        
+        // 열 너비 자동 조정
+        for (i in 0..4) {
+            villageSheet.autoSizeColumn(i)
+        }
+    }
+    
+    /**
+     * 주간 통계 시트 생성
+     */
+    private fun createWeeklyStatisticsSheet(workbook: Workbook, statistics: DepartmentStatisticsResponse, headerStyle: CellStyle) {
+        val weeklySheet = workbook.createSheet("주간 통계")
+        
+        // 헤더 생성
+        var rowNum = 0
+        var row = weeklySheet.createRow(rowNum++)
+        var cellNum = 0
+        
+        var cell = row.createCell(cellNum++)
+        cell.setCellValue("주 시작일")
+        cell.setCellStyle(headerStyle)
+        
+        cell = row.createCell(cellNum++)
+        cell.setCellValue("전체 멤버 수")
+        cell.setCellStyle(headerStyle)
+        
+        cell = row.createCell(cellNum++)
+        cell.setCellValue("출석 멤버 수")
+        cell.setCellStyle(headerStyle)
+        
+        cell = row.createCell(cellNum++)
+        cell.setCellValue("출석률")
+        cell.setCellStyle(headerStyle)
+        
+        // 데이터 생성
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        statistics.weeklyStats.forEach { week ->
+            row = weeklySheet.createRow(rowNum++)
+            cellNum = 0
+            
+            row.createCell(cellNum++).setCellValue(week.weekStart.format(formatter))
+            row.createCell(cellNum++).setCellValue(week.totalMembers.toDouble())
+            row.createCell(cellNum++).setCellValue(week.attendedMembers.toDouble())
+            row.createCell(cellNum).setCellValue(week.attendanceRate)
+        }
+        
+        // 열 너비 자동 조정
+        for (i in 0..3) {
+            weeklySheet.autoSizeColumn(i)
+        }
     }
     
     /**
