@@ -1,4 +1,4 @@
-package com.attendly.api.controller.minister
+package com.attendly.api.controller.admin
 
 import com.attendly.api.dto.minister.*
 import com.attendly.security.CustomUserDetailsService
@@ -8,7 +8,6 @@ import com.attendly.service.MinisterStatisticsService
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.MockKAnnotations
 import io.mockk.every
-import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -19,18 +18,14 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.io.OutputStream
 import java.time.LocalDate
-import jakarta.servlet.http.HttpServletResponse
 
-@WebMvcTest(MinisterStatisticsController::class)
+@WebMvcTest(AdminStatisticsController::class)
 @Import(TestSecurityConfig::class)
-class MinisterStatisticsControllerTest {
+class AdminStatisticsControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -109,7 +104,7 @@ class MinisterStatisticsControllerTest {
 
     @Test
     @DisplayName("교역자 권한으로 부서 통계 요약 조회 성공")
-    @WithMockUser(username = "minister@attendly.com", roles = ["MINISTER"])
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
     fun testGetDepartmentStatisticsWithMinisterRole() {
         // given
         val departmentId = 1L
@@ -122,23 +117,23 @@ class MinisterStatisticsControllerTest {
 
         // when & then
         mockMvc.perform(
-            get("/api/minister/departments/{departmentId}/statistics", departmentId)
+            MockMvcRequestBuilders.get("/api/admin/departments/{departmentId}/statistics", departmentId)
                 .param("startDate", startDate.toString())
                 .param("endDate", endDate.toString())
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.data.departmentId").value(1))
-            .andExpect(jsonPath("$.data.departmentName").value("대학부"))
-            .andExpect(jsonPath("$.data.totalMembers").value(120))
-            .andExpect(jsonPath("$.data.attendedMembers").value(98))
-            .andExpect(jsonPath("$.data.attendanceRate").value(81.7))
-            .andExpect(jsonPath("$.data.averageQtCount").value(4.2))
-            .andExpect(jsonPath("$.data.villages").isArray)
-            .andExpect(jsonPath("$.data.villages[0].villageId").value(1))
-            .andExpect(jsonPath("$.data.weeklyStats").isArray)
-            .andExpect(jsonPath("$.data.weeklyStats[0].totalMembers").value(120))
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.success").value(true))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.departmentId").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.departmentName").value("대학부"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.totalMembers").value(120))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.attendedMembers").value(98))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.attendanceRate").value(81.7))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.averageQtCount").value(4.2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.villages").isArray)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.villages[0].villageId").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.weeklyStats").isArray)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.weeklyStats[0].totalMembers").value(120))
 
         verify { ministerStatisticsService.getDepartmentStatistics(departmentId, startDate, endDate) }
     }
@@ -154,36 +149,36 @@ class MinisterStatisticsControllerTest {
 
         // when & then
         mockMvc.perform(
-            get("/api/minister/departments/{departmentId}/statistics", departmentId)
+            MockMvcRequestBuilders.get("/api/admin/departments/{departmentId}/statistics", departmentId)
                 .param("startDate", startDate.toString())
                 .param("endDate", endDate.toString())
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andExpect(status().is5xxServerError)
+            .andExpect(MockMvcResultMatchers.status().is4xxClientError)
     }
-    
+
     @Test
     @DisplayName("교역자 권한으로 부서 통계 데이터 Excel 다운로드 성공")
-    @WithMockUser(username = "minister@attendly.com", roles = ["MINISTER"])
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
     fun testDownloadDepartmentStatisticsAsExcelWithMinisterRole() {
         // given
         val departmentId = 1L
         val startDate = LocalDate.of(2023, 9, 1)
         val endDate = LocalDate.of(2023, 9, 30)
         val format = "xls"
-        
-        every { 
-            ministerStatisticsService.getDepartmentName(departmentId) 
+
+        every {
+            ministerStatisticsService.getDepartmentName(departmentId)
         } returns "대학부"
-        
-        every { 
+
+        every {
             ministerStatisticsService.exportDepartmentStatisticsToExcel(
-                eq(departmentId), 
-                eq(startDate), 
-                eq(endDate), 
-                any() 
-            ) 
-        } answers { 
+                eq(departmentId),
+                eq(startDate),
+                eq(endDate),
+                any()
+            )
+        } answers {
             // 네 번째 인자인 outputStream에 더미 데이터 작성
             val outputStream = arg<OutputStream>(3)
             outputStream.write("Excel file content".toByteArray())
@@ -191,49 +186,51 @@ class MinisterStatisticsControllerTest {
 
         // when & then
         mockMvc.perform(
-            get("/api/minister/departments/{departmentId}/statistics/download", departmentId)
+            MockMvcRequestBuilders.get("/api/admin/departments/{departmentId}/statistics/download", departmentId)
                 .param("startDate", startDate.toString())
                 .param("endDate", endDate.toString())
                 .param("format", format)
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andExpect(status().isOk)
-            .andExpect(content().contentType("application/vnd.ms-excel"))
-            .andExpect(header().string("Content-Disposition", "attachment; filename=\"대학부_통계_${startDate}_${endDate}.xls\""))
-            
-        verify { 
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType("application/vnd.ms-excel"))
+            .andExpect(
+                MockMvcResultMatchers.header().string("Content-Disposition", "attachment; filename=\"대학부_통계_${startDate}_${endDate}.xls\"")
+            )
+
+        verify {
             ministerStatisticsService.getDepartmentName(departmentId)
             ministerStatisticsService.exportDepartmentStatisticsToExcel(
-                eq(departmentId), 
-                eq(startDate), 
-                eq(endDate), 
+                eq(departmentId),
+                eq(startDate),
+                eq(endDate),
                 any()
-            ) 
+            )
         }
     }
-    
+
     @Test
     @DisplayName("교역자 권한으로 부서 통계 데이터 CSV 다운로드 성공")
-    @WithMockUser(username = "minister@attendly.com", roles = ["MINISTER"])
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
     fun testDownloadDepartmentStatisticsAsCSVWithMinisterRole() {
         // given
         val departmentId = 1L
         val startDate = LocalDate.of(2023, 9, 1)
         val endDate = LocalDate.of(2023, 9, 30)
         val format = "csv"
-        
-        every { 
-            ministerStatisticsService.getDepartmentName(departmentId) 
+
+        every {
+            ministerStatisticsService.getDepartmentName(departmentId)
         } returns "대학부"
-        
-        every { 
+
+        every {
             ministerStatisticsService.exportDepartmentStatisticsToCSV(
-                eq(departmentId), 
-                eq(startDate), 
-                eq(endDate), 
-                any() 
-            ) 
-        } answers { 
+                eq(departmentId),
+                eq(startDate),
+                eq(endDate),
+                any()
+            )
+        } answers {
             // 네 번째 인자인 outputStream에 더미 데이터 작성
             val outputStream = arg<OutputStream>(3)
             outputStream.write("CSV file content".toByteArray())
@@ -241,54 +238,56 @@ class MinisterStatisticsControllerTest {
 
         // when & then
         mockMvc.perform(
-            get("/api/minister/departments/{departmentId}/statistics/download", departmentId)
+            MockMvcRequestBuilders.get("/api/admin/departments/{departmentId}/statistics/download", departmentId)
                 .param("startDate", startDate.toString())
                 .param("endDate", endDate.toString())
                 .param("format", format)
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andExpect(status().isOk)
-            .andExpect(content().contentType("text/csv; charset=UTF-8"))
-            .andExpect(header().string("Content-Disposition", "attachment; filename=\"대학부_통계_${startDate}_${endDate}.csv\""))
-            
-        verify { 
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType("text/csv; charset=UTF-8"))
+            .andExpect(
+                MockMvcResultMatchers.header().string("Content-Disposition", "attachment; filename=\"대학부_통계_${startDate}_${endDate}.csv\"")
+            )
+
+        verify {
             ministerStatisticsService.getDepartmentName(departmentId)
             ministerStatisticsService.exportDepartmentStatisticsToCSV(
-                eq(departmentId), 
-                eq(startDate), 
-                eq(endDate), 
+                eq(departmentId),
+                eq(startDate),
+                eq(endDate),
                 any()
-            ) 
+            )
         }
     }
-    
+
     @Test
     @DisplayName("지원하지 않는 형식으로 부서 통계 데이터 다운로드 시 실패")
-    @WithMockUser(username = "minister@attendly.com", roles = ["MINISTER"])
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
     fun testDownloadDepartmentStatisticsWithUnsupportedFormat() {
         // given
         val departmentId = 1L
         val startDate = LocalDate.of(2023, 9, 1)
         val endDate = LocalDate.of(2023, 9, 30)
         val format = "pdf" // 지원하지 않는 형식
-        
-        every { 
-            ministerStatisticsService.getDepartmentName(departmentId) 
+
+        every {
+            ministerStatisticsService.getDepartmentName(departmentId)
         } returns "대학부"
 
         // when & then
         mockMvc.perform(
-            get("/api/minister/departments/{departmentId}/statistics/download", departmentId)
+            MockMvcRequestBuilders.get("/api/admin/departments/{departmentId}/statistics/download", departmentId)
                 .param("startDate", startDate.toString())
                 .param("endDate", endDate.toString())
                 .param("format", format)
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andExpect(status().isBadRequest)
-            
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+
         verify { ministerStatisticsService.getDepartmentName(departmentId) }
     }
-    
+
     @Test
     @DisplayName("일반 사용자 권한으로 부서 통계 데이터 다운로드 실패")
     @WithMockUser(username = "user@attendly.com", roles = ["USER"])
@@ -301,18 +300,18 @@ class MinisterStatisticsControllerTest {
 
         // when & then
         mockMvc.perform(
-            get("/api/minister/departments/{departmentId}/statistics/download", departmentId)
+            MockMvcRequestBuilders.get("/api/admin/departments/{departmentId}/statistics/download", departmentId)
                 .param("startDate", startDate.toString())
                 .param("endDate", endDate.toString())
                 .param("format", format)
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andExpect(status().is5xxServerError)
+            .andExpect(MockMvcResultMatchers.status().is4xxClientError)
     }
 
     @Test
     @DisplayName("교역자 권한으로 마을별 상세 통계 조회 성공")
-    @WithMockUser(username = "minister@attendly.com", roles = ["MINISTER"])
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
     fun testGetVillageDetailStatisticsWithMinisterRole() {
         // given
         val departmentId = 1L
@@ -326,30 +325,30 @@ class MinisterStatisticsControllerTest {
 
         // when & then
         mockMvc.perform(
-            get("/api/minister/departments/{departmentId}/villages/{villageId}/statistics", departmentId, villageId)
+            MockMvcRequestBuilders.get("/api/admin/departments/{departmentId}/villages/{villageId}/statistics", departmentId, villageId)
                 .param("startDate", startDate.toString())
                 .param("endDate", endDate.toString())
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.data.villageId").value(1))
-            .andExpect(jsonPath("$.data.villageName").value("동문 마을"))
-            .andExpect(jsonPath("$.data.totalMembers").value(24))
-            .andExpect(jsonPath("$.data.attendedMembers").value(22))
-            .andExpect(jsonPath("$.data.attendanceRate").value(91.7))
-            .andExpect(jsonPath("$.data.averageQtCount").value(4.8))
-            .andExpect(jsonPath("$.data.members").isArray)
-            .andExpect(jsonPath("$.data.members[0].userId").value(1))
-            .andExpect(jsonPath("$.data.members[0].userName").value("홍길동"))
-            .andExpect(jsonPath("$.data.members[0].attendanceCount").value(4))
-            .andExpect(jsonPath("$.data.members[0].attendanceRate").value(100.0))
-            .andExpect(jsonPath("$.data.members[0].qtCount").value(5))
-            .andExpect(jsonPath("$.data.weeklyStats").isArray)
-            .andExpect(jsonPath("$.data.weeklyStats[0].weekStart").value("2023-09-03"))
-            .andExpect(jsonPath("$.data.weeklyStats[0].totalMembers").value(24))
-            .andExpect(jsonPath("$.data.weeklyStats[0].attendedMembers").value(22))
-            .andExpect(jsonPath("$.data.weeklyStats[0].attendanceRate").value(91.7))
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.success").value(true))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.villageId").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.villageName").value("동문 마을"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.totalMembers").value(24))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.attendedMembers").value(22))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.attendanceRate").value(91.7))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.averageQtCount").value(4.8))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.members").isArray)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.members[0].userId").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.members[0].userName").value("홍길동"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.members[0].attendanceCount").value(4))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.members[0].attendanceRate").value(100.0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.members[0].qtCount").value(5))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.weeklyStats").isArray)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.weeklyStats[0].weekStart").value("2023-09-03"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.weeklyStats[0].totalMembers").value(24))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.weeklyStats[0].attendedMembers").value(22))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.weeklyStats[0].attendanceRate").value(91.7))
 
         verify { ministerStatisticsService.getVillageDetailStatistics(departmentId, villageId, startDate, endDate) }
     }
@@ -366,11 +365,11 @@ class MinisterStatisticsControllerTest {
 
         // when & then
         mockMvc.perform(
-            get("/api/minister/departments/{departmentId}/villages/{villageId}/statistics", departmentId, villageId)
+            MockMvcRequestBuilders.get("/api/admin/departments/{departmentId}/villages/{villageId}/statistics", departmentId, villageId)
                 .param("startDate", startDate.toString())
                 .param("endDate", endDate.toString())
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andExpect(status().is5xxServerError)
+            .andExpect(MockMvcResultMatchers.status().is4xxClientError)
     }
-} 
+}

@@ -1,4 +1,4 @@
-package com.attendly.api.controller.minister
+package com.attendly.api.controller.admin
 
 import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.minister.DepartmentStatisticsResponse
@@ -24,16 +24,16 @@ import java.time.LocalDate
 import jakarta.servlet.http.HttpServletResponse
 
 @RestController
-@RequestMapping("/api/minister")
-@Tag(name = "교역자 API", description = "교역자 전용 API")
-class MinisterStatisticsController(
+@RequestMapping("/api/admin")
+@Tag(name = "관리자 API", description = "관리자 전용 통계 API")
+class AdminStatisticsController(
     private val ministerStatisticsService: MinisterStatisticsService
 ) {
 
     @GetMapping("/departments/{departmentId}/statistics")
     @Operation(
-        summary = "부서 통계 요약 조회",
-        description = "특정 부서의 통계 요약 정보를 조회합니다. 지정된 기간 동안의 출석 현황, 마을별 통계, 주간 통계 등을 확인할 수 있습니다.",
+        summary = "부서 통계 요약 조회 (관리자용)",
+        description = "관리자가 특정 부서의 통계 요약 정보를 조회합니다. 지정된 기간 동안의 출석 현황, 마을별 통계, 주간 통계 등을 확인할 수 있습니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @ApiResponses(
@@ -48,7 +48,7 @@ class MinisterStatisticsController(
             io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음")
         ]
     )
-    @PreAuthorize("hasRole('MINISTER')")
+    @PreAuthorize("hasRole('ADMIN')")
     fun getDepartmentStatistics(
         @Parameter(description = "부서 ID", required = true)
         @PathVariable departmentId: Long,
@@ -68,8 +68,8 @@ class MinisterStatisticsController(
     
     @GetMapping("/departments/{departmentId}/statistics/download")
     @Operation(
-        summary = "부서 통계 데이터 다운로드",
-        description = "특정 부서의 통계 데이터를 Excel 또는 CSV 형식으로 다운로드합니다. 지정된 기간 동안의 출석 현황, 마을별 통계 등을 포함합니다.",
+        summary = "부서 통계 데이터 다운로드 (관리자용)",
+        description = "관리자가 특정 부서의 통계 데이터를 Excel 또는 CSV 형식으로 다운로드합니다. 지정된 기간 동안의 출석 현황, 마을별 통계 등을 포함합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @ApiResponses(
@@ -87,7 +87,7 @@ class MinisterStatisticsController(
             io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음")
         ]
     )
-    @PreAuthorize("hasRole('MINISTER')")
+    @PreAuthorize("hasRole('ADMIN')")
     fun downloadDepartmentStatistics(
         @Parameter(description = "부서 ID", required = true)
         @PathVariable departmentId: Long,
@@ -125,8 +125,8 @@ class MinisterStatisticsController(
     
     @GetMapping("/departments/{departmentId}/villages/{villageId}/statistics")
     @Operation(
-        summary = "마을별 상세 통계 조회",
-        description = "특정 마을의 상세 통계 정보를 조회합니다. 지정된 기간 동안의 출석 현황, 개인별 통계, 주간 통계 등을 확인할 수 있습니다.",
+        summary = "마을별 상세 통계 조회 (관리자용)",
+        description = "관리자가 특정 마을의 상세 통계 정보를 조회합니다. 지정된 기간 동안의 출석 현황, 개인별 통계, 주간 통계 등을 확인할 수 있습니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @ApiResponses(
@@ -141,7 +141,7 @@ class MinisterStatisticsController(
             io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음")
         ]
     )
-    @PreAuthorize("hasRole('MINISTER')")
+    @PreAuthorize("hasRole('ADMIN')")
     fun getVillageDetailStatistics(
         @Parameter(description = "부서 ID", required = true)
         @PathVariable departmentId: Long,

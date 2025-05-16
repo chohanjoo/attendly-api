@@ -44,6 +44,10 @@
         {
             "name": "관리자 출석 API",
             "description": "관리자용 출석 데이터 관리 API"
+        },
+        {
+            "name": "관리자 API",
+            "description": "관리자 전용 통계 API"
         }
     ],
     "paths": {
@@ -2085,6 +2089,283 @@
                 ]
             }
         },
+        "/api/admin/departments/{departmentId}/villages/{villageId}/statistics": {
+            "get": {
+                "tags": [
+                    "관리자 API"
+                ],
+                "summary": "마을별 상세 통계 조회 (관리자용)",
+                "description": "관리자가 특정 마을의 상세 통계 정보를 조회합니다. 지정된 기간 동안의 출석 현황, 개인별 통계, 주간 통계 등을 확인할 수 있습니다.",
+                "operationId": "getVillageDetailStatistics",
+                "parameters": [
+                    {
+                        "name": "departmentId",
+                        "in": "path",
+                        "description": "부서 ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "villageId",
+                        "in": "path",
+                        "description": "마을 ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "description": "시작 날짜 (yyyy-MM-dd)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "description": "종료 날짜 (yyyy-MM-dd)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "잘못된 요청",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVillageDetailStatisticsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "마을별 통계 조회 성공",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VillageDetailStatisticsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "권한 없음",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVillageDetailStatisticsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "부서 또는 마을을 찾을 수 없음",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVillageDetailStatisticsResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/departments/{departmentId}/statistics": {
+            "get": {
+                "tags": [
+                    "관리자 API"
+                ],
+                "summary": "부서 통계 요약 조회 (관리자용)",
+                "description": "관리자가 특정 부서의 통계 요약 정보를 조회합니다. 지정된 기간 동안의 출석 현황, 마을별 통계, 주간 통계 등을 확인할 수 있습니다.",
+                "operationId": "getDepartmentStatistics",
+                "parameters": [
+                    {
+                        "name": "departmentId",
+                        "in": "path",
+                        "description": "부서 ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "description": "시작 날짜 (yyyy-MM-dd)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "description": "종료 날짜 (yyyy-MM-dd)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "부서 통계 조회 성공",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DepartmentStatisticsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "잘못된 요청",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseDepartmentStatisticsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "권한 없음",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseDepartmentStatisticsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "부서 또는 마을을 찾을 수 없음",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseDepartmentStatisticsResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/departments/{departmentId}/statistics/download": {
+            "get": {
+                "tags": [
+                    "관리자 API"
+                ],
+                "summary": "부서 통계 데이터 다운로드 (관리자용)",
+                "description": "관리자가 특정 부서의 통계 데이터를 Excel 또는 CSV 형식으로 다운로드합니다. 지정된 기간 동안의 출석 현황, 마을별 통계 등을 포함합니다.",
+                "operationId": "downloadDepartmentStatistics",
+                "parameters": [
+                    {
+                        "name": "departmentId",
+                        "in": "path",
+                        "description": "부서 ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "startDate",
+                        "in": "query",
+                        "description": "시작 날짜 (yyyy-MM-dd)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "endDate",
+                        "in": "query",
+                        "description": "종료 날짜 (yyyy-MM-dd)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "format",
+                        "in": "query",
+                        "description": "다운로드 형식 (xls, csv)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "부서를 찾을 수 없음"
+                    },
+                    "200": {
+                        "description": "통계 데이터 다운로드 성공",
+                        "content": {
+                            "application/vnd.ms-excel": {},
+                            "text/csv": {}
+                        }
+                    },
+                    "400": {
+                        "description": "잘못된 요청"
+                    },
+                    "403": {
+                        "description": "권한 없음"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/batch/jobs/{jobId}": {
             "get": {
                 "tags": [
@@ -4012,6 +4293,354 @@
                         "items": {
                             "type": "string"
                         }
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "MemberStatisticsItem": {
+                "required": [
+                    "attendanceCount",
+                    "attendanceRate",
+                    "qtCount",
+                    "userId",
+                    "userName"
+                ],
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "integer",
+                        "description": "사용자 ID",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "userName": {
+                        "type": "string",
+                        "description": "사용자 이름",
+                        "example": "홍길동"
+                    },
+                    "attendanceCount": {
+                        "type": "integer",
+                        "description": "출석 횟수",
+                        "format": "int32",
+                        "example": 4
+                    },
+                    "attendanceRate": {
+                        "type": "number",
+                        "description": "출석률",
+                        "format": "double",
+                        "example": 100.0
+                    },
+                    "qtCount": {
+                        "type": "integer",
+                        "description": "QT 횟수",
+                        "format": "int32",
+                        "example": 5
+                    }
+                },
+                "description": "멤버 통계 항목"
+            },
+            "VillageDetailStatisticsResponse": {
+                "required": [
+                    "attendanceRate",
+                    "attendedMembers",
+                    "averageQtCount",
+                    "members",
+                    "totalMembers",
+                    "villageId",
+                    "villageName",
+                    "weeklyStats"
+                ],
+                "type": "object",
+                "properties": {
+                    "villageId": {
+                        "type": "integer",
+                        "description": "마을 ID",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "villageName": {
+                        "type": "string",
+                        "description": "마을명",
+                        "example": "동문 마을"
+                    },
+                    "totalMembers": {
+                        "type": "integer",
+                        "description": "총 멤버 수",
+                        "format": "int32",
+                        "example": 24
+                    },
+                    "attendedMembers": {
+                        "type": "integer",
+                        "description": "출석 멤버 수",
+                        "format": "int32",
+                        "example": 22
+                    },
+                    "attendanceRate": {
+                        "type": "number",
+                        "description": "출석률",
+                        "format": "double",
+                        "example": 91.7
+                    },
+                    "averageQtCount": {
+                        "type": "number",
+                        "description": "평균 QT 횟수",
+                        "format": "double",
+                        "example": 4.8
+                    },
+                    "members": {
+                        "type": "array",
+                        "description": "멤버별 통계",
+                        "items": {
+                            "$ref": "#/components/schemas/MemberStatisticsItem"
+                        }
+                    },
+                    "weeklyStats": {
+                        "type": "array",
+                        "description": "주간 통계",
+                        "items": {
+                            "$ref": "#/components/schemas/VillageWeeklyStatisticsItem"
+                        }
+                    }
+                },
+                "description": "마을 상세 통계 응답"
+            },
+            "VillageWeeklyStatisticsItem": {
+                "required": [
+                    "attendanceRate",
+                    "attendedMembers",
+                    "totalMembers",
+                    "weekStart"
+                ],
+                "type": "object",
+                "properties": {
+                    "weekStart": {
+                        "type": "string",
+                        "description": "주 시작일",
+                        "example": "2023-09-03"
+                    },
+                    "totalMembers": {
+                        "type": "integer",
+                        "description": "총 멤버 수",
+                        "format": "int32",
+                        "example": 24
+                    },
+                    "attendedMembers": {
+                        "type": "integer",
+                        "description": "출석 멤버 수",
+                        "format": "int32",
+                        "example": 22
+                    },
+                    "attendanceRate": {
+                        "type": "number",
+                        "description": "출석률",
+                        "format": "double",
+                        "example": 91.7
+                    }
+                },
+                "description": "마을 주간 통계 항목"
+            },
+            "ApiResponseVillageDetailStatisticsResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/VillageDetailStatisticsResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "DepartmentStatisticsResponse": {
+                "required": [
+                    "attendanceRate",
+                    "attendedMembers",
+                    "averageQtCount",
+                    "departmentId",
+                    "departmentName",
+                    "totalMembers",
+                    "villages",
+                    "weeklyStats"
+                ],
+                "type": "object",
+                "properties": {
+                    "departmentId": {
+                        "type": "integer",
+                        "description": "부서 ID",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "departmentName": {
+                        "type": "string",
+                        "description": "부서명",
+                        "example": "대학부"
+                    },
+                    "totalMembers": {
+                        "type": "integer",
+                        "description": "총 멤버 수",
+                        "format": "int32",
+                        "example": 120
+                    },
+                    "attendedMembers": {
+                        "type": "integer",
+                        "description": "출석 멤버 수",
+                        "format": "int32",
+                        "example": 98
+                    },
+                    "attendanceRate": {
+                        "type": "number",
+                        "description": "출석률",
+                        "format": "double",
+                        "example": 81.7
+                    },
+                    "averageQtCount": {
+                        "type": "number",
+                        "description": "평균 QT 횟수",
+                        "format": "double",
+                        "example": 4.2
+                    },
+                    "villages": {
+                        "type": "array",
+                        "description": "마을별 통계",
+                        "items": {
+                            "$ref": "#/components/schemas/VillageStatisticsItem"
+                        }
+                    },
+                    "weeklyStats": {
+                        "type": "array",
+                        "description": "주간 통계",
+                        "items": {
+                            "$ref": "#/components/schemas/WeeklyStatisticsItem"
+                        }
+                    }
+                },
+                "description": "부서 통계 요약 응답"
+            },
+            "VillageStatisticsItem": {
+                "required": [
+                    "attendanceRate",
+                    "attendedMembers",
+                    "averageQtCount",
+                    "totalMembers",
+                    "villageId",
+                    "villageName"
+                ],
+                "type": "object",
+                "properties": {
+                    "villageId": {
+                        "type": "integer",
+                        "description": "마을 ID",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "villageName": {
+                        "type": "string",
+                        "description": "마을명",
+                        "example": "동문 마을"
+                    },
+                    "totalMembers": {
+                        "type": "integer",
+                        "description": "총 멤버 수",
+                        "format": "int32",
+                        "example": 24
+                    },
+                    "attendedMembers": {
+                        "type": "integer",
+                        "description": "출석 멤버 수",
+                        "format": "int32",
+                        "example": 22
+                    },
+                    "attendanceRate": {
+                        "type": "number",
+                        "description": "출석률",
+                        "format": "double",
+                        "example": 91.7
+                    },
+                    "averageQtCount": {
+                        "type": "number",
+                        "description": "평균 QT 횟수",
+                        "format": "double",
+                        "example": 4.8
+                    }
+                },
+                "description": "마을 통계 항목"
+            },
+            "WeeklyStatisticsItem": {
+                "required": [
+                    "attendanceRate",
+                    "attendedMembers",
+                    "totalMembers",
+                    "weekStart"
+                ],
+                "type": "object",
+                "properties": {
+                    "weekStart": {
+                        "type": "string",
+                        "description": "주 시작일",
+                        "format": "date",
+                        "example": "2023-09-03"
+                    },
+                    "totalMembers": {
+                        "type": "integer",
+                        "description": "총 멤버 수",
+                        "format": "int32",
+                        "example": 120
+                    },
+                    "attendedMembers": {
+                        "type": "integer",
+                        "description": "출석 멤버 수",
+                        "format": "int32",
+                        "example": 95
+                    },
+                    "attendanceRate": {
+                        "type": "number",
+                        "description": "출석률",
+                        "format": "double",
+                        "example": 79.2
+                    }
+                },
+                "description": "주간 통계 항목"
+            },
+            "ApiResponseDepartmentStatisticsResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/DepartmentStatisticsResponse"
                     },
                     "message": {
                         "type": "string"
