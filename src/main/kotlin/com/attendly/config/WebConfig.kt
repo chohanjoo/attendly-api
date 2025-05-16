@@ -34,16 +34,6 @@ class WebConfig(
         registration.order = 1
         return registration
     }
-
-    override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/**")
-            .allowedOriginPatterns("*")
-            .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-            .allowedHeaders("*")
-            .exposedHeaders("Authorization", "Content-Disposition")
-            .allowCredentials(true)
-            .maxAge(3600)
-    }
 }
 
 class ContentCachingFilter : OncePerRequestFilter() {

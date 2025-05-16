@@ -31,7 +31,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.p6spy.engine.spy.P6SpyDriver
       SPRING_FLYWAY_REPAIR: "true"
-      DISCORD_WEBHOOK_URL: https://discord.com/api/webhooks/1368899732864503818/2kxY39C_ZOklifqUImZpYYp_5mSpWALlnHB2GUT7bAQjpaOjGM3MU7N1YfRUWlt9B0_Q
+      DISCORD_WEBHOOK_URL: https://discord.com/api/webhooks/1372565578954309642/G94sGsXYBLOJe08bI0esT9hafeMYCGjo-tRzk7rnEDMJqRAHc2CH1amZpi4k9awxy_Xm
       TZ: Asia/Seoul
     depends_on:
       db:
