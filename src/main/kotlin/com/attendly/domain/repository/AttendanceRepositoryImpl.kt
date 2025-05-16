@@ -74,6 +74,31 @@ class AttendanceRepositoryImpl(
             .fetch()
     }
     
+    override fun findByVillageIdAndDateRange(villageId: Long, startDate: LocalDate, endDate: LocalDate): List<Attendance> {
+        val weekStarts = mutableListOf<LocalDate>()
+        var currentWeekStart = startDate
+        
+        // 날짜 범위 내의 모든 주의 시작일 계산
+        while (!currentWeekStart.isAfter(endDate)) {
+            weekStarts.add(currentWeekStart)
+            currentWeekStart = currentWeekStart.plusWeeks(1)
+        }
+        
+        if (weekStarts.isEmpty()) {
+            return emptyList()
+        }
+        
+        return queryFactory
+            .selectFrom(attendance)
+            .join(attendance.member, member).fetchJoin()
+            .join(attendance.gbsGroup, gbsGroup).fetchJoin()
+            .where(
+                gbsGroup.village.id.eq(villageId),
+                attendance.weekStart.`in`(weekStarts)
+            )
+            .fetch()
+    }
+    
     override fun findAttendancesForAdmin(
         search: String?,
         startDate: LocalDate?,

@@ -68,6 +68,7 @@ enum class ErrorMessage(
     DEPARTMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "E5005", "찾을 수 없는 부서입니다"),
     VILLAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "E5006", "마을을 찾을 수 없습니다"),
     VILLAGE_LEADER_NOT_FOUND(HttpStatus.NOT_FOUND, "E5007", "마을장을 찾을 수 없습니다"),
+    VILLAGE_NOT_IN_DEPARTMENT(HttpStatus.BAD_REQUEST, "E5008", "마을이 해당 부서에 속하지 않습니다"),
     
     // 시스템/배치 관련 (E9000-E9099)
     BATCH_JOB_NOT_FOUND(HttpStatus.NOT_FOUND, "E9000", "배치 작업을 찾을 수 없습니다"),

@@ -15,6 +15,11 @@ interface AttendanceRepositoryCustom {
     
     fun findByVillageIdAndWeek(villageId: Long, weekStart: LocalDate): List<Attendance>
     
+    /**
+     * 특정 마을의 날짜 범위 내 출석 기록을 조회합니다.
+     */
+    fun findByVillageIdAndDateRange(villageId: Long, startDate: LocalDate, endDate: LocalDate): List<Attendance>
+    
     fun findAttendancesForAdmin(
         search: String?,
         startDate: LocalDate?,

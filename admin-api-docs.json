@@ -2270,6 +2270,40 @@
                     }
                 ]
             }
+        },
+        "/api/admin/attendance/statistics": {
+            "get": {
+                "tags": [
+                    "관리자 출석 API"
+                ],
+                "summary": "출석 통계 정보 조회",
+                "description": "출석률, 결석률, 지각률 등의 통계 정보를 제공합니다.",
+                "operationId": "getAttendanceStatistics",
+                "parameters": [
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseAdminAttendanceStatisticsResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -4226,6 +4260,76 @@
                     },
                     "hasMore": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "AdminAttendanceStatisticsResponse": {
+                "required": [
+                    "absentRate",
+                    "absentRateDifference",
+                    "attendanceRate",
+                    "attendanceRateDifference",
+                    "lateRate",
+                    "lateRateDifference",
+                    "totalAttendanceCount"
+                ],
+                "type": "object",
+                "properties": {
+                    "attendanceRate": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "attendanceRateDifference": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "totalAttendanceCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "absentRate": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "absentRateDifference": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "lateRate": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "lateRateDifference": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                }
+            },
+            "ApiResponseAdminAttendanceStatisticsResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/AdminAttendanceStatisticsResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             }

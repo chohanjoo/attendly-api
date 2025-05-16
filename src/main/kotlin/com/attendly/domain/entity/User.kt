@@ -40,6 +40,10 @@ class User(
     @JoinColumn(name = "department_id", nullable = false)
     val department: Department,
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "village_id")
+    val village: Village? = null,
+
     @Column(nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
 
