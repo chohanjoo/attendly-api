@@ -1,8 +1,10 @@
 package com.attendly.api.controller.admin
 
+import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.PageResponse
 import com.attendly.api.dto.admin.AdminAttendanceResponse
 import com.attendly.api.dto.admin.AdminAttendanceSearchRequest
+import com.attendly.api.dto.admin.AdminAttendanceStatisticsResponse
 import com.attendly.enums.AttendanceStatus
 import com.attendly.service.AdminAttendanceService
 import io.mockk.every
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -27,23 +30,22 @@ class AdminAttendanceControllerTest {
     @InjectMockKs
     private lateinit var adminAttendanceController: AdminAttendanceController
 
-    private lateinit var mockAttendanceResponse: AdminAttendanceResponse
     private lateinit var mockPageResponse: PageResponse<AdminAttendanceResponse>
+    private lateinit var mockAttendanceResponse: AdminAttendanceResponse
 
     @BeforeEach
-    fun setUp() {
-        val today = LocalDate.now()
-        
+    fun setup() {
+        // 테스트용 응답 데이터 설정
         mockAttendanceResponse = AdminAttendanceResponse(
             id = 1L,
             userId = 2L,
             userName = "홍길동",
-            date = today,
+            date = LocalDate.now(),
             status = AttendanceStatus.PRESENT,
             eventType = "주일예배",
             note = null
         )
-        
+
         mockPageResponse = PageResponse(
             items = listOf(mockAttendanceResponse),
             totalCount = 1,
@@ -136,5 +138,47 @@ class AdminAttendanceControllerTest {
         }
 
         assertEquals(HttpStatus.OK.value(), response.statusCodeValue)
+    }
+    
+    @Test
+    fun `출석 통계 정보 조회 테스트`() {
+        // given
+        val statisticsResponse = AdminAttendanceStatisticsResponse(
+            attendanceRate = 75.0,
+            attendanceRateDifference = 5.0,
+            totalAttendanceCount = 150,
+            absentRate = 15.0,
+            absentRateDifference = -3.0,
+            lateRate = 10.0,
+            lateRateDifference = -2.0
+        )
+        
+        every {
+            adminAttendanceService.getAttendanceStatistics()
+        } returns statisticsResponse
+        
+        // when
+        val response = adminAttendanceController.getAttendanceStatistics()
+        
+        // then
+        verify {
+            adminAttendanceService.getAttendanceStatistics()
+        }
+        
+        assertEquals(HttpStatus.OK.value(), response.statusCodeValue)
+        val responseBody = response.body
+        assertNotNull(responseBody)
+        assertEquals(true, responseBody.success)
+        assertEquals(200, responseBody.code)
+        assertNotNull(responseBody.data)
+        
+        val data = responseBody.data!!
+        assertEquals(75.0, data.attendanceRate)
+        assertEquals(5.0, data.attendanceRateDifference)
+        assertEquals(150, data.totalAttendanceCount)
+        assertEquals(15.0, data.absentRate)
+        assertEquals(-3.0, data.absentRateDifference)
+        assertEquals(10.0, data.lateRate)
+        assertEquals(-2.0, data.lateRateDifference)
     }
 } 

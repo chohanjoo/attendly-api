@@ -4,6 +4,7 @@ import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.PageResponse
 import com.attendly.api.dto.admin.AdminAttendanceResponse
 import com.attendly.api.dto.admin.AdminAttendanceSearchRequest
+import com.attendly.api.dto.admin.AdminAttendanceStatisticsResponse
 import com.attendly.api.util.ResponseUtil
 import com.attendly.enums.AttendanceStatus
 import com.attendly.service.AdminAttendanceService
@@ -64,5 +65,17 @@ class AdminAttendanceController(
         
         val attendances = adminAttendanceService.getAttendancesForAdmin(request)
         return ResponseUtil.success(attendances)
+    }
+    
+    @GetMapping("/attendance/statistics")
+    @Operation(
+        summary = "출석 통계 정보 조회",
+        description = "출석률, 결석률, 지각률 등의 통계 정보를 제공합니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @PreAuthorize("hasAnyRole('ADMIN', 'MINISTER')")
+    fun getAttendanceStatistics(): ResponseEntity<ApiResponse<AdminAttendanceStatisticsResponse>> {
+        val statistics = adminAttendanceService.getAttendanceStatistics()
+        return ResponseUtil.success(statistics)
     }
 } 
