@@ -40,6 +40,10 @@
         {
             "name": "마을장 API",
             "description": "마을장을 위한 API"
+        },
+        {
+            "name": "마을",
+            "description": "마을 관련 API"
         }
     ],
     "paths": {
@@ -158,6 +162,109 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/village/{id}/gbs-assignment": {
+            "get": {
+                "tags": [
+                    "마을"
+                ],
+                "summary": "GBS 배치 정보 조회",
+                "description": "GBS 배치 관리를 위한 칸반 보드에 필요한 정보를 조회합니다",
+                "operationId": "getGbsAssignment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseGbsAssignmentResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "마을"
+                ],
+                "summary": "GBS 배치 정보 저장",
+                "description": "GBS 배치 관리를 위한 칸반 보드에서 설정한 배치 정보를 저장합니다",
+                "operationId": "saveGbsAssignment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GbsAssignmentSaveRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseGbsAssignmentSaveResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/village-leader/{villageId}/attendance": {
@@ -466,6 +573,49 @@
                             "*/*": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiResponseVillageStatistics"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/village/{id}": {
+            "get": {
+                "tags": [
+                    "마을"
+                ],
+                "summary": "특정 마을 정보 조회",
+                "description": "특정 마을의 정보를 조회합니다",
+                "operationId": "getVillageById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseUserVillageResponse"
                                 }
                             }
                         }
@@ -1289,6 +1439,109 @@
                     }
                 }
             },
+            "GbsAssignment": {
+                "required": [
+                    "gbsId",
+                    "leaderId",
+                    "memberIds"
+                ],
+                "type": "object",
+                "properties": {
+                    "gbsId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "leaderId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "memberIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                }
+            },
+            "GbsAssignmentSaveRequest": {
+                "required": [
+                    "assignments",
+                    "endDate",
+                    "startDate"
+                ],
+                "type": "object",
+                "properties": {
+                    "startDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "endDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "assignments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GbsAssignment"
+                        }
+                    }
+                }
+            },
+            "ApiResponseGbsAssignmentSaveResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/GbsAssignmentSaveResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "GbsAssignmentSaveResponse": {
+                "required": [
+                    "assignmentCount",
+                    "memberCount",
+                    "message",
+                    "villageId"
+                ],
+                "type": "object",
+                "properties": {
+                    "villageId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "assignmentCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "memberCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
             "AttendanceMemberItemDto": {
                 "required": [
                     "memberId",
@@ -2011,6 +2264,194 @@
                 },
                 "description": "주별 통계"
             },
+            "ApiResponseUserVillageResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/UserVillageResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "UserVillageResponse": {
+                "required": [
+                    "departmentId",
+                    "departmentName",
+                    "isVillageLeader",
+                    "userId",
+                    "userName",
+                    "villageId",
+                    "villageName"
+                ],
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "userName": {
+                        "type": "string"
+                    },
+                    "villageId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "villageName": {
+                        "type": "string"
+                    },
+                    "departmentId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "departmentName": {
+                        "type": "string"
+                    },
+                    "isVillageLeader": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "ApiResponseGbsAssignmentResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/GbsAssignmentResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "GbsAssignmentResponse": {
+                "required": [
+                    "columns",
+                    "labels",
+                    "villageId",
+                    "villageName"
+                ],
+                "type": "object",
+                "properties": {
+                    "villageId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "villageName": {
+                        "type": "string"
+                    },
+                    "columns": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/KanbanColumn"
+                        }
+                    },
+                    "labels": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/KanbanLabel"
+                        }
+                    }
+                }
+            },
+            "KanbanCard": {
+                "required": [
+                    "content",
+                    "id",
+                    "labels"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "content": {
+                        "type": "string"
+                    },
+                    "labels": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/KanbanLabel"
+                        }
+                    }
+                }
+            },
+            "KanbanColumn": {
+                "required": [
+                    "cards",
+                    "id",
+                    "title"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "cards": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/KanbanCard"
+                        }
+                    }
+                }
+            },
+            "KanbanLabel": {
+                "required": [
+                    "color",
+                    "id",
+                    "name"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "color": {
+                        "type": "string"
+                    }
+                }
+            },
             "ApiResponseVillageAttendanceResponse": {
                 "required": [
                     "code",
@@ -2499,72 +2940,6 @@
                         "items": {
                             "$ref": "#/components/schemas/GbsMemberResponse"
                         }
-                    }
-                }
-            },
-            "ApiResponseUserVillageResponse": {
-                "required": [
-                    "code",
-                    "message",
-                    "success",
-                    "timestamp"
-                ],
-                "type": "object",
-                "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "timestamp": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "data": {
-                        "$ref": "#/components/schemas/UserVillageResponse"
-                    },
-                    "message": {
-                        "type": "string"
-                    },
-                    "code": {
-                        "type": "integer",
-                        "format": "int32"
-                    }
-                }
-            },
-            "UserVillageResponse": {
-                "required": [
-                    "departmentId",
-                    "departmentName",
-                    "isVillageLeader",
-                    "userId",
-                    "userName",
-                    "villageId",
-                    "villageName"
-                ],
-                "type": "object",
-                "properties": {
-                    "userId": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "userName": {
-                        "type": "string"
-                    },
-                    "villageId": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "villageName": {
-                        "type": "string"
-                    },
-                    "departmentId": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "departmentName": {
-                        "type": "string"
-                    },
-                    "isVillageLeader": {
-                        "type": "boolean"
                     }
                 }
             },

@@ -48,4 +48,16 @@ class GbsMemberHistoryRepositoryImpl(
             )
             .fetchOne()
     }
+    
+    override fun findCurrentMembersByGbsId(gbsId: Long, date: LocalDate): List<GbsMemberHistory> {
+        return queryFactory
+            .selectFrom(gbsMemberHistory)
+            .join(gbsMemberHistory.member).fetchJoin()
+            .where(
+                gbsMemberHistory.gbsGroup.id.eq(gbsId),
+                gbsMemberHistory.startDate.loe(date),
+                gbsMemberHistory.endDate.isNull.or(gbsMemberHistory.endDate.goe(date))
+            )
+            .fetch()
+    }
 } 

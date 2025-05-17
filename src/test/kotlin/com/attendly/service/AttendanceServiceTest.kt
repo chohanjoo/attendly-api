@@ -226,7 +226,7 @@ class AttendanceServiceTest {
         )
         
         every { gbsGroupRepository.findById(gbsId) } returns Optional.of(gbsGroup)
-        every { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
+        every { attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
         
         val member = User(
             id = 2L, 
@@ -337,7 +337,7 @@ class AttendanceServiceTest {
         every { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) } returns leaderHistory
         
         // 기존 출석 데이터 조회
-        every { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
+        every { attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
         
         // 조원 정보 조회
         every { userRepository.findById(2L) } returns Optional.of(member1)
@@ -405,7 +405,7 @@ class AttendanceServiceTest {
         assertEquals(WorshipStatus.O, result[0].worship)
         
         verify { gbsGroupRepository.findById(1L) }
-        verify { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) }
+        verify { attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart) }
         verify { userRepository.findById(2L) }
         verify { userRepository.findById(3L) }
         verify { 
@@ -513,7 +513,7 @@ class AttendanceServiceTest {
         )
         
         every { gbsGroupRepository.findById(gbsId) } returns Optional.of(gbsGroup)
-        every { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns listOf(attendance)
+        every { attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns listOf(attendance)
         
         // when
         val result = attendanceService.getAttendancesByGbs(gbsId, weekStart)
@@ -525,7 +525,7 @@ class AttendanceServiceTest {
         assertEquals(WorshipStatus.O, result[0].worship)
         
         verify { gbsGroupRepository.findById(gbsId) }
-        verify { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) }
+        verify { attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart) }
     }
     
     @Test
@@ -685,7 +685,7 @@ class AttendanceServiceTest {
         every { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) } returns leaderHistory
         
         // 기존 출석 데이터 조회
-        every { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
+        every { attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
         
         // 조원 정보 조회
         every { userRepository.findById(5L) } returns Optional.of(nonGbsMember)
@@ -707,7 +707,7 @@ class AttendanceServiceTest {
         assertEquals(ErrorMessage.MEMBER_NOT_IN_GBS.code, exception.errorMessage.code)
         verify { gbsGroupRepository.findById(1L) }
         verify { gbsLeaderHistoryRepository.findByGbsGroupIdAndLeaderIdAndEndDateIsNull(1L, 1L) }
-        verify { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) }
+        verify { attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart) }
         verify { userRepository.findById(5L) }
         verify { 
             gbsMemberHistoryRepository.findActiveMembers(
@@ -751,7 +751,7 @@ class AttendanceServiceTest {
         every { gbsGroupRepository.findById(gbsId) } returns Optional.of(gbsGroup)
         
         // 기존 출석 데이터 삭제
-        every { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
+        every { attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart) } returns emptyList()
         
         // 조원 정보
         val member1 = User(
@@ -845,7 +845,7 @@ class AttendanceServiceTest {
         
         verify { villageRepository.findById(villageId) }
         verify { gbsGroupRepository.findById(gbsId) }
-        verify { attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart) }
+        verify { attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart) }
         verify { userRepository.findById(2L) }
         verify { userRepository.findById(3L) }
         verify { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsId) }

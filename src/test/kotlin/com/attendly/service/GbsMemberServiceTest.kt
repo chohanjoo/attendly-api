@@ -2,9 +2,15 @@ package com.attendly.service
 
 import com.attendly.api.dto.GbsMemberResponse
 import com.attendly.api.dto.GbsMembersListResponse
+import com.attendly.api.dto.GbsAssignmentSaveRequest
+import com.attendly.api.dto.GbsAssignment
 import com.attendly.domain.entity.*
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.LeaderDelegationRepository
+import com.attendly.domain.repository.VillageRepository
+import com.attendly.domain.repository.GbsGroupRepository
+import com.attendly.domain.repository.GbsMemberHistoryRepository
+import com.attendly.domain.repository.UserRepository
 import com.attendly.enums.Role
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
@@ -36,6 +42,18 @@ class GbsMemberServiceTest {
     @MockK
     private lateinit var userService: UserService
 
+    @MockK
+    private lateinit var villageRepository: VillageRepository
+
+    @MockK
+    private lateinit var gbsGroupRepository: GbsGroupRepository
+
+    @MockK
+    private lateinit var gbsMemberHistoryRepository: GbsMemberHistoryRepository
+
+    @MockK
+    private lateinit var userRepository: UserRepository
+
     @InjectMockKs
     private lateinit var gbsMemberService: GbsMemberService
 
@@ -49,12 +67,20 @@ class GbsMemberServiceTest {
         gbsLeaderHistoryRepository = mockk()
         leaderDelegationRepository = mockk()
         userService = mockk()
+        villageRepository = mockk()
+        gbsGroupRepository = mockk()
+        gbsMemberHistoryRepository = mockk()
+        userRepository = mockk()
 
         gbsMemberService = GbsMemberService(
             organizationService,
             gbsLeaderHistoryRepository,
             leaderDelegationRepository,
-            userService
+            userService,
+            villageRepository,
+            gbsGroupRepository,
+            gbsMemberHistoryRepository,
+            userRepository
         )
     }
 
@@ -208,7 +234,7 @@ class GbsMemberServiceTest {
             id = gbsId,
             name = gbsName,
             village = village,
-            termStartDate = LocalDate.of(2023, 1, 1),
+            termStartDate = startDate,
             termEndDate = LocalDate.of(2023, 12, 31)
         )
         
@@ -347,6 +373,162 @@ class GbsMemberServiceTest {
         assertEquals(ErrorMessage.ACCESS_DENIED_LEADER_HISTORY.code, exception.errorMessage.code)
     }
 
+    @Test
+    fun `saveGbsAssignment는 유효한 요청으로 GBS 배치 정보를 저장한다`() {
+        // Given
+        val villageId = 1L
+        val gbsId1 = 101L
+        val gbsId2 = 102L
+        val leaderId1 = 201L
+        val leaderId2 = 202L
+        val memberId1 = 301L
+        val memberId2 = 302L
+        val memberId3 = 303L
+        
+        val startDate = LocalDate.of(2023, 6, 1)
+        val endDate = LocalDate.of(2023, 12, 31)
+        
+        val village = Village(id = villageId, name = "1마을", department = mockk())
+        val gbsGroup1 = GbsGroup(id = gbsId1, name = "GBS1", village = village, termStartDate = startDate, termEndDate = endDate)
+        val gbsGroup2 = GbsGroup(id = gbsId2, name = "GBS2", village = village, termStartDate = startDate, termEndDate = endDate)
+        
+        val department = mockk<Department>()
+        val leader1 = User(id = leaderId1, name = "리더1", role = Role.LEADER, department = department)
+        val leader2 = User(id = leaderId2, name = "리더2", role = Role.LEADER, department = department)
+        val member1 = User(id = memberId1, name = "멤버1", role = Role.MEMBER, department = department)
+        val member2 = User(id = memberId2, name = "멤버2", role = Role.MEMBER, department = department)
+        val member3 = User(id = memberId3, name = "멤버3", role = Role.MEMBER, department = department)
+        
+        // 기존 리더 히스토리 - 변경이 필요한 경우
+        val previousLeader = mockk<User>(relaxed = true)
+        every { previousLeader.id } returns 999L
+        
+        val existingLeaderHistory1 = mockk<GbsLeaderHistory>(relaxed = true)
+        every { existingLeaderHistory1.id } returns 1001L
+        every { existingLeaderHistory1.gbsGroup } returns gbsGroup1
+        every { existingLeaderHistory1.leader } returns previousLeader
+        every { existingLeaderHistory1.startDate } returns LocalDate.of(2023, 1, 1)
+        every { existingLeaderHistory1.endDate } returns null
+        
+        // 요청 객체 생성
+        val request = GbsAssignmentSaveRequest(
+            startDate = startDate,
+            endDate = endDate,
+            assignments = listOf(
+                GbsAssignment(gbsId = gbsId1, leaderId = leaderId1, memberIds = listOf(memberId1, memberId2)),
+                GbsAssignment(gbsId = gbsId2, leaderId = leaderId2, memberIds = listOf(memberId3))
+            )
+        )
+        
+        // Mock 설정
+        every { villageRepository.findById(villageId) } returns java.util.Optional.of(village)
+        
+        every { gbsGroupRepository.findById(gbsId1) } returns java.util.Optional.of(gbsGroup1)
+        every { gbsGroupRepository.findById(gbsId2) } returns java.util.Optional.of(gbsGroup2)
+        
+        every { userRepository.findById(leaderId1) } returns java.util.Optional.of(leader1)
+        every { userRepository.findById(leaderId2) } returns java.util.Optional.of(leader2)
+        every { userRepository.findById(memberId1) } returns java.util.Optional.of(member1)
+        every { userRepository.findById(memberId2) } returns java.util.Optional.of(member2)
+        every { userRepository.findById(memberId3) } returns java.util.Optional.of(member3)
+        
+        // GBS1의 기존 리더가 있고 변경 필요
+        every { gbsLeaderHistoryRepository.findCurrentLeaderHistoryByGbsId(gbsId1, startDate) } returns existingLeaderHistory1
+        // GBS2는 기존 리더가 없음
+        every { gbsLeaderHistoryRepository.findCurrentLeaderHistoryByGbsId(gbsId2, startDate) } returns null
+        
+        // GBS1의 기존 멤버는 없음
+        every { gbsMemberHistoryRepository.findCurrentMembersByGbsId(gbsId1, startDate) } returns emptyList()
+        // GBS2의 기존 멤버는 없음
+        every { gbsMemberHistoryRepository.findCurrentMembersByGbsId(gbsId2, startDate) } returns emptyList()
+        
+        every { gbsLeaderHistoryRepository.save(any()) } returnsArgument 0
+        every { gbsMemberHistoryRepository.save(any()) } returnsArgument 0
+        
+        // When
+        val result = gbsMemberService.saveGbsAssignment(villageId, request)
+        
+        // Then
+        assertEquals(villageId, result.villageId)
+        assertEquals(2, result.assignmentCount)
+        assertEquals(5, result.memberCount) // 리더 2명 + 멤버 3명
+        assertEquals("GBS 배치가 성공적으로 저장되었습니다.", result.message)
+        
+        // 기존 리더 종료 확인
+        verify(exactly = 1) { gbsLeaderHistoryRepository.findCurrentLeaderHistoryByGbsId(gbsId1, startDate) }
+        verify(exactly = 1) { gbsLeaderHistoryRepository.findCurrentLeaderHistoryByGbsId(gbsId2, startDate) }
+        
+        // 리더 저장 확인 - 총 3회 호출 (기존 리더 종료 1회, 새 리더 등록 2회)
+        verify(atLeast = 3) { gbsLeaderHistoryRepository.save(any()) }
+        
+        // 멤버 등록 확인
+        verify(exactly = 1) { gbsMemberHistoryRepository.findCurrentMembersByGbsId(gbsId1, startDate) }
+        verify(exactly = 1) { gbsMemberHistoryRepository.findCurrentMembersByGbsId(gbsId2, startDate) }
+        verify(exactly = 3) { gbsMemberHistoryRepository.save(any()) }
+    }
+    
+    @Test
+    fun `saveGbsAssignment는 마을에 속하지 않은 GBS에 대한 요청을 거부한다`() {
+        // Given
+        val villageId = 1L
+        val otherVillageId = 2L
+        val gbsId = 101L
+        val leaderId = 201L
+        
+        val startDate = LocalDate.of(2023, 6, 1)
+        val endDate = LocalDate.of(2023, 12, 31)
+        
+        val village = Village(id = villageId, name = "1마을", department = mockk())
+        val otherVillage = Village(id = otherVillageId, name = "2마을", department = mockk())
+        // 다른 마을에 속한 GBS
+        val gbsGroup = GbsGroup(id = gbsId, name = "GBS1", village = otherVillage, termStartDate = startDate, termEndDate = endDate)
+        
+        // 요청 객체 생성
+        val request = GbsAssignmentSaveRequest(
+            startDate = startDate,
+            endDate = endDate,
+            assignments = listOf(
+                GbsAssignment(gbsId = gbsId, leaderId = leaderId, memberIds = emptyList())
+            )
+        )
+        
+        // Mock 설정
+        every { villageRepository.findById(villageId) } returns java.util.Optional.of(village)
+        every { gbsGroupRepository.findById(gbsId) } returns java.util.Optional.of(gbsGroup)
+        
+        // When & Then
+        val exception = assertThrows(AttendlyApiException::class.java) {
+            gbsMemberService.saveGbsAssignment(villageId, request)
+        }
+        
+        assertEquals(ErrorMessage.GBS_GROUP_NOT_IN_VILLAGE.code, exception.errorMessage.code)
+    }
+    
+    @Test
+    fun `saveGbsAssignment는 존재하지 않는 마을에 대한 요청을 거부한다`() {
+        // Given
+        val villageId = 999L
+        val startDate = LocalDate.of(2023, 6, 1)
+        val endDate = LocalDate.of(2023, 12, 31)
+        
+        // 요청 객체 생성
+        val request = GbsAssignmentSaveRequest(
+            startDate = startDate,
+            endDate = endDate,
+            assignments = emptyList()
+        )
+        
+        // Mock 설정
+        every { villageRepository.findById(villageId) } returns java.util.Optional.empty()
+        
+        // When & Then
+        val exception = assertThrows(AttendlyApiException::class.java) {
+            gbsMemberService.saveGbsAssignment(villageId, request)
+        }
+        
+        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorMessage.code)
+    }
+
     // Private helper methods
     private fun createUser(role: Role, id: Long = 1L): User {
         val user = mockk<User>()
@@ -355,6 +537,7 @@ class GbsMemberServiceTest {
         every { user.name } returns "테스트 사용자"
         every { user.gbsLeaderHistories } returns mutableListOf()
         every { user.villageLeader } returns null
+        every { user.department } returns mockk<Department>()
         return user
     }
 

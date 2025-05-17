@@ -110,7 +110,7 @@ class AttendanceRepositoryTest {
     @Test
     fun `GBS 그룹과 주 시작일로 출석 정보를 찾을 수 있다`() {
         // when
-        val foundAttendances = attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart)
+        val foundAttendances = attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart)
 
         // then
         assertEquals(1, foundAttendances.size)
@@ -124,7 +124,7 @@ class AttendanceRepositoryTest {
         // when
         val startDate = LocalDate.of(2023, 4, 1)
         val endDate = LocalDate.of(2023, 6, 1)
-        val foundAttendances = attendanceRepository.findByMemberAndWeekStartBetween(member, startDate, endDate)
+        val foundAttendances = attendanceRepository.findAllByMemberAndWeekStartBetween(member, startDate, endDate)
 
         // then
         assertEquals(1, foundAttendances.size)
@@ -137,7 +137,7 @@ class AttendanceRepositoryTest {
         // when
         val wrongStartDate = LocalDate.of(2022, 1, 1)
         val wrongEndDate = LocalDate.of(2022, 12, 31)
-        val foundAttendances = attendanceRepository.findByMemberAndWeekStartBetween(member, wrongStartDate, wrongEndDate)
+        val foundAttendances = attendanceRepository.findAllByMemberAndWeekStartBetween(member, wrongStartDate, wrongEndDate)
 
         // then
         assertTrue(foundAttendances.isEmpty())
@@ -158,7 +158,7 @@ class AttendanceRepositoryTest {
         entityManager.flush()
 
         // when
-        val foundAttendances = attendanceRepository.findByGbsGroupAndWeekStart(otherGbsGroup, weekStart)
+        val foundAttendances = attendanceRepository.findAllByGbsGroupAndWeekStart(otherGbsGroup, weekStart)
 
         // then
         assertTrue(foundAttendances.isEmpty())

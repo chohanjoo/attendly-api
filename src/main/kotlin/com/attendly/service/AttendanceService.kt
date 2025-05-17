@@ -115,7 +115,7 @@ class AttendanceService(
      * 기존 출석 데이터 삭제
      */
     private fun deleteExistingAttendances(gbsGroup: GbsGroup, weekStart: LocalDate) {
-        attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart).let { 
+        attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart).let { 
             if (it.isNotEmpty()) attendanceRepository.deleteAll(it) 
         }
     }
@@ -185,7 +185,7 @@ class AttendanceService(
                 AttendlyApiException(ErrorMessage.GBS_GROUP_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.GBS_GROUP_NOT_FOUND, gbsId)) 
             }
         
-        return attendanceRepository.findByGbsGroupAndWeekStart(gbsGroup, weekStart)
+        return attendanceRepository.findAllByGbsGroupAndWeekStart(gbsGroup, weekStart)
             .map { it.toAttendanceResponse() }
     }
     

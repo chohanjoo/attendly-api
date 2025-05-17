@@ -4,13 +4,25 @@ import com.attendly.api.dto.GbsMembersListResponse
 import com.attendly.api.dto.LeaderGbsHistoryListResponse
 import com.attendly.api.dto.LeaderGbsHistoryResponse
 import com.attendly.api.dto.LeaderGbsResponse
+import com.attendly.api.dto.GbsAssignmentResponse
+import com.attendly.api.dto.GbsAssignmentSaveRequest
+import com.attendly.api.dto.GbsAssignmentSaveResponse
+import com.attendly.api.dto.KanbanCard
+import com.attendly.api.dto.KanbanColumn
+import com.attendly.api.dto.KanbanLabel
 import com.attendly.domain.entity.GbsLeaderHistory
+import com.attendly.domain.entity.GbsMemberHistory
 import com.attendly.enums.Role
 import com.attendly.domain.entity.User
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
 import com.attendly.domain.repository.LeaderDelegationRepository
+import com.attendly.domain.repository.VillageRepository
+import com.attendly.domain.repository.GbsGroupRepository
+import com.attendly.domain.repository.GbsMemberHistoryRepository
+import com.attendly.domain.repository.UserRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
+import com.attendly.exception.ErrorMessageUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -20,7 +32,11 @@ class GbsMemberService(
     private val organizationService: OrganizationService,
     private val gbsLeaderHistoryRepository: GbsLeaderHistoryRepository,
     private val leaderDelegationRepository: LeaderDelegationRepository,
-    private val userService: UserService
+    private val userService: UserService,
+    private val villageRepository: VillageRepository,
+    private val gbsGroupRepository: GbsGroupRepository,
+    private val gbsMemberHistoryRepository: GbsMemberHistoryRepository,
+    private val userRepository: UserRepository
 ) {
 
     /**
@@ -144,6 +160,279 @@ class GbsMemberService(
             leaderName = leader.name,
             historyCount = historyResponses.size,
             histories = historyResponses
+        )
+    }
+
+    /**
+     * GBS 배치 정보를 칸반 보드 형태로 조회합니다.
+     *
+     * @param villageId 마을 ID
+     * @param date 조회 기준 날짜
+     * @return GBS 배치 정보
+     */
+    @Transactional(readOnly = true)
+    fun getGbsAssignment(villageId: Long, date: LocalDate): GbsAssignmentResponse {
+        // 마을 정보 조회
+        val village = villageRepository.findById(villageId)
+            .orElseThrow { 
+                AttendlyApiException(
+                    ErrorMessage.VILLAGE_NOT_FOUND, 
+                    ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId)
+                ) 
+            }
+        
+        // 해당 마을의 GBS 그룹 조회
+        val gbsGroups = gbsGroupRepository.findActiveGroupsByVillageId(villageId, date)
+        
+        // GBS 라벨 정보 생성
+        val labels = gbsGroups.map { gbs ->
+            KanbanLabel(
+                id = gbs.id!!,
+                name = gbs.name,
+                color = getColorForGbs(gbs.id)
+            )
+        }
+        
+        // 칸반 컬럼 생성
+        val columns = mutableListOf<KanbanColumn>()
+        
+        // 미배정 멤버 컬럼
+        val unassignedMembers = getUsersNotAssignedToGbs(villageId, date)
+        val unassignedCards = unassignedMembers.map { user ->
+            KanbanCard(
+                id = "user-${user.id}",
+                content = user.name,
+                labels = emptyList()
+            )
+        }
+        columns.add(
+            KanbanColumn(
+                id = "unassigned",
+                title = "미배정 멤버",
+                cards = unassignedCards
+            )
+        )
+        
+        // 리더 컬럼
+        val leaderCards = mutableListOf<KanbanCard>()
+        gbsGroups.forEach { gbs ->
+            val currentLeaderHistory = gbsLeaderHistoryRepository.findCurrentLeaderHistoryByGbsId(gbs.id!!, date)
+            if (currentLeaderHistory != null) {
+                val leader = currentLeaderHistory.leader
+                val card = KanbanCard(
+                    id = "user-${leader.id}",
+                    content = leader.name,
+                    labels = listOf(labels.find { it.id == gbs.id }!!)
+                )
+                leaderCards.add(card)
+            }
+        }
+        columns.add(KanbanColumn(
+            id = "leaders",
+            title = "리더",
+            cards = leaderCards
+        ))
+        
+        // 배정 완료 컬럼
+        val assignedCards = mutableListOf<KanbanCard>()
+        gbsGroups.forEach { gbs ->
+            val memberHistories = gbsMemberHistoryRepository.findCurrentMembersByGbsId(gbs.id!!, date)
+            memberHistories.forEach { history ->
+                val member = history.member
+                // 이미 리더로 배정된 사용자는 제외
+                if (!leaderCards.any { it.id == "user-${member.id}" }) {
+                    val card = KanbanCard(
+                        id = "user-${member.id}",
+                        content = member.name,
+                        labels = listOf(labels.find { it.id == gbs.id }!!)
+                    )
+                    assignedCards.add(card)
+                }
+            }
+        }
+        columns.add(KanbanColumn(
+            id = "assigned",
+            title = "배정 완료",
+            cards = assignedCards
+        ))
+        
+        return GbsAssignmentResponse(
+            villageId = villageId,
+            villageName = village.name,
+            columns = columns,
+            labels = labels
+        )
+    }
+    
+    /**
+     * GBS에 배정되지 않은 사용자 목록을 조회합니다.
+     */
+    private fun getUsersNotAssignedToGbs(villageId: Long, date: LocalDate): List<User> {
+        // 해당 마을에 소속된 모든 사용자 조회
+        val allVillageUsers = userRepository.findByVillageId(villageId)
+        
+        // 현재 GBS에 배정된 사용자 ID 목록
+        val assignedUserIds = mutableSetOf<Long>()
+        
+        // 리더로 배정된 사용자 ID 추가
+        val gbsGroups = gbsGroupRepository.findActiveGroupsByVillageId(villageId, date)
+        gbsGroups.forEach { gbs ->
+            val leaderHistory = gbsLeaderHistoryRepository.findCurrentLeaderHistoryByGbsId(gbs.id!!, date)
+            if (leaderHistory != null) {
+                assignedUserIds.add(leaderHistory.leader.id!!)
+            }
+            
+            // 멤버로 배정된 사용자 ID 추가
+            val memberHistories = gbsMemberHistoryRepository.findCurrentMembersByGbsId(gbs.id, date)
+            memberHistories.forEach { history ->
+                assignedUserIds.add(history.member.id!!)
+            }
+        }
+        
+        // 배정되지 않은 사용자만 필터링
+        return allVillageUsers.filter { user -> !assignedUserIds.contains(user.id) }
+    }
+    
+    /**
+     * GBS ID에 따라 고유한 색상을 반환합니다.
+     */
+    private fun getColorForGbs(gbsId: Long?): String {
+        // 미리 정의된 색상 리스트
+        val colors = listOf(
+            "#FF5733", "#33FF57", "#3357FF", "#FF33A8", "#A833FF",
+            "#33FFF3", "#FFD433", "#FF8033", "#33FF98", "#3380FF"
+        )
+        // GBS ID를 기준으로 색상 할당
+        return if (gbsId != null) {
+            val index = ((gbsId % colors.size) + colors.size) % colors.size
+            colors[index.toInt()]
+        } else {
+            "#CCCCCC" // 기본 색상
+        }
+    }
+
+    /**
+     * GBS 배치 정보를 저장합니다.
+     *
+     * @param villageId 마을 ID
+     * @param request GBS 배치 정보 저장 요청
+     * @return GBS 배치 정보 저장 응답
+     */
+    @Transactional
+    fun saveGbsAssignment(villageId: Long, request: GbsAssignmentSaveRequest): GbsAssignmentSaveResponse {
+        // 마을 정보 확인
+        val village = villageRepository.findById(villageId)
+            .orElseThrow { 
+                AttendlyApiException(
+                    ErrorMessage.VILLAGE_NOT_FOUND, 
+                    ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId)
+                ) 
+            }
+        
+        var totalMemberCount = 0
+        
+        // 각 GBS 그룹에 대한 배치 정보 저장
+        request.assignments.forEach { assignment ->
+            // GBS 그룹 확인
+            val gbsGroup = gbsGroupRepository.findById(assignment.gbsId)
+                .orElseThrow { 
+                    AttendlyApiException(
+                        ErrorMessage.GBS_GROUP_NOT_FOUND, 
+                        ErrorMessageUtils.withId(ErrorMessage.GBS_GROUP_NOT_FOUND, assignment.gbsId)
+                    ) 
+                }
+            
+            // 마을에 속하는 GBS인지 확인
+            if (gbsGroup.village.id != villageId) {
+                throw AttendlyApiException(
+                    ErrorMessage.GBS_GROUP_NOT_IN_VILLAGE,
+                    "GBS ID: ${assignment.gbsId}, Village ID: $villageId"
+                )
+            }
+            
+            // 리더 확인
+            val leader = userRepository.findById(assignment.leaderId)
+                .orElseThrow { 
+                    AttendlyApiException(
+                        ErrorMessage.USER_NOT_FOUND, 
+                        ErrorMessageUtils.withId(ErrorMessage.USER_NOT_FOUND, assignment.leaderId)
+                    ) 
+                }
+            
+            // 기존 활성 리더 기록 조회 및 종료
+            val currentLeaderHistory = gbsLeaderHistoryRepository.findCurrentLeaderHistoryByGbsId(assignment.gbsId, request.startDate)
+            if (currentLeaderHistory != null && currentLeaderHistory.leader.id != assignment.leaderId) {
+                // 기존 리더와 새로운 리더가 다른 경우 기존 기록 종료
+                // 새 객체 생성하여 endDate 설정 후 저장
+                val updatedLeaderHistory = GbsLeaderHistory(
+                    id = currentLeaderHistory.id,
+                    gbsGroup = currentLeaderHistory.gbsGroup,
+                    leader = currentLeaderHistory.leader,
+                    startDate = currentLeaderHistory.startDate,
+                    endDate = request.startDate.minusDays(1)
+                )
+                gbsLeaderHistoryRepository.save(updatedLeaderHistory)
+            }
+            
+            // 새로운 리더가 기존 리더와 다르거나 기존 리더 기록이 없는 경우 새 기록 생성
+            if (currentLeaderHistory == null || currentLeaderHistory.leader.id != assignment.leaderId) {
+                val newLeaderHistory = GbsLeaderHistory(
+                    gbsGroup = gbsGroup,
+                    leader = leader,
+                    startDate = request.startDate,
+                    endDate = null
+                )
+                gbsLeaderHistoryRepository.save(newLeaderHistory)
+            }
+            
+            // 기존 멤버 기록 조회 및 종료
+            val currentMemberHistories = gbsMemberHistoryRepository.findCurrentMembersByGbsId(assignment.gbsId, request.startDate)
+            val currentMemberIds = currentMemberHistories.map { it.member.id!! }.toSet()
+            val newMemberIds = assignment.memberIds.toSet()
+            
+            // 제거된 멤버들의 기록 종료
+            val removedMemberHistories = currentMemberHistories.filter { it.member.id!! !in newMemberIds }
+            removedMemberHistories.forEach { history ->
+                // 새 객체 생성하여 endDate 설정 후 저장
+                val updatedHistory = GbsMemberHistory(
+                    id = history.id,
+                    gbsGroup = history.gbsGroup,
+                    member = history.member, 
+                    startDate = history.startDate,
+                    endDate = request.startDate.minusDays(1)
+                )
+                gbsMemberHistoryRepository.save(updatedHistory)
+            }
+            
+            // 새로 추가된 멤버들의 기록 생성
+            val addedMemberIds = newMemberIds - currentMemberIds
+            addedMemberIds.forEach { memberId ->
+                val member = userRepository.findById(memberId)
+                    .orElseThrow { 
+                        AttendlyApiException(
+                            ErrorMessage.USER_NOT_FOUND, 
+                            ErrorMessageUtils.withId(ErrorMessage.USER_NOT_FOUND, memberId)
+                        ) 
+                    }
+                
+                val newMemberHistory = GbsMemberHistory(
+                    gbsGroup = gbsGroup,
+                    member = member,
+                    startDate = request.startDate,
+                    endDate = null
+                )
+                gbsMemberHistoryRepository.save(newMemberHistory)
+            }
+            
+            // 멤버 수 카운팅 (리더 + 멤버)
+            totalMemberCount += 1 + assignment.memberIds.size
+        }
+        
+        return GbsAssignmentSaveResponse(
+            villageId = villageId,
+            assignmentCount = request.assignments.size,
+            memberCount = totalMemberCount,
+            message = "GBS 배치가 성공적으로 저장되었습니다."
         )
     }
 } 

@@ -9,9 +9,9 @@ import java.time.LocalDate
 
 @Repository
 interface AttendanceRepository : JpaRepository<Attendance, Long>, AttendanceRepositoryCustom {
-    fun findByGbsGroupAndWeekStart(gbsGroup: GbsGroup, weekStart: LocalDate): List<Attendance>
+    fun findAllByGbsGroupAndWeekStart(gbsGroup: GbsGroup, weekStart: LocalDate): List<Attendance>
     
-    fun findByMemberAndWeekStartBetween(
+    fun findAllByMemberAndWeekStartBetween(
         member: User,
         startDate: LocalDate,
         endDate: LocalDate
