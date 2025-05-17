@@ -19,8 +19,6 @@ interface GbsLeaderHistoryRepository : JpaRepository<GbsLeaderHistory, Long>, Gb
     )
     fun findByLeaderIdWithDetailsOrderByStartDateDesc(@Param("leaderId") leaderId: Long): List<GbsLeaderHistory>
 
-    override fun findByLeaderIdAndEndDateIsNull(leaderId: Long): GbsLeaderHistory?
-
     override @Query("SELECT glh FROM GbsLeaderHistory glh JOIN FETCH glh.leader WHERE glh.gbsGroup.id = :gbsId AND glh.leader.id = :leaderId")
     fun findCurrentLeaderHistoryByGbsIdAndLeaderId(gbsId: Long, leaderId: Long): GbsLeaderHistory?
 }

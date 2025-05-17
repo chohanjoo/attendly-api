@@ -1,18 +1,17 @@
 package com.attendly.service
 
-import com.attendly.api.dto.UserVillageResponse
-import com.attendly.api.dto.VillageMemberResponse
 import com.attendly.api.dto.MemberInfo
-import com.attendly.domain.repository.VillageRepository
-import com.attendly.domain.repository.VillageLeaderRepository
+import com.attendly.api.dto.UserVillageResponse
 import com.attendly.domain.repository.UserRepository
+import com.attendly.domain.repository.VillageLeaderRepository
+import com.attendly.domain.repository.VillageRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
 import com.attendly.security.UserDetailsAdapter
+import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.security.core.Authentication
 
 @Service
 class VillageService(
@@ -30,8 +29,13 @@ class VillageService(
     @Transactional(readOnly = true)
     fun getVillageById(villageId: Long, authentication: Authentication): UserVillageResponse {
         val village = villageRepository.findById(villageId)
-            .orElseThrow { AttendlyApiException(ErrorMessage.VILLAGE_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId)) }
-        
+            .orElseThrow {
+                AttendlyApiException(
+                    ErrorMessage.VILLAGE_NOT_FOUND,
+                    ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId)
+                )
+            }
+
         // 현재 마을의 마을장 여부 확인
         val currentVillageLeader = villageLeaderRepository.findByVillageIdAndEndDateIsNull(villageId)
         val isVillageLeader = if (currentVillageLeader != null) {
@@ -40,7 +44,7 @@ class VillageService(
         } else {
             false
         }
-        
+
         return UserVillageResponse(
             userId = 0L, // 특정 마을을 볼 때는 사용자 정보가 필요 없음
             userName = "", // 특정 마을을 볼 때는 사용자 정보가 필요 없음
@@ -59,13 +63,18 @@ class VillageService(
      * @return 마을 멤버 목록 응답 객체
      */
     @Transactional(readOnly = true)
-    fun getVillageMembers(villageId: Long): VillageMemberResponse {
+    fun getVillageMembers(villageId: Long): List<MemberInfo> {
         val village = villageRepository.findById(villageId)
-            .orElseThrow { AttendlyApiException(ErrorMessage.VILLAGE_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId)) }
-        
+            .orElseThrow {
+                AttendlyApiException(
+                    ErrorMessage.VILLAGE_NOT_FOUND,
+                    ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId)
+                )
+            }
+
         val members = userRepository.findByVillageId(villageId)
-        
-        val memberInfos = members.map { user ->
+
+        return members.map { user ->
             MemberInfo(
                 id = user.id!!,
                 name = user.name,
@@ -76,12 +85,5 @@ class VillageService(
                 joinDate = null // 가입일은 현재 User 엔티티에 없음
             )
         }
-        
-        return VillageMemberResponse(
-            members = memberInfos,
-            totalCount = members.size,
-            villageId = village.id!!,
-            villageName = village.name
-        )
     }
 } 

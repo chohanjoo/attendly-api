@@ -44,9 +44,9 @@ class VillageController(
     )
     @GetMapping("/{villageId}/members")
     @PreAuthorize("isAuthenticated()")
-    fun getVillageMembers(@PathVariable villageId: Long): ResponseEntity<ApiResponse<VillageMemberResponse>> {
+    fun getVillageMembers(@PathVariable villageId: Long): ResponseEntity<ApiResponse<PageResponse<MemberInfo>>> {
         val membersResponse = villageService.getVillageMembers(villageId)
-        return ResponseUtil.success(membersResponse, "마을 멤버 목록 조회 성공")
+        return ResponseUtil.successList(membersResponse)
     }
     
     @Operation(

@@ -288,21 +288,16 @@ class VillageControllerTest {
     fun `마을 멤버 목록 조회 성공`() {
         // Given
         val villageId = 1L
-        val memberResponse = VillageMemberResponse(
-            members = listOf(
-                MemberInfo(
-                    id = 1L,
-                    name = "홍길동",
-                    birthDate = LocalDate.of(1990, 1, 1),
-                    email = "hong@example.com",
-                    phoneNumber = "010-1234-5678",
-                    role = "MEMBER",
-                    joinDate = LocalDate.of(2023, 1, 1)
-                )
-            ),
-            totalCount = 1,
-            villageId = villageId,
-            villageName = "1마을"
+        val memberResponse = listOf(
+            MemberInfo(
+                id = 1L,
+                name = "홍길동",
+                birthDate = LocalDate.of(1990, 1, 1),
+                email = "hong@example.com",
+                phoneNumber = "010-1234-5678",
+                role = "MEMBER",
+                joinDate = LocalDate.of(2023, 1, 1)
+            )
         )
 
         every { villageService.getVillageMembers(villageId) } returns memberResponse
@@ -317,19 +312,15 @@ class VillageControllerTest {
         val apiResponse = responseEntity.body
         assertNotNull(apiResponse)
         assertTrue(apiResponse!!.success)
-        assertEquals("마을 멤버 목록 조회 성공", apiResponse.message)
         assertEquals(200, apiResponse.code)
 
         val result = apiResponse.data
         assertNotNull(result)
-        assertEquals(1, result!!.members.size)
-        assertEquals(1L, result.members[0].id)
-        assertEquals("홍길동", result.members[0].name)
-        assertEquals("hong@example.com", result.members[0].email)
-        assertEquals("MEMBER", result.members[0].role)
-        assertEquals(1, result.totalCount)
-        assertEquals(villageId, result.villageId)
-        assertEquals("1마을", result.villageName)
+        assertEquals(1, result!!.totalCount)
+        assertEquals(1L, result.items[0].id)
+        assertEquals("홍길동", result.items[0].name)
+        assertEquals("hong@example.com", result.items[0].email)
+        assertEquals("MEMBER", result.items[0].role)
 
         verify(exactly = 1) { villageService.getVillageMembers(villageId) }
     }

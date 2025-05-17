@@ -25,7 +25,3 @@ interface UserRepository : JpaRepository<User, Long>, UserRepositoryCustom {
 
     fun findByVillageId(villageId: Long): List<User>
 }
-
-interface UserRepositoryCustom {
-    fun findByFilters(name: String?, departmentId: Long?, roles: List<Role>?, pageable: Pageable): Page<User>
-} 
