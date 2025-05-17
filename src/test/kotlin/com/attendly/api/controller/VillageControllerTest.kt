@@ -1,14 +1,7 @@
 package com.attendly.api.controller
 
-import com.attendly.api.dto.UserVillageResponse
-import com.attendly.api.dto.GbsAssignmentResponse
-import com.attendly.api.dto.GbsAssignmentSaveRequest
-import com.attendly.api.dto.GbsAssignmentSaveResponse
-import com.attendly.api.dto.GbsAssignment
-import com.attendly.api.dto.KanbanColumn
-import com.attendly.api.dto.KanbanLabel
-import com.attendly.api.dto.LeaderCandidateResponse
-import com.attendly.api.dto.LeaderCandidate
+import com.attendly.api.dto.*
+import com.attendly.service.GbsGroupService
 import com.attendly.service.GbsMemberService
 import com.attendly.service.VillageService
 import io.mockk.every
@@ -19,17 +12,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import com.attendly.api.dto.GbsGroupInfo
-import com.attendly.api.dto.GbsGroupListResponse
-import com.attendly.service.GbsGroupService
-import org.springframework.security.test.context.support.WithMockUser
-import com.attendly.api.dto.MemberInfo
-import com.attendly.api.dto.VillageMemberResponse
 
 @ExtendWith(SpringExtension::class)
 class VillageControllerTest {
@@ -71,13 +59,13 @@ class VillageControllerTest {
         // then
         assertNotNull(responseEntity)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        
+
         val apiResponse = responseEntity.body
         assertNotNull(apiResponse)
         assertTrue(apiResponse!!.success)
         assertEquals("마을 정보 조회 성공", apiResponse.message)
         assertEquals(200, apiResponse.code)
-        
+
         val result = apiResponse.data
         assertNotNull(result)
         assertEquals(villageId, result!!.villageId)
@@ -88,7 +76,7 @@ class VillageControllerTest {
 
         verify(exactly = 1) { villageService.getVillageById(villageId, authentication) }
     }
-    
+
     @Test
     fun `GBS 배치 정보를 조회한다`() {
         // given
@@ -108,7 +96,7 @@ class VillageControllerTest {
                 color = "#FF5733"
             )
         )
-        
+
         val expectedResponse = GbsAssignmentResponse(
             villageId = villageId,
             villageName = "1마을",
@@ -124,21 +112,21 @@ class VillageControllerTest {
         // then
         assertNotNull(responseEntity)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        
+
         val apiResponse = responseEntity.body
         assertNotNull(apiResponse)
         assertTrue(apiResponse!!.success)
         assertEquals("GBS 배치 정보 조회 성공", apiResponse.message)
         assertEquals(200, apiResponse.code)
-        
+
         val result = apiResponse.data
         assertNotNull(result)
         assertEquals(villageId, result!!.villageId)
         assertEquals("1마을", result.villageName)
-        
+
         verify(exactly = 1) { gbsMemberService.getGbsAssignment(villageId, date) }
     }
-    
+
     @Test
     fun `GBS 배치 정보를 저장한다`() {
         // given
@@ -148,18 +136,18 @@ class VillageControllerTest {
             endDate = LocalDate.of(2023, 12, 31),
             assignments = listOf(
                 GbsAssignment(
-                    gbsId = 1L, 
-                    leaderId = 10L, 
+                    gbsId = 1L,
+                    leaderId = 10L,
                     memberIds = listOf(101L, 102L)
                 ),
                 GbsAssignment(
-                    gbsId = 2L, 
-                    leaderId = 20L, 
+                    gbsId = 2L,
+                    leaderId = 20L,
                     memberIds = listOf(201L)
                 )
             )
         )
-        
+
         val expectedResponse = GbsAssignmentSaveResponse(
             villageId = villageId,
             assignmentCount = 2,
@@ -175,20 +163,20 @@ class VillageControllerTest {
         // then
         assertNotNull(responseEntity)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        
+
         val apiResponse = responseEntity.body
         assertNotNull(apiResponse)
         assertTrue(apiResponse!!.success)
         assertEquals("GBS 배치 저장 성공", apiResponse.message)
         assertEquals(200, apiResponse.code)
-        
+
         val result = apiResponse.data
         assertNotNull(result)
         assertEquals(villageId, result!!.villageId)
         assertEquals(2, result.assignmentCount)
         assertEquals(5, result.memberCount)
         assertEquals("GBS 배치가 성공적으로 저장되었습니다.", result.message)
-        
+
         verify(exactly = 1) { gbsMemberService.saveGbsAssignment(villageId, request) }
     }
 
@@ -212,10 +200,8 @@ class VillageControllerTest {
                 previousGbsCount = 1
             )
         )
-        
-        val expectedResponse = LeaderCandidateResponse(candidates = candidates)
 
-        every { gbsMemberService.getLeaderCandidates(villageId) } returns expectedResponse
+        every { gbsMemberService.getLeaderCandidates(villageId) } returns candidates
 
         // when
         val responseEntity = villageController.getLeaderCandidates(villageId)
@@ -223,31 +209,30 @@ class VillageControllerTest {
         // then
         assertNotNull(responseEntity)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        
+
         val apiResponse = responseEntity.body
         assertNotNull(apiResponse)
         assertTrue(apiResponse!!.success)
-        assertEquals("리더 후보 목록 조회 성공", apiResponse.message)
         assertEquals(200, apiResponse.code)
-        
+
         val result = apiResponse.data
         assertNotNull(result)
-        assertEquals(2, result!!.candidates.size)
-        
-        val firstCandidate = result.candidates[0]
+        assertEquals(2, result!!.items.size)
+
+        val firstCandidate = result.items[0]
         assertEquals(789L, firstCandidate.id)
         assertEquals("박지성", firstCandidate.name)
         assertEquals("park@example.com", firstCandidate.email)
         assertEquals(true, firstCandidate.isLeader)
         assertEquals(2, firstCandidate.previousGbsCount)
-        
-        val secondCandidate = result.candidates[1]
+
+        val secondCandidate = result.items[1]
         assertEquals(101L, secondCandidate.id)
         assertEquals("손흥민", secondCandidate.name)
         assertEquals("son@example.com", secondCandidate.email)
         assertEquals(true, secondCandidate.isLeader)
         assertEquals(1, secondCandidate.previousGbsCount)
-        
+
         verify(exactly = 1) { gbsMemberService.getLeaderCandidates(villageId) }
     }
 
@@ -274,28 +259,28 @@ class VillageControllerTest {
                 )
             )
         )
-        
+
         every { gbsGroupService.getGbsGroups(villageId) } returns gbsGroupResponse
-        
+
         // when
         val responseEntity = villageController.getGbsGroups(villageId)
-        
+
         // then
         assertNotNull(responseEntity)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        
+
         val apiResponse = responseEntity.body
         assertNotNull(apiResponse)
         assertTrue(apiResponse!!.success)
         assertEquals("GBS 그룹 목록 조회 성공", apiResponse.message)
         assertEquals(200, apiResponse.code)
-        
+
         val result = apiResponse.data
         assertNotNull(result)
         assertEquals(2, result!!.groups.size)
         assertEquals("믿음 GBS", result.groups[0].name)
         assertEquals("소망 GBS", result.groups[1].name)
-        
+
         verify(exactly = 1) { gbsGroupService.getGbsGroups(villageId) }
     }
 
@@ -328,13 +313,13 @@ class VillageControllerTest {
         // Then
         assertNotNull(responseEntity)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        
+
         val apiResponse = responseEntity.body
         assertNotNull(apiResponse)
         assertTrue(apiResponse!!.success)
         assertEquals("마을 멤버 목록 조회 성공", apiResponse.message)
         assertEquals(200, apiResponse.code)
-        
+
         val result = apiResponse.data
         assertNotNull(result)
         assertEquals(1, result!!.members.size)
@@ -345,7 +330,7 @@ class VillageControllerTest {
         assertEquals(1, result.totalCount)
         assertEquals(villageId, result.villageId)
         assertEquals("1마을", result.villageName)
-        
+
         verify(exactly = 1) { villageService.getVillageMembers(villageId) }
     }
 } 

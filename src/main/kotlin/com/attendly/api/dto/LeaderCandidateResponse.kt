@@ -1,13 +1,6 @@
 package com.attendly.api.dto
 
 /**
- * GBS 리더 후보 목록 응답 DTO
- */
-data class LeaderCandidateResponse(
-    val candidates: List<LeaderCandidate>
-)
-
-/**
  * GBS 리더 후보 정보 DTO
  */
 data class LeaderCandidate(

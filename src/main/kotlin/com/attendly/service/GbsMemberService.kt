@@ -1,30 +1,14 @@
 package com.attendly.service
 
-import com.attendly.api.dto.GbsMembersListResponse
-import com.attendly.api.dto.LeaderGbsHistoryListResponse
-import com.attendly.api.dto.LeaderGbsHistoryResponse
-import com.attendly.api.dto.LeaderGbsResponse
-import com.attendly.api.dto.GbsAssignmentResponse
-import com.attendly.api.dto.GbsAssignmentSaveRequest
-import com.attendly.api.dto.GbsAssignmentSaveResponse
-import com.attendly.api.dto.KanbanCard
-import com.attendly.api.dto.KanbanColumn
-import com.attendly.api.dto.KanbanLabel
+import com.attendly.api.dto.*
 import com.attendly.domain.entity.GbsLeaderHistory
 import com.attendly.domain.entity.GbsMemberHistory
-import com.attendly.enums.Role
 import com.attendly.domain.entity.User
-import com.attendly.domain.repository.GbsLeaderHistoryRepository
-import com.attendly.domain.repository.LeaderDelegationRepository
-import com.attendly.domain.repository.VillageRepository
-import com.attendly.domain.repository.GbsGroupRepository
-import com.attendly.domain.repository.GbsMemberHistoryRepository
-import com.attendly.domain.repository.UserRepository
+import com.attendly.domain.repository.*
+import com.attendly.enums.Role
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
-import com.attendly.api.dto.LeaderCandidateResponse
-import com.attendly.api.dto.LeaderCandidate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -445,7 +429,7 @@ class GbsMemberService(
      * @return 리더 후보 목록 응답
      */
     @Transactional(readOnly = true)
-    fun getLeaderCandidates(villageId: Long): LeaderCandidateResponse {
+    fun getLeaderCandidates(villageId: Long): List<LeaderCandidate> {
         // 마을 정보 확인
         val village = villageRepository.findById(villageId)
             .orElseThrow { 
@@ -473,11 +457,9 @@ class GbsMemberService(
         }
         
         // 현재 리더인 사용자와 이전 경험이 많은 사용자를 우선 순위로 정렬
-        val sortedCandidates = candidates.sortedWith(
+        return candidates.sortedWith(
             compareByDescending<LeaderCandidate> { it.isLeader }
                 .thenByDescending { it.previousGbsCount }
         )
-        
-        return LeaderCandidateResponse(candidates = sortedCandidates)
     }
 } 

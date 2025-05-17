@@ -1,17 +1,10 @@
 package com.attendly.api.controller
 
-import com.attendly.api.dto.ApiResponse
-import com.attendly.api.dto.UserVillageResponse
-import com.attendly.api.dto.GbsAssignmentResponse
-import com.attendly.api.dto.GbsAssignmentSaveRequest
-import com.attendly.api.dto.GbsAssignmentSaveResponse
-import com.attendly.api.dto.GbsGroupListResponse
-import com.attendly.api.dto.LeaderCandidateResponse
-import com.attendly.api.dto.VillageMemberResponse
+import com.attendly.api.dto.*
 import com.attendly.api.util.ResponseUtil
-import com.attendly.service.VillageService
-import com.attendly.service.GbsMemberService
 import com.attendly.service.GbsGroupService
+import com.attendly.service.GbsMemberService
+import com.attendly.service.VillageService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -19,13 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 
 @RestController
@@ -100,9 +87,9 @@ class VillageController(
     )
     @GetMapping("/{id}/leader-candidates")
     @PreAuthorize("isAuthenticated()")
-    fun getLeaderCandidates(@PathVariable id: Long): ResponseEntity<ApiResponse<LeaderCandidateResponse>> {
+    fun getLeaderCandidates(@PathVariable id: Long): ResponseEntity<ApiResponse<PageResponse<LeaderCandidate>>> {
         val candidatesResponse = gbsMemberService.getLeaderCandidates(id)
-        return ResponseUtil.success(candidatesResponse, "리더 후보 목록 조회 성공")
+        return ResponseUtil.successList(candidatesResponse)
     }
     
     @Operation(
