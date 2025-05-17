@@ -1,8 +1,11 @@
 package com.attendly.service
 
 import com.attendly.api.dto.UserVillageResponse
+import com.attendly.api.dto.VillageMemberResponse
+import com.attendly.api.dto.MemberInfo
 import com.attendly.domain.repository.VillageRepository
 import com.attendly.domain.repository.VillageLeaderRepository
+import com.attendly.domain.repository.UserRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
@@ -14,7 +17,8 @@ import org.springframework.security.core.Authentication
 @Service
 class VillageService(
     private val villageRepository: VillageRepository,
-    private val villageLeaderRepository: VillageLeaderRepository
+    private val villageLeaderRepository: VillageLeaderRepository,
+    private val userRepository: UserRepository
 ) {
 
     /**
@@ -45,6 +49,39 @@ class VillageService(
             departmentId = village.department.id!!,
             departmentName = village.department.name,
             isVillageLeader = isVillageLeader
+        )
+    }
+
+    /**
+     * 특정 마을의 멤버 목록 조회
+     *
+     * @param villageId 마을 ID
+     * @return 마을 멤버 목록 응답 객체
+     */
+    @Transactional(readOnly = true)
+    fun getVillageMembers(villageId: Long): VillageMemberResponse {
+        val village = villageRepository.findById(villageId)
+            .orElseThrow { AttendlyApiException(ErrorMessage.VILLAGE_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId)) }
+        
+        val members = userRepository.findByVillageId(villageId)
+        
+        val memberInfos = members.map { user ->
+            MemberInfo(
+                id = user.id!!,
+                name = user.name,
+                birthDate = user.birthDate,
+                email = user.email,
+                phoneNumber = user.phoneNumber,
+                role = user.role.name,
+                joinDate = null // 가입일은 현재 User 엔티티에 없음
+            )
+        }
+        
+        return VillageMemberResponse(
+            members = memberInfos,
+            totalCount = members.size,
+            villageId = village.id!!,
+            villageName = village.name
         )
     }
 } 

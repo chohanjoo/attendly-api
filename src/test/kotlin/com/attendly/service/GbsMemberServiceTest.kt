@@ -26,6 +26,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import com.attendly.api.dto.LeaderCandidate
+import com.attendly.api.dto.LeaderCandidateResponse
 
 @ExtendWith(MockKExtension::class)
 class GbsMemberServiceTest {
@@ -527,6 +529,75 @@ class GbsMemberServiceTest {
         }
         
         assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorMessage.code)
+    }
+
+    @Test
+    fun `리더 후보 목록을 성공적으로 조회한다`() {
+        // given
+        val villageId = 1L
+        val village = mockk<Village>()
+        val department = mockk<Department>()
+        val user1 = User(id = 1L, name = "박지성", email = "park@example.com", role = Role.LEADER, department = department)
+        val user2 = User(id = 2L, name = "손흥민", email = "son@example.com", role = Role.LEADER, department = department)
+        
+        val leaderHistoryUser1 = listOf(
+            mockk<GbsLeaderHistory>(),
+            mockk<GbsLeaderHistory>()
+        )
+        
+        val leaderHistoryUser2 = listOf(
+            mockk<GbsLeaderHistory>()
+        )
+        
+        every { villageRepository.findById(villageId) } returns java.util.Optional.of(village)
+        every { userRepository.findByVillageId(villageId) } returns listOf(user1, user2)
+        every { gbsLeaderHistoryRepository.findByLeaderIdOrderByStartDateDesc(1L) } returns leaderHistoryUser1
+        every { gbsLeaderHistoryRepository.findByLeaderIdOrderByStartDateDesc(2L) } returns leaderHistoryUser2
+        every { gbsLeaderHistoryRepository.findByLeaderIdAndEndDateIsNull(1L) } returns mockk()
+        every { gbsLeaderHistoryRepository.findByLeaderIdAndEndDateIsNull(2L) } returns mockk()
+        
+        // when
+        val result = gbsMemberService.getLeaderCandidates(villageId)
+        
+        // then
+        assertEquals(2, result.candidates.size)
+        
+        val firstCandidate = result.candidates[0]
+        assertEquals(1L, firstCandidate.id)
+        assertEquals("박지성", firstCandidate.name)
+        assertEquals("park@example.com", firstCandidate.email)
+        assertEquals(true, firstCandidate.isLeader)
+        assertEquals(2, firstCandidate.previousGbsCount)
+        
+        val secondCandidate = result.candidates[1]
+        assertEquals(2L, secondCandidate.id)
+        assertEquals("손흥민", secondCandidate.name)
+        assertEquals("son@example.com", secondCandidate.email)
+        assertEquals(true, secondCandidate.isLeader)
+        assertEquals(1, secondCandidate.previousGbsCount)
+        
+        verify(exactly = 1) { villageRepository.findById(villageId) }
+        verify(exactly = 1) { userRepository.findByVillageId(villageId) }
+        verify(exactly = 1) { gbsLeaderHistoryRepository.findByLeaderIdOrderByStartDateDesc(1L) }
+        verify(exactly = 1) { gbsLeaderHistoryRepository.findByLeaderIdOrderByStartDateDesc(2L) }
+        verify(exactly = 1) { gbsLeaderHistoryRepository.findByLeaderIdAndEndDateIsNull(1L) }
+        verify(exactly = 1) { gbsLeaderHistoryRepository.findByLeaderIdAndEndDateIsNull(2L) }
+    }
+    
+    @Test
+    fun `존재하지 않는 마을의 리더 후보 목록 조회시 예외가 발생한다`() {
+        // given
+        val villageId = 999L
+        
+        every { villageRepository.findById(villageId) } returns java.util.Optional.empty()
+        
+        // when & then
+        val exception = assertThrows(AttendlyApiException::class.java) {
+            gbsMemberService.getLeaderCandidates(villageId)
+        }
+        
+        assertEquals(ErrorMessage.VILLAGE_NOT_FOUND.code, exception.errorMessage.code)
+        verify(exactly = 1) { villageRepository.findById(villageId) }
     }
 
     // Private helper methods

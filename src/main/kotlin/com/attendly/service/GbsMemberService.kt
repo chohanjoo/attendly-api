@@ -23,6 +23,8 @@ import com.attendly.domain.repository.UserRepository
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
+import com.attendly.api.dto.LeaderCandidateResponse
+import com.attendly.api.dto.LeaderCandidate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -434,5 +436,48 @@ class GbsMemberService(
             memberCount = totalMemberCount,
             message = "GBS 배치가 성공적으로 저장되었습니다."
         )
+    }
+
+    /**
+     * GBS 리더로 지정할 수 있는 사용자 목록을 조회합니다.
+     *
+     * @param villageId 마을 ID
+     * @return 리더 후보 목록 응답
+     */
+    @Transactional(readOnly = true)
+    fun getLeaderCandidates(villageId: Long): LeaderCandidateResponse {
+        // 마을 정보 확인
+        val village = villageRepository.findById(villageId)
+            .orElseThrow { 
+                AttendlyApiException(
+                    ErrorMessage.VILLAGE_NOT_FOUND, 
+                    ErrorMessageUtils.withId(ErrorMessage.VILLAGE_NOT_FOUND, villageId)
+                ) 
+            }
+        
+        // 해당 마을에 소속된 사용자 중 리더 후보를 조회
+        val villageUsers = userRepository.findByVillageId(villageId)
+        
+        // 각 사용자별 이전 GBS 리더 경험 횟수 조회
+        val candidates = villageUsers.map { user ->
+            val previousGbsHistories = gbsLeaderHistoryRepository.findByLeaderIdOrderByStartDateDesc(user.id!!)
+            val isCurrentlyLeader = gbsLeaderHistoryRepository.findByLeaderIdAndEndDateIsNull(user.id) != null
+            
+            LeaderCandidate(
+                id = user.id,
+                name = user.name,
+                email = user.email,
+                isLeader = isCurrentlyLeader,
+                previousGbsCount = previousGbsHistories.size
+            )
+        }
+        
+        // 현재 리더인 사용자와 이전 경험이 많은 사용자를 우선 순위로 정렬
+        val sortedCandidates = candidates.sortedWith(
+            compareByDescending<LeaderCandidate> { it.isLeader }
+                .thenByDescending { it.previousGbsCount }
+        )
+        
+        return LeaderCandidateResponse(candidates = sortedCandidates)
     }
 } 

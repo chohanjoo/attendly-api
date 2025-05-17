@@ -1,12 +1,15 @@
 package com.attendly.service
 
 import com.attendly.api.dto.UserVillageResponse
+import com.attendly.api.dto.VillageMemberResponse
 import com.attendly.domain.entity.Department
 import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
 import com.attendly.domain.entity.VillageLeader
+import com.attendly.domain.repository.UserRepository
 import com.attendly.domain.repository.VillageLeaderRepository
 import com.attendly.domain.repository.VillageRepository
+import com.attendly.enums.Role
 import com.attendly.exception.AttendlyApiException
 import com.attendly.security.UserDetailsAdapter
 import io.mockk.*
@@ -20,7 +23,14 @@ import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.junit.jupiter.api.extension.ExtendWith
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import org.junit.jupiter.api.Assertions.assertNotNull
 
+@ExtendWith(MockKExtension::class)
 class VillageServiceTest {
 
     private lateinit var villageService: VillageService
@@ -29,6 +39,7 @@ class VillageServiceTest {
     private lateinit var authentication: Authentication
     private lateinit var userDetailsAdapter: UserDetailsAdapter
     private lateinit var user: User
+    private lateinit var userRepository: UserRepository
     
     @BeforeEach
     fun setUp() {
@@ -37,10 +48,12 @@ class VillageServiceTest {
         authentication = mockk()
         userDetailsAdapter = mockk()
         user = mockk()
+        userRepository = mockk()
         
         villageService = VillageService(
             villageRepository = villageRepository,
-            villageLeaderRepository = villageLeaderRepository
+            villageLeaderRepository = villageLeaderRepository,
+            userRepository = userRepository
         )
     }
     
@@ -137,5 +150,101 @@ class VillageServiceTest {
         }
         
         verify(exactly = 1) { villageRepository.findById(villageId) }
+    }
+
+    @Test
+    fun `마을 멤버 목록 조회 성공`() {
+        // Given
+        val villageId = 1L
+        val department = Department(
+            id = 1L,
+            name = "청년부",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        val village = Village(
+            id = villageId,
+            name = "1마을",
+            department = department,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+
+        val users = listOf(
+            User(
+                id = 1L,
+                name = "홍길동",
+                birthDate = LocalDate.of(1990, 1, 1),
+                role = Role.MEMBER,
+                email = "hong@example.com",
+                phoneNumber = "010-1234-5678",
+                department = department,
+                village = village,
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now()
+            ),
+            User(
+                id = 2L,
+                name = "김철수",
+                birthDate = LocalDate.of(1992, 3, 15),
+                role = Role.MEMBER,
+                email = "kim@example.com",
+                phoneNumber = "010-2345-6789",
+                department = department,
+                village = village,
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now()
+            )
+        )
+
+        every { villageRepository.findById(villageId) } returns Optional.of(village)
+        every { userRepository.findByVillageId(villageId) } returns users
+
+        // When
+        val result = villageService.getVillageMembers(villageId)
+
+        // Then
+        assertNotNull(result)
+        assertEquals(2, result.totalCount)
+        assertEquals(villageId, result.villageId)
+        assertEquals("1마을", result.villageName)
+        
+        assertEquals(2, result.members.size)
+        
+        with(result.members[0]) {
+            assertEquals(1L, id)
+            assertEquals("홍길동", name)
+            assertEquals(LocalDate.of(1990, 1, 1), birthDate)
+            assertEquals("hong@example.com", email)
+            assertEquals("010-1234-5678", phoneNumber)
+            assertEquals("MEMBER", role)
+        }
+        
+        with(result.members[1]) {
+            assertEquals(2L, id)
+            assertEquals("김철수", name)
+            assertEquals(LocalDate.of(1992, 3, 15), birthDate)
+            assertEquals("kim@example.com", email)
+            assertEquals("010-2345-6789", phoneNumber)
+            assertEquals("MEMBER", role)
+        }
+        
+        verify(exactly = 1) { villageRepository.findById(villageId) }
+        verify(exactly = 1) { userRepository.findByVillageId(villageId) }
+    }
+
+    @Test
+    fun `존재하지 않는 마을 ID로 멤버 목록 조회 시 예외 발생`() {
+        // Given
+        val nonExistentVillageId = 999L
+        every { villageRepository.findById(nonExistentVillageId) } returns Optional.empty()
+
+        // When & Then
+        assertThrows<AttendlyApiException> {
+            villageService.getVillageMembers(nonExistentVillageId)
+        }
+        
+        verify(exactly = 1) { villageRepository.findById(nonExistentVillageId) }
+        verify(exactly = 0) { userRepository.findByVillageId(any()) }
     }
 } 
