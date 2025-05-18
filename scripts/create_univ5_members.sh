@@ -94,7 +94,7 @@ for i in {1..100}; do
   fi
   
   # 요청 사이에 약간의 지연 추가
-  sleep 0.5
+  sleep 0.1
 done
 
 echo "작업 완료! 총 100명의 MEMBER 계정이 univ5 부서에 생성되었습니다." 

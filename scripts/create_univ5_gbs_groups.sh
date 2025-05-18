@@ -36,13 +36,17 @@ echo "2. 'univ5' 부서 조회"
 ALL_DEPARTMENTS=$(curl -s -X GET "$BASE_URL/api/admin/organization/departments" \
   -H "Authorization: Bearer $ACCESS_TOKEN")
 
+echo "모든 부서: $ALL_DEPARTMENTS"
+
 # univ5 부서의 ID를 추출합니다
 if [ "$JQ_AVAILABLE" = true ]; then
   # jq를 사용하여 추출
-  DEPARTMENT_ID=$(echo "$ALL_DEPARTMENTS" | jq '.[] | select(.name=="univ5") | .id')
+  DEPARTMENT_ID=$(echo "$ALL_DEPARTMENTS" | jq '.data.items[] | select(.name=="univ5") | .id')
 else
   # grep을 사용하여 추출 (대체 방법)
-  DEPARTMENT_ID=$(echo "$ALL_DEPARTMENTS" | grep -o '"id":[0-9]*,"name":"univ5"' | grep -o '"id":[0-9]*' | cut -d':' -f2)
+  # 응답 구조가 변경되어 items 배열 내에서 찾아야 함
+  ITEMS_SECTION=$(echo "$ALL_DEPARTMENTS" | grep -o '"items":\[.*\]' | sed 's/"items"://')
+  DEPARTMENT_ID=$(echo "$ITEMS_SECTION" | grep -o '"id":[0-9]*,"name":"univ5"' | grep -o '"id":[0-9]*' | cut -d':' -f2)
 fi
 
 if [ -z "$DEPARTMENT_ID" ]; then
@@ -60,12 +64,14 @@ echo "univ5 부서 상세 정보: $DEPARTMENT_INFO"
 
 # 2. 마을장 계정 생성
 echo "3. 마을장 계정 생성"
+# 타임스탬프를 이용하여 고유한 이메일 생성
+TIMESTAMP=$(date +%s)
 VILLAGE_LEADER_RESPONSE=$(curl -s -X POST "$BASE_URL/api/admin/users" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -d "{
     \"name\": \"Emma Wilson\",
-    \"email\": \"unit5Qvillage@example.co m\",
+    \"email\": \"univ5village_$TIMESTAMP@example.com\",
     \"password\": \"test123!@#\",
     \"role\": \"VILLAGE_LEADER\",
     \"departmentId\": $DEPARTMENT_ID,
@@ -74,9 +80,13 @@ VILLAGE_LEADER_RESPONSE=$(curl -s -X POST "$BASE_URL/api/admin/users" \
   }")
 
 # 마을장 ID 추출
-VILLAGE_LEADER_ID=$(echo "$VILLAGE_LEADER_RESPONSE" | grep -o '"id":[0-9]*' | cut -d':' -f2)
+if [ "$JQ_AVAILABLE" = true ]; then
+  VILLAGE_LEADER_ID=$(echo "$VILLAGE_LEADER_RESPONSE" | jq -r '.data.id')
+else
+  VILLAGE_LEADER_ID=$(echo "$VILLAGE_LEADER_RESPONSE" | grep -o '"data":{.*}' | grep -o '"id":[0-9]*' | cut -d':' -f2)
+fi
 
-if [ -z "$VILLAGE_LEADER_ID" ]; then
+if [ -z "$VILLAGE_LEADER_ID" ] || [ "$VILLAGE_LEADER_ID" = "null" ]; then
   echo "❌ 마을장 계정 생성 실패"
   echo "응답: $VILLAGE_LEADER_RESPONSE"
   exit 1
@@ -96,9 +106,13 @@ VILLAGE_RESPONSE=$(curl -s -X POST "$BASE_URL/api/admin/organization/villages" \
   }")
 
 # 마을 ID 추출
-VILLAGE_ID=$(echo "$VILLAGE_RESPONSE" | grep -o '"id":[0-9]*' | cut -d':' -f2)
+if [ "$JQ_AVAILABLE" = true ]; then
+  VILLAGE_ID=$(echo "$VILLAGE_RESPONSE" | jq -r '.data.id')
+else
+  VILLAGE_ID=$(echo "$VILLAGE_RESPONSE" | grep -o '"data":{.*}' | grep -o '"id":[0-9]*' | cut -d':' -f2)
+fi
 
-if [ -z "$VILLAGE_ID" ]; then
+if [ -z "$VILLAGE_ID" ] || [ "$VILLAGE_ID" = "null" ]; then
   echo "❌ 'M village' 마을 생성 실패"
   echo "응답: $VILLAGE_RESPONSE"
   exit 1
@@ -113,11 +127,11 @@ VILLAGE_LEADER_ASSIGN_RESPONSE=$(curl -s -X POST "$BASE_URL/api/admin/village-le
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -d "{
     \"villageId\": $VILLAGE_ID,
-    \"villageLeaderId\": $VILLAGE_LEADER_ID,
+    \"userId\": $VILLAGE_LEADER_ID,
     \"startDate\": \"2025-01-01\"
   }")
 
-if [[ "$VILLAGE_LEADER_ASSIGN_RESPONSE" == *"id"* ]]; then
+if [[ "$VILLAGE_LEADER_ASSIGN_RESPONSE" == *"\"success\":true"* ]]; then
   echo "✅ 마을장 등록 성공"
 else
   echo "❌ 마을장 등록 실패"
@@ -139,9 +153,11 @@ if [ "$JQ_AVAILABLE" = true ]; then
   # jq를 사용하여 추출
   while read -r id; do
     LEADER_IDS+=("$id")
-  done < <(echo "$LEADERS_RESPONSE" | jq -r ".users[] | select(.departmentId == $DEPARTMENT_ID and .role == \"LEADER\") | .id")
+  done < <(echo "$LEADERS_RESPONSE" | jq -r ".data.users[] | select(.departmentId == $DEPARTMENT_ID and .role == \"LEADER\") | .id")
 else
   # grep을 사용하여 추출 (대체 방법)
+  # 응답 구조가 변경되어 users 배열 내에서 찾아야 함
+  USERS_SECTION=$(echo "$LEADERS_RESPONSE" | grep -o '"users":\[.*\]' | sed 's/"users"://')
   while read -r line; do
     if echo "$line" | grep -q "\"departmentId\":$DEPARTMENT_ID" && echo "$line" | grep -q "\"role\":\"LEADER\""; then
       id=$(echo "$line" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
@@ -149,7 +165,7 @@ else
         LEADER_IDS+=("$id")
       fi
     fi
-  done < <(echo "$LEADERS_RESPONSE" | tr '{' '\n')
+  done < <(echo "$USERS_SECTION" | tr '{' '\n')
 fi
 
 echo "univ5 부서의 LEADER 수: ${#LEADER_IDS[@]}"
@@ -180,9 +196,13 @@ for i in "${!LEADER_IDS[@]}"; do
     }")
   
   # GBS 그룹 ID 추출
-  GBS_ID=$(echo "$GBS_RESPONSE" | grep -o '"id":[0-9]*' | cut -d':' -f2)
+  if [ "$JQ_AVAILABLE" = true ]; then
+    GBS_ID=$(echo "$GBS_RESPONSE" | jq -r '.data.id')
+  else
+    GBS_ID=$(echo "$GBS_RESPONSE" | grep -o '"data":{.*}' | grep -o '"id":[0-9]*' | cut -d':' -f2)
+  fi
   
-  if [ -z "$GBS_ID" ]; then
+  if [ -z "$GBS_ID" ] || [ "$GBS_ID" = "null" ]; then
     echo "❌ GBS 그룹 생성 실패: $GROUP_NAME"
     echo "응답: $GBS_RESPONSE"
   else

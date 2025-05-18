@@ -189,10 +189,10 @@ class AdminUserControllerTest {
         
         val pagedResponse = PageImpl(users, pageable, 2)
         
-        every { adminUserService.searchUsers(null, null, null, pageable) } returns pagedResponse
+        every { adminUserService.searchUsers(null, null, null, null, pageable) } returns pagedResponse
         
         // when
-        val result = controller.getAllUsers(null, null, null, pageable)
+        val result = controller.getAllUsers(null, null, null, null, pageable)
         
         // then
         assertEquals(HttpStatus.OK, result.statusCode)
@@ -201,7 +201,7 @@ class AdminUserControllerTest {
         assertEquals(users, result.body?.data?.items)
         assertEquals(2L, result.body?.data?.totalCount)
         
-        verify { adminUserService.searchUsers(null, null, null, pageable) }
+        verify { adminUserService.searchUsers(null, null, null, null, pageable) }
     }
 
     @Test
@@ -227,10 +227,10 @@ class AdminUserControllerTest {
         
         val pagedResponse = PageImpl(users, pageable, 1)
         
-        every { adminUserService.searchUsers(searchName, null, null, pageable) } returns pagedResponse
+        every { adminUserService.searchUsers(searchName, null, null, null, pageable) } returns pagedResponse
         
         // when
-        val result = controller.getAllUsers(searchName, null, null, pageable)
+        val result = controller.getAllUsers(searchName, null, null, null, pageable)
         
         // then
         assertEquals(HttpStatus.OK, result.statusCode)
@@ -239,7 +239,7 @@ class AdminUserControllerTest {
         assertEquals(users, result.body?.data?.items)
         assertEquals(1L, result.body?.data?.totalCount)
         
-        verify { adminUserService.searchUsers(searchName, null, null, pageable) }
+        verify { adminUserService.searchUsers(searchName, null, null, null, pageable) }
     }
 
     @Test
@@ -248,6 +248,7 @@ class AdminUserControllerTest {
         val pageable = PageRequest.of(0, 10)
         val searchName = "홍길동"
         val departmentId = 1L
+        val villageId = 2L
         val roles = listOf(Role.LEADER)
         val users = listOf(
             UserResponse(
@@ -267,10 +268,10 @@ class AdminUserControllerTest {
         
         val pagedResponse = PageImpl(users, pageable, 1)
         
-        every { adminUserService.searchUsers(searchName, departmentId, roles, pageable) } returns pagedResponse
+        every { adminUserService.searchUsers(searchName, departmentId, villageId, roles, pageable) } returns pagedResponse
         
         // when
-        val result = controller.getAllUsers(searchName, departmentId, roles, pageable)
+        val result = controller.getAllUsers(searchName, departmentId, villageId, roles, pageable)
         
         // then
         assertEquals(HttpStatus.OK, result.statusCode)
@@ -279,7 +280,7 @@ class AdminUserControllerTest {
         assertEquals(users, result.body?.data?.items)
         assertEquals(1L, result.body?.data?.totalCount)
         
-        verify { adminUserService.searchUsers(searchName, departmentId, roles, pageable) }
+        verify { adminUserService.searchUsers(searchName, departmentId, villageId, roles, pageable) }
     }
 
     @Test

@@ -1,8 +1,8 @@
 package com.attendly.domain.repository
 
-import com.attendly.domain.entity.QUser
+import com.attendly.domain.entity.QUser.user
 import com.attendly.domain.entity.User
-import com.attendly.enums.Role
+import com.attendly.domain.model.UserFilterDto
 import com.querydsl.core.BooleanBuilder
 import com.querydsl.jpa.impl.JPAQuery
 import com.querydsl.jpa.impl.JPAQueryFactory
@@ -19,27 +19,13 @@ class UserRepositoryImpl : UserRepositoryCustom {
     @PersistenceContext
     private lateinit var entityManager: EntityManager
     
-    override fun findByFilters(name: String?, departmentId: Long?, roles: List<Role>?, pageable: Pageable): Page<User> {
+    override fun findByFilters(filter: UserFilterDto, pageable: Pageable): Page<User> {
         val queryFactory = JPAQueryFactory(entityManager)
-        val user = QUser.user
-        
+
         val predicate = BooleanBuilder()
-        
-        // 이름 필터링
-        if (!name.isNullOrBlank()) {
-            predicate.and(user.name.containsIgnoreCase(name))
-        }
-        
-        // 부서 ID 필터링
-        if (departmentId != null) {
-            predicate.and(user.department.id.eq(departmentId))
-        }
-        
-        // 역할 필터링
-        if (!roles.isNullOrEmpty()) {
-            predicate.and(user.role.`in`(roles))
-        }
-        
+
+        addWhereCondition(filter, predicate)
+
         // 조회 쿼리
         val query = queryFactory
             .selectFrom(user)
@@ -81,5 +67,48 @@ class UserRepositoryImpl : UserRepositoryCustom {
         
         // Page 객체 반환
         return PageImpl(content, pageable, totalCount)
+    }
+
+    /**
+     * Map을 이용한 필터 조건으로 사용자를 조회합니다.
+     */
+    override fun findByFilters(filter: UserFilterDto): List<User> {
+        val queryFactory = JPAQueryFactory(entityManager)
+
+        val predicate = BooleanBuilder()
+
+        addWhereCondition(filter, predicate)
+        
+        // 조회 쿼리 실행 및 결과 반환
+        return queryFactory
+            .selectFrom(user)
+            .where(predicate)
+            .orderBy(user.id.asc())
+            .fetch()
+    }
+
+    private fun addWhereCondition(
+        filter: UserFilterDto,
+        predicate: BooleanBuilder
+    ) {
+        // 이름 필터링
+        if (!filter.name.isNullOrBlank()) {
+            predicate.and(user.name.containsIgnoreCase(filter.name))
+        }
+
+        // 부서 ID 필터링
+        if (filter.departmentId != null) {
+            predicate.and(user.department.id.eq(filter.departmentId))
+        }
+
+        // 마을 ID 필터링
+        if (filter.villageId != null) {
+            predicate.and(user.village.id.eq(filter.villageId))
+        }
+
+        // 역할 필터링
+        if (!filter.roles.isNullOrEmpty()) {
+            predicate.and(user.role.`in`(filter.roles))
+        }
     }
 } 

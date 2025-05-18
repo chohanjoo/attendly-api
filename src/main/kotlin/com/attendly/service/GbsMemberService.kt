@@ -4,6 +4,7 @@ import com.attendly.api.dto.*
 import com.attendly.domain.entity.GbsLeaderHistory
 import com.attendly.domain.entity.GbsMemberHistory
 import com.attendly.domain.entity.User
+import com.attendly.domain.model.UserFilterDto
 import com.attendly.domain.repository.*
 import com.attendly.enums.Role
 import com.attendly.exception.AttendlyApiException
@@ -440,7 +441,12 @@ class GbsMemberService(
             }
         
         // 해당 마을에 소속된 사용자 중 리더 후보를 조회
-        val villageUsers = userRepository.findByVillageId(villageId)
+        val villageUsers = userRepository.findByFilters(
+            UserFilterDto(
+                villageId = villageId,
+                roles = listOf(Role.LEADER),
+            )
+        )
         
         // 각 사용자별 이전 GBS 리더 경험 횟수 조회
         val candidates = villageUsers.map { user ->

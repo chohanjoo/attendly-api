@@ -5,6 +5,7 @@ import com.attendly.api.dto.GbsAssignmentSaveRequest
 import com.attendly.api.dto.GbsMemberResponse
 import com.attendly.api.dto.GbsMembersListResponse
 import com.attendly.domain.entity.*
+import com.attendly.domain.model.UserFilterDto
 import com.attendly.domain.repository.*
 import com.attendly.enums.Role
 import com.attendly.exception.AttendlyApiException
@@ -532,6 +533,7 @@ class GbsMemberServiceTest {
         val department = mockk<Department>()
         val user1 = User(id = 1L, name = "박지성", email = "park@example.com", role = Role.LEADER, department = department)
         val user2 = User(id = 2L, name = "손흥민", email = "son@example.com", role = Role.LEADER, department = department)
+        val userFilterDto = UserFilterDto(villageId = villageId, roles = listOf(Role.LEADER))
 
         val leaderHistoryUser1 = listOf(
             mockk<GbsLeaderHistory>(),
@@ -543,7 +545,7 @@ class GbsMemberServiceTest {
         )
 
         every { villageRepository.findById(villageId) } returns java.util.Optional.of(village)
-        every { userRepository.findByVillageId(villageId) } returns listOf(user1, user2)
+        every { userRepository.findByFilters(userFilterDto) } returns listOf(user1, user2)
         every { gbsLeaderHistoryRepository.findByLeaderIdOrderByStartDateDesc(1L) } returns leaderHistoryUser1
         every { gbsLeaderHistoryRepository.findByLeaderIdOrderByStartDateDesc(2L) } returns leaderHistoryUser2
         every { gbsLeaderHistoryRepository.findByLeaderIdAndEndDateIsNull(1L) } returns mockk()
@@ -570,7 +572,7 @@ class GbsMemberServiceTest {
         assertEquals(1, secondCandidate.previousGbsCount)
 
         verify(exactly = 1) { villageRepository.findById(villageId) }
-        verify(exactly = 1) { userRepository.findByVillageId(villageId) }
+        verify(exactly = 1) { userRepository.findByFilters(userFilterDto) }
         verify(exactly = 1) { gbsLeaderHistoryRepository.findByLeaderIdOrderByStartDateDesc(1L) }
         verify(exactly = 1) { gbsLeaderHistoryRepository.findByLeaderIdOrderByStartDateDesc(2L) }
         verify(exactly = 1) { gbsLeaderHistoryRepository.findByLeaderIdAndEndDateIsNull(1L) }

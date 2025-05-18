@@ -404,6 +404,7 @@ class AdminUserServiceTest {
         val pageable = PageRequest.of(0, 10)
         val searchName = "홍길"
         val departmentId = 1L
+        val villageId = 2L
         val roles = listOf(Role.LEADER)
         val department = Department(id = departmentId, name = "청년부")
         val users = listOf(
@@ -419,10 +420,10 @@ class AdminUserServiceTest {
         
         val pagedUsers = PageImpl(users, pageable, users.size.toLong())
         
-        every { userRepository.findByFilters(searchName, departmentId, roles, pageable) } returns pagedUsers
+        every { userRepository.findByFilters(any(), pageable) } returns pagedUsers
         
         // when
-        val result = adminUserService.searchUsers(searchName, departmentId, roles, pageable)
+        val result = adminUserService.searchUsers(searchName, departmentId, villageId, roles, pageable)
         
         // then
         assertNotNull(result)
@@ -433,7 +434,7 @@ class AdminUserServiceTest {
         assertEquals(departmentId, result.content[0].departmentId)
         assertEquals("청년부", result.content[0].departmentName)
         
-        verify { userRepository.findByFilters(searchName, departmentId, roles, pageable) }
+        verify { userRepository.findByFilters(any(), pageable) }
     }
     
     @Test
@@ -465,7 +466,7 @@ class AdminUserServiceTest {
         every { userRepository.findAll(pageable) } returns pagedUsers
         
         // when
-        val result = adminUserService.searchUsers(null, null, null, pageable)
+        val result = adminUserService.searchUsers(null, null, null, null, pageable)
         
         // then
         assertNotNull(result)
@@ -476,6 +477,6 @@ class AdminUserServiceTest {
         assertEquals("김철수", result.content[1].name)
         
         verify { userRepository.findAll(pageable) }
-        verify(exactly = 0) { userRepository.findByFilters(any(), any(), any(), any()) }
+        verify(exactly = 0) { userRepository.findByFilters(any(), any()) }
     }
 } 

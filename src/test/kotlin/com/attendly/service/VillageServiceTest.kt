@@ -4,6 +4,7 @@ import com.attendly.domain.entity.Department
 import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
 import com.attendly.domain.entity.VillageLeader
+import com.attendly.domain.model.UserFilterDto
 import com.attendly.domain.repository.UserRepository
 import com.attendly.domain.repository.VillageLeaderRepository
 import com.attendly.domain.repository.VillageRepository
@@ -195,7 +196,9 @@ class VillageServiceTest {
         )
 
         every { villageRepository.findById(villageId) } returns Optional.of(village)
-        every { userRepository.findByVillageId(villageId) } returns users
+
+        val userFilterDto = UserFilterDto(villageId = villageId, roles = listOf(Role.MEMBER))
+        every { userRepository.findByFilters(userFilterDto) } returns users
 
         // When
         val result = villageService.getVillageMembers(villageId)
@@ -222,7 +225,7 @@ class VillageServiceTest {
         }
 
         verify(exactly = 1) { villageRepository.findById(villageId) }
-        verify(exactly = 1) { userRepository.findByVillageId(villageId) }
+        verify(exactly = 1) { userRepository.findByFilters(userFilterDto) }
     }
 
     @Test

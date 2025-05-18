@@ -3,9 +3,9 @@ package com.attendly.service
 import com.attendly.api.dto.*
 import com.attendly.domain.entity.User
 import com.attendly.domain.repository.DepartmentRepository
+import com.attendly.domain.model.UserFilterDto
 import com.attendly.domain.repository.UserRepository
 import com.attendly.enums.Role
-import com.attendly.enums.UserStatus
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.Optional
 
 @Service
 class AdminUserService(
@@ -306,13 +305,19 @@ class AdminUserService(
     /**
      * 사용자 필터링 검색
      */
-    fun searchUsers(name: String?, departmentId: Long?, roles: List<Role>?, pageable: Pageable): Page<UserResponse> {
-        val users = if (name.isNullOrBlank() && departmentId == null && roles.isNullOrEmpty()) {
+    fun searchUsers(name: String?, departmentId: Long?, villageId: Long?, roles: List<Role>?, pageable: Pageable): Page<UserResponse> {
+        val users = if (name.isNullOrBlank() && departmentId == null && villageId == null && roles.isNullOrEmpty()) {
             // 필터 조건이 없는 경우
             userRepository.findAll(pageable)
         } else {
             // 필터링 조건이 있는 경우
-            userRepository.findByFilters(name, departmentId, roles, pageable)
+            val filter = UserFilterDto(
+                name = name,
+                departmentId = departmentId,
+                villageId = villageId,
+                roles = roles
+            )
+            userRepository.findByFilters(filter, pageable)
         }
         
         return users.map { user ->

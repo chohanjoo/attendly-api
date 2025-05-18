@@ -2,9 +2,11 @@ package com.attendly.service
 
 import com.attendly.api.dto.MemberInfo
 import com.attendly.api.dto.UserVillageResponse
+import com.attendly.domain.model.UserFilterDto
 import com.attendly.domain.repository.UserRepository
 import com.attendly.domain.repository.VillageLeaderRepository
 import com.attendly.domain.repository.VillageRepository
+import com.attendly.enums.Role
 import com.attendly.exception.AttendlyApiException
 import com.attendly.exception.ErrorMessage
 import com.attendly.exception.ErrorMessageUtils
@@ -72,7 +74,12 @@ class VillageService(
                 )
             }
 
-        val members = userRepository.findByVillageId(villageId)
+        val members = userRepository.findByFilters(
+            UserFilterDto(
+                villageId = villageId,
+                roles = listOf(Role.MEMBER),
+            )
+        )
 
         return members.map { user ->
             MemberInfo(

@@ -20,12 +20,18 @@ BASE_URL="http://localhost:8080"
 
 # 1. 관리자 계정으로 로그인
 echo "1. 관리자 계정으로 로그인"
-ACCESS_TOKEN=$(curl -s -X POST "$BASE_URL/auth/login" \
+LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/auth/login" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "hanjoo@naver.com",
     "password": "test123!@#"
-  }' | grep -o '"accessToken":"[^"]*' | cut -d'"' -f4)
+  }')
+
+if [ "$JQ_AVAILABLE" = true ]; then
+  ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.data.accessToken')
+else
+  ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | grep -o '"accessToken":"[^"]*' | cut -d'"' -f4)
+fi
 
 if [ -z "$ACCESS_TOKEN" ]; then
   echo "❌ 로그인 실패. 관리자 계정 정보를 확인해주세요."
@@ -37,22 +43,22 @@ echo "토큰: ${ACCESS_TOKEN}"
 # M village 마을 조회 - 마을 ID 찾기
 echo "2. 'M village' 마을 찾기"
 # 모든 부서 목록 조회
-DEPARTMENTS=$(curl -s -X GET "$BASE_URL/api/admin/organization/departments" \
+DEPARTMENTS_RESPONSE=$(curl -s -X GET "$BASE_URL/api/admin/organization/departments" \
   -H "Authorization: Bearer $ACCESS_TOKEN")
 
-echo "부서 정보: ${DEPARTMENTS}"
+echo "부서 정보: ${DEPARTMENTS_RESPONSE}"
 
 # 각 부서에 속한 마을 검색하여 "M village" 찾기
 VILLAGE_ID=""
 if [ "$JQ_AVAILABLE" = true ]; then
   # jq를 사용한 방법
-  DEPT_IDS=$(echo "$DEPARTMENTS" | jq -r '.[].id')
+  DEPT_IDS=$(echo "$DEPARTMENTS_RESPONSE" | jq -r '.data.items[].id')
 else
   # grep을 사용한 방법
-  DEPT_IDS=$(echo "$DEPARTMENTS" | grep -o '"id":[0-9]*' | cut -d':' -f2)
+  DEPT_IDS=$(echo "$DEPARTMENTS_RESPONSE" | grep -o '"id":[0-9]*' | cut -d':' -f2)
 fi
 
-# 마을 ID를 찾기 위해 마을장 계정으로 조회 시도
+# 마을장 계정으로 마을 조회 시도
 echo "마을장 계정으로 마을 조회 중..."
 VILLAGE_LEADERS_RESPONSE=$(curl -s -X POST "$BASE_URL/api/users/by-roles" \
   -H "Content-Type: application/json" \
@@ -71,7 +77,7 @@ for DEPT_ID in $DEPT_IDS; do
   # 해당 부서의 마을장들 정보 추출
   if [ "$JQ_AVAILABLE" = true ]; then
     # jq 사용
-    LEADERS=$(echo "$VILLAGE_LEADERS_RESPONSE" | jq -r ".users[] | select(.departmentId == $DEPT_ID) | .id")
+    LEADERS=$(echo "$VILLAGE_LEADERS_RESPONSE" | jq -r ".data.users[] | select(.departmentId == $DEPT_ID) | .id")
   else
     # grep 사용
     LEADERS=$(echo "$VILLAGE_LEADERS_RESPONSE" | grep -o "{[^}]*\"departmentId\":$DEPT_ID[^}]*\"role\":\"VILLAGE_LEADER\"[^}]*}" | grep -o '"id":[0-9]*' | cut -d':' -f2)
@@ -121,12 +127,14 @@ echo "GBS 정보 응답: ${GBS_INFO}"
 # GBS ID 목록 추출
 GBS_IDS=()
 if [ "$JQ_AVAILABLE" = true ]; then
-  # jq를 사용하여 추출
+  # jq를 사용하여 추출 - 변경된 API 응답 구조에 맞게 수정
   while read -r id; do
     GBS_IDS+=("$id")
-  done < <(echo "$GBS_INFO" | jq -r '.gbsList[].gbsId')
+  done < <(echo "$GBS_INFO" | jq -r '.data.gbsList[].gbsId')
 else
-  # grep을 사용하여 추출 (대체 방법)
+  # grep을 사용하여 추출 (대체 방법) - 변경된 API 응답 구조에 맞게 수정
+  # 먼저 data 객체 내용만 추출
+  DATA_CONTENT=$(echo "$GBS_INFO" | grep -o '"data":{[^}]*}' | sed 's/"data"://')
   while read -r line; do
     if echo "$line" | grep -q '"gbsId":[0-9]*'; then
       id=$(echo "$line" | grep -o '"gbsId":[0-9]*' | head -1 | cut -d':' -f2)
@@ -134,7 +142,7 @@ else
         GBS_IDS+=("$id")
       fi
     fi
-  done < <(echo "$GBS_INFO" | tr '{' '\n')
+  done < <(echo "$DATA_CONTENT" | tr '{' '\n')
 fi
 
 GBS_COUNT=${#GBS_IDS[@]}
@@ -160,7 +168,7 @@ if [ "$JQ_AVAILABLE" = true ]; then
   # jq를 사용하여 추출
   while read -r id; do
     MEMBER_IDS+=("$id")
-  done < <(echo "$MEMBERS_RESPONSE" | jq -r '.users[].id')
+  done < <(echo "$MEMBERS_RESPONSE" | jq -r '.data.users[].id')
 else
   # grep을 사용하여 추출 (대체 방법)
   while read -r line; do
@@ -194,7 +202,7 @@ fi
 
 # 각 GBS 그룹에 멤버 배정
 for i in "${!GBS_IDS[@]}"; do
-  GBS_ID=${GBS_IDS[$i]}
+  GBS_ID="${GBS_IDS[$i]}"
   
   # 각 GBS의 배정 인원 결정 (마지막 GBS는 4명, 나머지는 5명)
   members_to_assign=5
@@ -205,7 +213,7 @@ for i in "${!GBS_IDS[@]}"; do
     members_to_assign=$remaining_members
   fi
   
-  echo "GBS ID: $GBS_ID에 $members_to_assign명 배정 중..."
+  echo "GBS ID: ${GBS_ID}에 ${members_to_assign}명 배정 중..."
   
   # 각 GBS에 멤버 배정
   for j in $(seq 0 $(($members_to_assign - 1))); do

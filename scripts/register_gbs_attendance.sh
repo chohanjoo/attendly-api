@@ -26,13 +26,15 @@ login() {
   LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/auth/login" \
     -H "Content-Type: application/json" \
     -d '{
-      "email": "admin@example.com",
-      "password": "admin123!@#"
+      "email": "admin@church.com",
+      "password": "admin123"
     }')
   
   if [ "$JQ_AVAILABLE" = true ]; then
-    ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.accessToken')
+    # 새 API 응답 구조에서 토큰 추출
+    ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.data.accessToken')
   else
+    # grep 명령어로 토큰 추출 (새 응답 구조에 맞게 수정)
     ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | grep -o '"accessToken":"[^"]*' | cut -d'"' -f4)
   fi
   
@@ -44,12 +46,12 @@ login() {
     LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/auth/login" \
       -H "Content-Type: application/json" \
       -d '{
-        "email": "hanjoo@naver.com",
-        "password": "test123!@#"
+        "email": "admin@church.com",
+        "password": "admin123"
       }')
     
     if [ "$JQ_AVAILABLE" = true ]; then
-      ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.accessToken')
+      ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.data.accessToken')
     else
       ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | grep -o '"accessToken":"[^"]*' | cut -d'"' -f4)
     fi
@@ -67,94 +69,55 @@ login() {
 get_village_info() {
   echo "1. 'M village' 마을 정보 조회 중..."
   
-  VILLAGE_RESPONSE=$(curl -s -X GET "$BASE_URL/api/users/my-village" \
-    -H "Authorization: Bearer $ACCESS_TOKEN")
-  
-  echo "마을 조회 응답: $VILLAGE_RESPONSE"
-  
-  if [ "$JQ_AVAILABLE" = true ]; then
-    VILLAGE_ID=$(echo "$VILLAGE_RESPONSE" | jq -r '.villageId')
-    VILLAGE_NAME=$(echo "$VILLAGE_RESPONSE" | jq -r '.villageName')
-  else
-    VILLAGE_ID=$(echo "$VILLAGE_RESPONSE" | grep -o '"villageId":[0-9]*' | cut -d':' -f2)
-    VILLAGE_NAME=$(echo "$VILLAGE_RESPONSE" | grep -o '"villageName":"[^"]*' | cut -d'"' -f4)
-  fi
-  
-  if [ -z "$VILLAGE_ID" ] || [ "$VILLAGE_ID" = "null" ]; then
-    echo "현재 사용자의 마을 정보 조회에 실패했습니다. 다른 방법으로 M village를 찾습니다..."
-    find_m_village
-  else
-    echo "마을 정보: ID=$VILLAGE_ID, 이름=$VILLAGE_NAME"
+  # API 변경으로 인해 직접 마을 ID 1부터 10까지 시도
+  for i in {1..10}; do
+    VILLAGE_RESPONSE=$(curl -s -X GET "$BASE_URL/api/village-leader/$i/gbs" \
+      -H "Authorization: Bearer $ACCESS_TOKEN")
     
-    if [[ "$VILLAGE_NAME" != *"M village"* ]]; then
-      echo "현재 사용자가 M village에 속해 있지 않습니다. 다른 방법으로 M village를 찾습니다..."
-      find_m_village
-    fi
-  fi
-}
-
-# M village를 찾기 위한 대체 방법
-find_m_village() {
-  echo "M village 마을을 찾기 위해 모든 마을 조회를 시도합니다..."
-  
-  # 관리자 권한으로 모든 부서 조회
-  DEPARTMENTS_RESPONSE=$(curl -s -X GET "$BASE_URL/api/admin/organization/departments" \
-    -H "Authorization: Bearer $ACCESS_TOKEN")
-  
-  if [ "$JQ_AVAILABLE" = true ]; then
-    DEPARTMENT_IDS=($(echo "$DEPARTMENTS_RESPONSE" | jq -r '.[].id'))
-  else
-    DEPARTMENT_IDS=($(echo "$DEPARTMENTS_RESPONSE" | grep -o '"id":[0-9]*' | cut -d':' -f2))
-  fi
-  
-  # 각 부서별로 마을 확인
-  for DEPT_ID in "${DEPARTMENT_IDS[@]}"; do
-    echo "부서 ID $DEPT_ID의 마을들을 조회합니다..."
+    echo "마을 ID ${i} 조회 응답: ${VILLAGE_RESPONSE}"
     
-    # 마을 정보를 얻기 위한 임시 방법 (마을장 권한 정보 활용)
-    # 먼저 마을장 역할을 가진, 해당 부서의 사용자 조회
-    VILLAGE_LEADERS_RESPONSE=$(curl -s -X POST "$BASE_URL/api/users/by-roles" \
-      -H "Content-Type: application/json" \
-      -H "Authorization: Bearer $ACCESS_TOKEN" \
-      -d "{
-        \"roles\": [\"VILLAGE_LEADER\"]
-      }")
-    
-    # 각 마을장의 정보를 추출
-    if [ "$JQ_AVAILABLE" = true ]; then
-      LEADER_IDS=($(echo "$VILLAGE_LEADERS_RESPONSE" | jq -r ".users[] | select(.departmentId == $DEPT_ID) | .id"))
-    else
-      LEADER_IDS=($(echo "$VILLAGE_LEADERS_RESPONSE" | grep -E "{[^}]*\"departmentId\":$DEPT_ID[^}]*\"role\":\"VILLAGE_LEADER\"[^}]*}" | grep -o '"id":[0-9]*' | cut -d':' -f2))
-    fi
-    
-    for LEADER_ID in "${LEADER_IDS[@]}"; do
-      echo "마을장 ID $LEADER_ID의 마을 정보를 찾습니다..."
+    # 성공 응답인지 확인
+    if [[ "$VILLAGE_RESPONSE" == *'"success":true'* ]]; then
+      if [ "$JQ_AVAILABLE" = true ]; then
+        VILLAGE_ID=$(echo "${VILLAGE_RESPONSE}" | jq -r '.data.villageId')
+        VILLAGE_NAME=$(echo "${VILLAGE_RESPONSE}" | jq -r '.data.villageName')
+      else
+        VILLAGE_ID=$(echo "${VILLAGE_RESPONSE}" | grep -o '"villageId":[0-9]*' | cut -d':' -f2)
+        VILLAGE_NAME=$(echo "${VILLAGE_RESPONSE}" | grep -o '"villageName":"[^"]*' | cut -d'"' -f4)
+      fi
       
-      # 마을장 ID로 마을 조회 시도
-      # 마을장 API를 이용하여 마을 ID 유추 (1부터 10까지 시도)
-      for i in {1..10}; do
-        VILLAGE_INFO=$(curl -s -X GET "$BASE_URL/api/village-leader/$i/gbs" \
-          -H "Authorization: Bearer $ACCESS_TOKEN")
-        
-        if [[ "$VILLAGE_INFO" == *"villageName"* ]] && [[ "$VILLAGE_INFO" == *"M village"* ]]; then
-          echo "M village 발견! ID: $i"
-          VILLAGE_ID=$i
-          VILLAGE_NAME="M village"
-          break 3  # 모든 루프 종료
-        fi
-      done
-    done
+      echo "마을 정보: ID=${VILLAGE_ID}, 이름=${VILLAGE_NAME}"
+      
+      if [[ "$VILLAGE_NAME" == *"M village"* ]] || [[ "$VILLAGE_NAME" == *"M 마을"* ]]; then
+        echo "M village 발견! ID: $VILLAGE_ID"
+        break
+      fi
+    fi
+    
+    # 마을 찾지 못한 경우 1초 대기 후 다음 ID 시도
+    sleep 1
   done
   
-  if [ -z "$VILLAGE_ID" ]; then
-    echo "M village 마을을 찾을 수 없습니다."
-    exit 1
+  # M village를 찾지 못한 경우, 첫 번째 마을 사용
+  if [ -z "$VILLAGE_ID" ] || [ "$VILLAGE_ID" = "null" ]; then
+    echo "M village를 찾을 수 없어 첫 번째 마을을 사용합니다."
+    VILLAGE_ID=1
+    VILLAGE_RESPONSE=$(curl -s -X GET "$BASE_URL/api/village-leader/$VILLAGE_ID/gbs" \
+      -H "Authorization: Bearer $ACCESS_TOKEN")
+      
+    if [ "$JQ_AVAILABLE" = true ]; then
+      VILLAGE_NAME=$(echo "${VILLAGE_RESPONSE}" | jq -r '.data.villageName')
+    else
+      VILLAGE_NAME=$(echo "${VILLAGE_RESPONSE}" | grep -o '"villageName":"[^"]*' | cut -d'"' -f4)
+    fi
+    
+    echo "사용할 마을 정보: ID=${VILLAGE_ID}, 이름=${VILLAGE_NAME}"
   fi
 }
 
-# M village에 속한 모든 GBS 그룹 조회
+# M Village에 속한 모든 GBS 그룹 조회
 get_gbs_groups() {
-  echo "2. 'M village' 마을에 속한 모든 GBS 그룹 조회 중..."
+  echo "2. '$VILLAGE_NAME' 마을에 속한 모든 GBS 그룹 조회 중..."
   
   GBS_RESPONSE=$(curl -s -X GET "$BASE_URL/api/village-leader/$VILLAGE_ID/gbs" \
     -H "Authorization: Bearer $ACCESS_TOKEN")
@@ -162,9 +125,9 @@ get_gbs_groups() {
   echo "GBS 그룹 조회 응답: $GBS_RESPONSE"
   
   if [ "$JQ_AVAILABLE" = true ]; then
-    GBS_COUNT=$(echo "$GBS_RESPONSE" | jq -r '.gbsCount')
-    GBS_IDS=($(echo "$GBS_RESPONSE" | jq -r '.gbsList[].gbsId'))
-    GBS_NAMES=($(echo "$GBS_RESPONSE" | jq -r '.gbsList[].gbsName'))
+    GBS_COUNT=$(echo "${GBS_RESPONSE}" | jq -r '.data.gbsCount')
+    GBS_IDS=($(echo "${GBS_RESPONSE}" | jq -r '.data.gbsList[].gbsId'))
+    GBS_NAMES=($(echo "${GBS_RESPONSE}" | jq -r '.data.gbsList[].gbsName'))
     
     # GBS 그룹의 멤버 정보 저장을 위한 배열 생성
     declare -a ALL_GBS_MEMBERS
@@ -175,39 +138,49 @@ get_gbs_groups() {
     for i in "${!GBS_IDS[@]}"; do
       GBS_ID=${GBS_IDS[$i]}
       
-      # 하드코딩된 멤버 ID 배열 (테스트용)
-      if [ "$GBS_ID" -eq 2 ]; then
-        ALL_GBS_MEMBERS[$i]="5 6 7 29 30"
-      elif [ "$GBS_ID" -eq 3 ]; then
-        ALL_GBS_MEMBERS[$i]="31 32 33 34 35"
-      elif [ "$GBS_ID" -eq 4 ]; then
-        ALL_GBS_MEMBERS[$i]="36 37 38 39 40"
-      elif [ "$GBS_ID" -eq 5 ]; then
-        ALL_GBS_MEMBERS[$i]="41 42 43 44 45"
-      elif [ "$GBS_ID" -eq 6 ]; then
-        ALL_GBS_MEMBERS[$i]="46 47 48 49 50"
-      elif [ "$GBS_ID" -eq 7 ]; then
-        ALL_GBS_MEMBERS[$i]="51 52 53 54 55"
-      elif [ "$GBS_ID" -eq 8 ]; then
-        ALL_GBS_MEMBERS[$i]="56 57 58 59 60"
-      elif [ "$GBS_ID" -eq 9 ]; then
-        ALL_GBS_MEMBERS[$i]="61 62 63 64 65"
-      elif [ "$GBS_ID" -eq 10 ]; then
-        ALL_GBS_MEMBERS[$i]="66 67 68 69 70"
+      # API로부터 멤버 정보 추출
+      MEMBERS=$(echo "${GBS_RESPONSE}" | jq -r ".data.gbsList[$i].members[].id" 2>/dev/null || echo "")
+      
+      # 멤버가 없거나 추출 실패 시 하드코딩 멤버 사용
+      if [ -z "$MEMBERS" ]; then
+        # 하드코딩된 멤버 ID 배열 (테스트용)
+        if [ "$GBS_ID" -eq 1 ]; then
+          ALL_GBS_MEMBERS[$i]="4"
+        elif [ "$GBS_ID" -eq 2 ]; then
+          ALL_GBS_MEMBERS[$i]="5 6 7 29 30"
+        elif [ "$GBS_ID" -eq 3 ]; then
+          ALL_GBS_MEMBERS[$i]="31 32 33 34 35"
+        elif [ "$GBS_ID" -eq 4 ]; then
+          ALL_GBS_MEMBERS[$i]="36 37 38 39 40"
+        elif [ "$GBS_ID" -eq 5 ]; then
+          ALL_GBS_MEMBERS[$i]="41 42 43 44 45"
+        elif [ "$GBS_ID" -eq 6 ]; then
+          ALL_GBS_MEMBERS[$i]="46 47 48 49 50"
+        elif [ "$GBS_ID" -eq 7 ]; then
+          ALL_GBS_MEMBERS[$i]="51 52 53 54 55"
+        elif [ "$GBS_ID" -eq 8 ]; then
+          ALL_GBS_MEMBERS[$i]="56 57 58 59 60"
+        elif [ "$GBS_ID" -eq 9 ]; then
+          ALL_GBS_MEMBERS[$i]="61 62 63 64 65"
+        elif [ "$GBS_ID" -eq 10 ]; then
+          ALL_GBS_MEMBERS[$i]="66 67 68 69 70"
+        else
+          ALL_GBS_MEMBERS[$i]=""
+        fi
       else
-        MEMBERS=$(echo "$GBS_RESPONSE" | jq -r ".gbsList[$i].members[].id" | tr '\n' ' ')
-        ALL_GBS_MEMBERS[$i]="$MEMBERS"
+        # API에서 추출한 멤버 ID 사용
+        ALL_GBS_MEMBERS[$i]=$(echo "$MEMBERS" | tr '\n' ' ')
       fi
       
       echo "GBS ID $GBS_ID의 멤버 목록: ${ALL_GBS_MEMBERS[$i]}"
     done
   else
     # jq가 없는 환경에서는 grep/sed 등으로 처리
-    GBS_COUNT=$(echo "$GBS_RESPONSE" | grep -o '"gbsCount":[0-9]*' | cut -d':' -f2)
+    GBS_COUNT=$(echo "${GBS_RESPONSE}" | grep -o '"gbsCount":[0-9]*' | cut -d':' -f2)
     
     # GBS ID와 이름 추출 (간단한 예시, 실제 환경에서 더 복잡할 수 있음)
-    GBS_IDS=($(echo "$GBS_RESPONSE" | grep -o '"gbsId":[0-9]*' | cut -d':' -f2))
-    GBS_NAMES=($(echo "$GBS_RESPONSE" | grep -o '"gbsName":"[^"]*' | cut -d'"' -f4))
+    GBS_IDS=($(echo "${GBS_RESPONSE}" | grep -o '"gbsId":[0-9]*' | cut -d':' -f2))
+    GBS_NAMES=($(echo "${GBS_RESPONSE}" | grep -o '"gbsName":"[^"]*' | cut -d'"' -f4))
     
     # GBS 그룹의 멤버 정보 저장을 위한 배열 생성
     declare -a ALL_GBS_MEMBERS
@@ -219,7 +192,9 @@ get_gbs_groups() {
       GBS_ID=${GBS_IDS[$i]}
       
       # 하드코딩된 멤버 ID 배열 (테스트용)
-      if [ "$GBS_ID" -eq 2 ]; then
+      if [ "$GBS_ID" -eq 1 ]; then
+        ALL_GBS_MEMBERS[$i]="4"
+      elif [ "$GBS_ID" -eq 2 ]; then
         ALL_GBS_MEMBERS[$i]="5 6 7 29 30"
       elif [ "$GBS_ID" -eq 3 ]; then
         ALL_GBS_MEMBERS[$i]="31 32 33 34 35"
@@ -238,17 +213,14 @@ get_gbs_groups() {
       elif [ "$GBS_ID" -eq 10 ]; then
         ALL_GBS_MEMBERS[$i]="66 67 68 69 70"
       else
-        # 멤버 ID 추출은 복잡하므로 간소화된 방식으로 처리
-        GBS_DETAIL=$(echo "$GBS_RESPONSE" | grep -o "{[^}]*\"gbsId\":$GBS_ID[^}]*\"members\":\[.*\][^}]*}")
-        MEMBERS=$(echo "$GBS_DETAIL" | grep -o '"id":[0-9]*' | cut -d':' -f2 | tr '\n' ' ')
-        ALL_GBS_MEMBERS[$i]="$MEMBERS"
+        ALL_GBS_MEMBERS[$i]=""
       fi
       
-      echo "GBS ID $GBS_ID의 멤버 목록: ${ALL_GBS_MEMBERS[$i]}"
+      echo "GBS ID ${GBS_ID}의 멤버 목록: ${ALL_GBS_MEMBERS[$i]}"
     done
   fi
   
-  echo "마을에 속한 GBS 그룹 수: $GBS_COUNT"
+  echo "마을에 속한 GBS 그룹 수: ${GBS_COUNT}"
   
   if [ ${#GBS_IDS[@]} -eq 0 ]; then
     echo "GBS 그룹이 없습니다."
