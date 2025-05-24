@@ -8,6 +8,19 @@ spring:
       refresh-expiration-time: 2592000000  # 30일
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  cloud:
+    vault:
+      token: ${SPRING_CLOUD_VAULT_TOKEN:00000000-0000-0000-0000-000000000000}
+      authentication: token
+      scheme: ${SPRING_CLOUD_VAULT_SCHEME:http}
+      host: ${SPRING_CLOUD_VAULT_HOST:localhost}
+      port: ${SPRING_CLOUD_VAULT_PORT:8200}
+      kv:
+        enabled: true
+        backend: secret
+        default-context: attendly-api
+  config:
+    import: vault://
 
 springdoc:
   api-docs:
@@ -15,4 +28,4 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
-    tagsSorter: alpha 
+    tagsSorter: alpha

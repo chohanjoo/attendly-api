@@ -20,7 +20,7 @@ spring:
 # Discord 웹훅 설정
 discord:
   webhook:
-    url: https://discord.com/api/webhooks/1372565578954309642/G94sGsXYBLOJe08bI0esT9hafeMYCGjo-tRzk7rnEDMJqRAHc2CH1amZpi4k9awxy_Xm
+    url: ${discord.webhook.url}
     min-level: DEBUG
 
 logging:

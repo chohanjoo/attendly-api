@@ -22,7 +22,6 @@
     <!-- Discord 로깅 설정 (dev, prod 환경에서만 사용) -->
     <springProfile name="dev,prod">
         <appender name="DISCORD" class="com.attendly.config.DiscordWebhookAppender">
-            <webhookUrl>${DISCORD_WEBHOOK_URL:-}</webhookUrl>
             <applicationName>Attendly API</applicationName>
             <environment>${SPRING_PROFILES_ACTIVE:-local}</environment>
             <minLevel>DEBUG</minLevel>

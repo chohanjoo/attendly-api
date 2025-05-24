@@ -20,6 +20,10 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	set("springCloudVersion", "2024.0.1")
+}
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -52,6 +56,9 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 	
+	// Vault 의존성 추가
+	implementation("org.springframework.cloud:spring-cloud-starter-vault-config")
+	
 	runtimeOnly("com.mysql:mysql-connector-j")
 	runtimeOnly("com.h2database:h2")
 	
@@ -64,6 +71,12 @@ dependencies {
 	testImplementation("io.mockk:mockk:1.13.10")
 	testImplementation("com.ninja-squad:springmockk:4.0.2")
 	testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom("org.springframework.cloud:spring-cloud-dependencies:${project.ext["springCloudVersion"]}")
+	}
 }
 
 kotlin {

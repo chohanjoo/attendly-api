@@ -31,11 +31,17 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.p6spy.engine.spy.P6SpyDriver
       SPRING_FLYWAY_REPAIR: "true"
-      DISCORD_WEBHOOK_URL: https://discord.com/api/webhooks/1372565578954309642/G94sGsXYBLOJe08bI0esT9hafeMYCGjo-tRzk7rnEDMJqRAHc2CH1amZpi4k9awxy_Xm
+      SPRING_CONFIG_IMPORT: "vault://"
+      SPRING_CLOUD_VAULT_TOKEN: ${VAULT_TOKEN}
+      SPRING_CLOUD_VAULT_SCHEME: "http"
+      SPRING_CLOUD_VAULT_HOST: "host.docker.internal"
+      SPRING_CLOUD_VAULT_PORT: "8200"
       TZ: Asia/Seoul
     depends_on:
       db:
         condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
-  mysql-data: 
+  mysql-data:

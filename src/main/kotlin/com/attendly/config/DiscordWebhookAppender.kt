@@ -8,24 +8,24 @@ import club.minnced.discord.webhook.WebhookClientBuilder
 import club.minnced.discord.webhook.send.WebhookEmbed
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
+import org.springframework.stereotype.Component
 import java.awt.Color
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.concurrent.ScheduledThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Discord 웹훅으로 로그를 전송하는 Logback 어펜더
  */
+@Component
 class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
-    private var webhookUrl: String? = null
     private var client: WebhookClient? = null
     private var applicationName: String = "Attendly API"
     private var environment: String = "UNKNOWN"
@@ -156,6 +156,8 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
      * 웹훅 클라이언트를 초기화합니다
      */
     override fun start() {
+        val webhookUrl = getDiscordWebhookUrl()
+        
         if (webhookUrl.isNullOrBlank()) {
             addWarn("No webhookUrl set for DiscordWebhookAppender. Discord logging will be disabled.")
             // 웹훅 URL이 없더라도 어펜더는 시작하여 다른 로깅에 영향을 주지 않음
@@ -163,38 +165,48 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
             return
         }
         
-        // 안전하게 로컬 변수로 복사하여 스마트 캐스트 문제 해결
-        val url = webhookUrl
-        if (url != null) {
-            try {
-                // 전송 속도 제한 및 429 오류 처리를 위한 설정
-                val clientBuilder = WebhookClientBuilder(url)
-                clientBuilder.setWait(true) // 응답 대기 설정
-                client = clientBuilder.build()
-                
-                // 메시지 처리용 스케줄러 초기화 (스레드 풀 크기 축소)
-                executor = ScheduledThreadPoolExecutor(1)
-                executor?.scheduleAtFixedRate(
-                    { processMessageQueue() },
-                    waitBetweenMessages,
-                    waitBetweenMessages,
-                    TimeUnit.MILLISECONDS
-                )
-                
-                // Swagger 로그 처리용 스케줄러 추가
-                executor?.scheduleAtFixedRate(
-                    { processSwaggerLogs() },
-                    SWAGGER_LOG_TIMEOUT,
-                    SWAGGER_LOG_TIMEOUT,
-                    TimeUnit.MILLISECONDS
-                )
-                
-                super.start()
-            } catch (e: Exception) {
-                addError("Failed to initialize Discord webhook client", e)
-                // 예외가 발생해도 어펜더는 시작
-                super.start()
-            }
+        try {
+            // 전송 속도 제한 및 429 오류 처리를 위한 설정
+            val clientBuilder = WebhookClientBuilder(webhookUrl)
+            clientBuilder.setWait(true) // 응답 대기 설정
+            client = clientBuilder.build()
+            
+            // 메시지 처리용 스케줄러 초기화 (스레드 풀 크기 축소)
+            executor = ScheduledThreadPoolExecutor(1)
+            executor?.scheduleAtFixedRate(
+                { processMessageQueue() },
+                waitBetweenMessages,
+                waitBetweenMessages,
+                TimeUnit.MILLISECONDS
+            )
+            
+            // Swagger 로그 처리용 스케줄러 추가
+            executor?.scheduleAtFixedRate(
+                { processSwaggerLogs() },
+                SWAGGER_LOG_TIMEOUT,
+                SWAGGER_LOG_TIMEOUT,
+                TimeUnit.MILLISECONDS
+            )
+            
+            super.start()
+        } catch (e: Exception) {
+            addError("Failed to initialize Discord webhook client", e)
+            // 예외가 발생해도 어펜더는 시작
+            super.start()
+        }
+    }
+
+    /**
+     * Vault에서 Discord Webhook URL을 가져옵니다.
+     */
+    private fun getDiscordWebhookUrl(): String? {
+        try {
+            // ApplicationContextProvider를 통해 VaultDiscordConfig 빈 가져오기
+            val vaultDiscordConfig = ApplicationContextProvider.getBean(VaultDiscordConfig::class.java)
+            return vaultDiscordConfig?.webhook?.url
+        } catch (e: Exception) {
+            addError("Failed to get Discord webhook URL from Vault", e)
+            return null
         }
     }
 
@@ -648,10 +660,6 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     }
 
     // Setter 메서드들 (XML 설정에서 사용됨)
-    fun setWebhookUrl(webhookUrl: String) {
-        this.webhookUrl = webhookUrl
-    }
-
     fun setApplicationName(applicationName: String) {
         this.applicationName = applicationName
     }
