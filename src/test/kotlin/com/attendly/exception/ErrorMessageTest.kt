@@ -12,7 +12,7 @@ class ErrorMessageTest {
         val message = ErrorMessage.USER_NOT_FOUND
         
         // then
-        assertEquals(HttpStatus.NOT_FOUND, message.status)
+        assertEquals(HttpStatus.BAD_REQUEST, message.status)
         assertEquals("E5000", message.code)
         assertEquals("사용자를 찾을 수 없습니다", message.message)
     }

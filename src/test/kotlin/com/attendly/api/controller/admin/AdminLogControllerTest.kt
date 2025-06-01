@@ -3,10 +3,10 @@ package com.attendly.api.controller.admin
 import com.attendly.api.dto.SystemLogResponseDto
 import com.attendly.domain.entity.SystemLog
 import com.attendly.security.JwtTokenProvider
+import com.attendly.security.TestSecurityConfig
 import com.attendly.service.SystemLogService
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
@@ -14,6 +14,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
@@ -26,8 +27,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import org.springframework.context.annotation.Import
-import com.attendly.security.TestSecurityConfig
 
 @WebMvcTest(AdminLogController::class)
 @Import(TestSecurityConfig::class)
@@ -39,10 +38,10 @@ class AdminLogControllerTest {
 
     @MockkBean
     private lateinit var systemLogService: SystemLogService
-    
+
     @MockkBean
     private lateinit var jwtTokenProvider: JwtTokenProvider
-    
+
     @MockkBean
     private lateinit var userDetailsService: UserDetailsService
 
@@ -64,7 +63,7 @@ class AdminLogControllerTest {
             userAgent = null,
             serverInstance = null
         )
-        
+
         val log2 = SystemLog(
             id = 2L,
             level = "ERROR",
@@ -77,16 +76,16 @@ class AdminLogControllerTest {
             userAgent = null,
             serverInstance = null
         )
-        
+
         val logs = listOf(log1, log2)
         val pageable = PageRequest.of(0, 20)
         val page = PageImpl(logs, pageable, logs.size.toLong())
-        
+
         // Response DTO 객체를 직접 생성
         val logResponseDto1 = SystemLogResponseDto(
             id = 1L,
             level = "INFO",
-            category = "APPLICATION", 
+            category = "APPLICATION",
             message = "테스트 로그 메시지 1",
             timestamp = now.minusDays(1),
             ipAddress = "127.0.0.1",
@@ -95,7 +94,7 @@ class AdminLogControllerTest {
             userAgent = null,
             serverInstance = null
         )
-        
+
         val logResponseDto2 = SystemLogResponseDto(
             id = 2L,
             level = "ERROR",
@@ -108,13 +107,13 @@ class AdminLogControllerTest {
             userAgent = null,
             serverInstance = null
         )
-        
+
         // Mock 설정 - SystemLogService
         every { systemLogService.getLogs(any(), any(), any(), any(), any(), any(), any()) } returns page
         every { systemLogService.getLogById(1L) } returns log1
         every { systemLogService.getLogById(999L) } returns null
         every { systemLogService.getLogCategories() } returns listOf("APPLICATION", "SECURITY")
-        
+
         // Companion object 모킹 설정
         mockkObject(SystemLogResponseDto.Companion)
         every { SystemLogResponseDto.from(log1) } returns logResponseDto1
@@ -136,7 +135,7 @@ class AdminLogControllerTest {
             .andExpect(jsonPath("$.data.items.length()").value(2))
             .andExpect(jsonPath("$.data.items[0].level").value("INFO"))
             .andExpect(jsonPath("$.data.items[1].level").value("ERROR"))
-            
+
         verify { systemLogService.getLogs(null, null, null, null, null, null, any()) }
     }
 
@@ -152,7 +151,7 @@ class AdminLogControllerTest {
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.success").value(true))
-            
+
         verify { systemLogService.getLogs("ERROR", null, null, null, null, null, any()) }
     }
 
@@ -169,7 +168,7 @@ class AdminLogControllerTest {
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data.id").value(1))
             .andExpect(jsonPath("$.data.level").value("INFO"))
-            
+
         verify { systemLogService.getLogById(1L) }
     }
 
@@ -184,7 +183,7 @@ class AdminLogControllerTest {
         )
             .andExpect(status().isNotFound)
             .andExpect(jsonPath("$.success").value(false))
-            
+
         verify { systemLogService.getLogById(999L) }
     }
 
@@ -202,7 +201,7 @@ class AdminLogControllerTest {
             .andExpect(jsonPath("$.data").isArray)
             .andExpect(jsonPath("$.data[0]").value("APPLICATION"))
             .andExpect(jsonPath("$.data[1]").value("SECURITY"))
-            
+
         verify { systemLogService.getLogCategories() }
     }
 
@@ -221,7 +220,7 @@ class AdminLogControllerTest {
             .andExpect(jsonPath("$.data[0]").value("INFO"))
             .andExpect(jsonPath("$.data[1]").value("WARN"))
             .andExpect(jsonPath("$.data[2]").value("ERROR"))
-            
+
         // getLevels는 하드코딩된 값이므로 서비스 호출이 없음
     }
 

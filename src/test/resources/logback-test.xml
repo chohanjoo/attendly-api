@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 콘솔 로깅 설정 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] [%X{requestId:-NONE}] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 테스트 환경: 콘솔만 사용, Discord 웹훅 비활성화 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <!-- 로거 설정 -->
+    <logger name="com.zaxxer" level="WARN"/>
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="p6spy" level="INFO"/>
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.hibernate.SQL" level="WARN" />
+    <logger name="org.hibernate.type.descriptor.sql" level="WARN" />
+    <logger name="org.flywaydb" level="WARN"/>
+    <logger name="io.swagger" level="WARN"/>
+    <logger name="com.attendly" level="DEBUG" />
+    <logger name="com.attendly.exception" level="ERROR" />
+</configuration> 
