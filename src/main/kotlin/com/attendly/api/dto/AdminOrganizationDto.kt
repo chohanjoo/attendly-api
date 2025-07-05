@@ -181,4 +181,8 @@ data class GbsReorganizationResponse(
     val affectedMemberCount: Int,
     val affectedLeaderCount: Int,
     val completedAt: LocalDateTime
+)
+
+data class GbsLeaderRemoveRequest(
+    val endDate: LocalDate? = null
 ) 

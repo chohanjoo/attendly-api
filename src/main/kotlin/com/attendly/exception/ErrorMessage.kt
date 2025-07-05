@@ -45,6 +45,8 @@ enum class ErrorMessage(
     NO_ACTIVE_LEADER(HttpStatus.BAD_REQUEST, "E2002", "해당 날짜에 활성화된 GBS 리더를 찾을 수 없습니다"),
     MEMBER_NOT_IN_GBS(HttpStatus.BAD_REQUEST, "E2003", "해당 멤버는 GBS에 속하지 않습니다"),
     GBS_GROUP_NOT_IN_VILLAGE(HttpStatus.BAD_REQUEST, "E2004", "GBS 그룹이 해당 마을에 속하지 않습니다"),
+    CANNOT_DELETE_GBS_GROUP_WITH_MEMBERS(HttpStatus.BAD_REQUEST, "E2005", "조원이 있는 GBS 그룹은 삭제할 수 없습니다"),
+    CANNOT_DELETE_GBS_GROUP_WITH_LEADER(HttpStatus.BAD_REQUEST, "E2006", "리더가 있는 GBS 그룹은 삭제할 수 없습니다"),
     
     // 리더 위임 관련 (E3000-E3099)
     DELEGATOR_NOT_FOUND(HttpStatus.BAD_REQUEST, "E3000", "위임자를 찾을 수 없습니다"),

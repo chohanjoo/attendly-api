@@ -1,13 +1,13 @@
 package com.attendly.api.controller.admin
 
-import com.attendly.api.dto.AdminGbsGroupListResponse
-import com.attendly.api.dto.PageResponse
-import com.attendly.api.dto.VillageResponse
+import com.attendly.api.dto.*
 import com.attendly.service.AdminOrganizationService
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.justRun
 import io.mockk.verify
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -15,7 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
@@ -382,5 +383,137 @@ class AdminOrganizationControllerTest {
             .andExpect(jsonPath("$.message").value("GBS 그룹 목록 조회 성공"))
         
         verify(exactly = 1) { adminOrganizationService.getAllGbsGroups(pageable) }
+    }
+
+    // 새로 추가된 API 테스트들
+    @Test
+    @DisplayName("GBS 그룹 멤버 조회 - 성공")
+    fun getGbsGroupMembers_Success() {
+        // given
+        val gbsGroupId = 1L
+        val memberResponses = listOf(
+            GbsMemberResponse(
+                id = 1L,
+                name = "홍길동",
+                email = "hong@test.com",
+                birthDate = LocalDate.of(1995, 1, 1),
+                joinDate = LocalDate.of(2024, 1, 1),
+                phoneNumber = "010-1234-5678"
+            ),
+            GbsMemberResponse(
+                id = 2L,
+                name = "김철수",
+                email = "kim@test.com",
+                birthDate = LocalDate.of(1996, 2, 2),
+                joinDate = LocalDate.of(2024, 1, 1),
+                phoneNumber = "010-2345-6789"
+            )
+        )
+
+        every { adminOrganizationService.getGbsGroupMembers(gbsGroupId) } returns memberResponses
+
+        val mockMvc = setupMockMvc()
+
+        // when & then
+        mockMvc.perform(get("/api/admin/organization/gbs-groups/{gbsGroupId}/members", gbsGroupId))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data.length()").value(2))
+            .andExpect(jsonPath("$.data[0].id").value(1))
+            .andExpect(jsonPath("$.data[0].name").value("홍길동"))
+            .andExpect(jsonPath("$.data[0].email").value("hong@test.com"))
+            .andExpect(jsonPath("$.data[0].phoneNumber").value("010-1234-5678"))
+            .andExpect(jsonPath("$.data[1].id").value(2))
+            .andExpect(jsonPath("$.data[1].name").value("김철수"))
+            .andExpect(jsonPath("$.message").value("GBS 그룹 멤버 조회 성공"))
+
+        verify(exactly = 1) { adminOrganizationService.getGbsGroupMembers(gbsGroupId) }
+    }
+
+    @Test
+    @DisplayName("GBS 그룹 멤버 조회 - 빈 결과")
+    fun getGbsGroupMembers_EmptyResult() {
+        // given
+        val gbsGroupId = 1L
+        val memberResponses = emptyList<GbsMemberResponse>()
+
+        every { adminOrganizationService.getGbsGroupMembers(gbsGroupId) } returns memberResponses
+
+        val mockMvc = setupMockMvc()
+
+        // when & then
+        mockMvc.perform(get("/api/admin/organization/gbs-groups/{gbsGroupId}/members", gbsGroupId))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data.length()").value(0))
+            .andExpect(jsonPath("$.message").value("GBS 그룹 멤버 조회 성공"))
+
+        verify(exactly = 1) { adminOrganizationService.getGbsGroupMembers(gbsGroupId) }
+    }
+
+    @Test
+    @DisplayName("GBS 그룹 삭제 - 성공")
+    fun deleteGbsGroup_Success() {
+        // given
+        val gbsGroupId = 1L
+
+        justRun { adminOrganizationService.deleteGbsGroup(gbsGroupId) }
+
+        val mockMvc = setupMockMvc()
+
+        // when & then
+        mockMvc.perform(delete("/api/admin/organization/gbs-groups/{gbsGroupId}", gbsGroupId))
+            .andExpect(status().isNoContent)
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data").isEmpty)
+            .andExpect(jsonPath("$.message").value("GBS 그룹이 성공적으로 삭제되었습니다"))
+
+        verify(exactly = 1) { adminOrganizationService.deleteGbsGroup(gbsGroupId) }
+    }
+
+    @Test
+    @DisplayName("GBS 리더 해제 - 성공 (요청 본문 없음)")
+    fun removeLeaderFromGbs_Success_NoRequestBody() {
+        // given
+        val gbsGroupId = 1L
+        val request = GbsLeaderRemoveRequest()
+
+        justRun { adminOrganizationService.removeLeaderFromGbs(gbsGroupId, request) }
+
+        val mockMvc = setupMockMvc()
+
+        // when & then
+        mockMvc.perform(delete("/api/admin/organization/gbs-groups/{gbsGroupId}/leaders", gbsGroupId))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data").isEmpty)
+            .andExpect(jsonPath("$.message").value("리더가 성공적으로 해제되었습니다"))
+
+        verify(exactly = 1) { adminOrganizationService.removeLeaderFromGbs(gbsGroupId, any()) }
+    }
+
+    @Test
+    @DisplayName("GBS 리더 해제 - 성공 (종료일 지정)")
+    fun removeLeaderFromGbs_Success_WithEndDate() {
+        // given
+        val gbsGroupId = 1L
+        val endDate = LocalDate.of(2024, 6, 30)
+        val request = GbsLeaderRemoveRequest(endDate = endDate)
+
+        justRun { adminOrganizationService.removeLeaderFromGbs(gbsGroupId, request) }
+
+        val mockMvc = setupMockMvc()
+        val objectMapper = ObjectMapper()
+
+        // when & then
+        mockMvc.perform(delete("/api/admin/organization/gbs-groups/{gbsGroupId}/leaders", gbsGroupId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data").isEmpty)
+            .andExpect(jsonPath("$.message").value("리더가 성공적으로 해제되었습니다"))
+
+        verify(exactly = 1) { adminOrganizationService.removeLeaderFromGbs(gbsGroupId, any()) }
     }
 } 

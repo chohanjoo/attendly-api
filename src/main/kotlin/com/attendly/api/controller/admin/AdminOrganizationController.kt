@@ -151,9 +151,7 @@ class AdminOrganizationController(
     ): ResponseEntity<ApiResponse<PageResponse<AdminGbsGroupListResponse>>> {
         val pageable = PageRequest.of(page, size, Sort.by("id").descending())
         val response = adminOrganizationService.getAllGbsGroups(pageable)
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(ApiResponse.success(response, "GBS 그룹 목록 조회 성공"))
+        return ResponseUtil.success(response, "GBS 그룹 목록 조회 성공")
     }
 
     @Operation(
@@ -209,5 +207,45 @@ class AdminOrganizationController(
     ): ResponseEntity<ApiResponse<GbsReorganizationResponse>> {
         val response = adminOrganizationService.executeGbsReorganization(request)
         return ResponseUtil.success(response, "GBS 그룹 재편성이 성공적으로 실행되었습니다")
+    }
+
+    @Operation(
+        summary = "GBS 그룹 멤버 조회",
+        description = "특정 GBS 그룹의 조원 목록을 조회합니다",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @GetMapping("/gbs-groups/{gbsGroupId}/members")
+    fun getGbsGroupMembers(
+        @PathVariable gbsGroupId: Long
+    ): ResponseEntity<ApiResponse<List<GbsMemberResponse>>> {
+        val response = adminOrganizationService.getGbsGroupMembers(gbsGroupId)
+        return ResponseUtil.success(response, "GBS 그룹 멤버 조회 성공")
+    }
+
+    @Operation(
+        summary = "GBS 그룹 삭제",
+        description = "특정 GBS 그룹을 삭제합니다",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @DeleteMapping("/gbs-groups/{gbsGroupId}")
+    fun deleteGbsGroup(
+        @PathVariable gbsGroupId: Long
+    ): ResponseEntity<ApiResponse<Void>> {
+        adminOrganizationService.deleteGbsGroup(gbsGroupId)
+        return ResponseUtil.successNoData(message = "GBS 그룹이 성공적으로 삭제되었습니다", status = HttpStatus.NO_CONTENT)
+    }
+
+    @Operation(
+        summary = "GBS 리더 해제",
+        description = "특정 GBS 그룹의 현재 리더를 해제합니다",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @DeleteMapping("/gbs-groups/{gbsGroupId}/leaders")
+    fun removeLeaderFromGbs(
+        @PathVariable gbsGroupId: Long,
+        @RequestBody request: GbsLeaderRemoveRequest = GbsLeaderRemoveRequest()
+    ): ResponseEntity<ApiResponse<Void>> {
+        adminOrganizationService.removeLeaderFromGbs(gbsGroupId, request)
+        return ResponseUtil.successNoData(message = "리더가 성공적으로 해제되었습니다")
     }
 } 

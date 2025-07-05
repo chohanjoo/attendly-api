@@ -290,6 +290,47 @@
                         "bearerAuth": []
                     }
                 ]
+            },
+            "delete": {
+                "tags": [
+                    "관리자-조직구조"
+                ],
+                "summary": "GBS 그룹 삭제",
+                "description": "특정 GBS 그룹을 삭제합니다",
+                "operationId": "deleteGbsGroup",
+                "parameters": [
+                    {
+                        "name": "gbsGroupId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/admin/organization/departments/{departmentId}": {
@@ -1273,6 +1314,47 @@
             }
         },
         "/api/admin/organization/gbs-groups/{gbsGroupId}/members": {
+            "get": {
+                "tags": [
+                    "관리자-조직구조"
+                ],
+                "summary": "GBS 그룹 멤버 조회",
+                "description": "특정 GBS 그룹의 조원 목록을 조회합니다",
+                "operationId": "getGbsGroupMembers",
+                "parameters": [
+                    {
+                        "name": "gbsGroupId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseListGbsMemberResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "관리자-조직구조"
@@ -1358,6 +1440,56 @@
                         }
                     },
                     "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseVoid"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "관리자-조직구조"
+                ],
+                "summary": "GBS 리더 해제",
+                "description": "특정 GBS 그룹의 현재 리더를 해제합니다",
+                "operationId": "removeLeaderFromGbs",
+                "parameters": [
+                    {
+                        "name": "gbsGroupId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GbsLeaderRemoveRequest"
+                            }
+                        }
+                    }
                 },
                 "responses": {
                     "200": {
@@ -2206,6 +2338,16 @@
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "마을별 통계 조회 성공",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VillageDetailStatisticsResponse"
+                                }
+                            }
+                        }
+                    },
                     "400": {
                         "description": "잘못된 요청",
                         "content": {
@@ -2222,16 +2364,6 @@
                             "*/*": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiResponseVillageDetailStatisticsResponse"
-                                }
-                            }
-                        }
-                    },
-                    "200": {
-                        "description": "마을별 통계 조회 성공",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/VillageDetailStatisticsResponse"
                                 }
                             }
                         }
@@ -2300,6 +2432,16 @@
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "부서 통계 조회 성공",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DepartmentStatisticsResponse"
+                                }
+                            }
+                        }
+                    },
                     "400": {
                         "description": "잘못된 요청",
                         "content": {
@@ -2316,16 +2458,6 @@
                             "*/*": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiResponseDepartmentStatisticsResponse"
-                                }
-                            }
-                        }
-                    },
-                    "200": {
-                        "description": "부서 통계 조회 성공",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/DepartmentStatisticsResponse"
                                 }
                             }
                         }
@@ -4267,6 +4399,68 @@
                     }
                 }
             },
+            "ApiResponseListGbsMemberResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GbsMemberResponse"
+                        }
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "GbsMemberResponse": {
+                "required": [
+                    "id",
+                    "joinDate",
+                    "name"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "birthDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "joinDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "phoneNumber": {
+                        "type": "string"
+                    }
+                }
+            },
             "ApiResponsePageResponseDepartmentResponse": {
                 "required": [
                     "code",
@@ -5128,6 +5322,15 @@
                     "code": {
                         "type": "integer",
                         "format": "int32"
+                    }
+                }
+            },
+            "GbsLeaderRemoveRequest": {
+                "type": "object",
+                "properties": {
+                    "endDate": {
+                        "type": "string",
+                        "format": "date"
                     }
                 }
             }

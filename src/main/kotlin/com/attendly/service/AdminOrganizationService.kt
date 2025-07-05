@@ -523,4 +523,80 @@ class AdminOrganizationService(
             hasMore = gbsGroups.hasNext()
         )
     }
+
+    /**
+     * GBS 그룹 멤버 조회
+     */
+    @Transactional(readOnly = true)
+    fun getGbsGroupMembers(gbsGroupId: Long): List<GbsMemberResponse> {
+        val gbsGroup = gbsGroupRepository.findById(gbsGroupId)
+            .orElseThrow { AttendlyApiException(ErrorMessage.GBS_GROUP_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.GBS_GROUP_NOT_FOUND, gbsGroupId)) }
+
+        val currentMembers = gbsMemberHistoryRepository.findCurrentMembersByGbsId(gbsGroupId, LocalDate.now())
+        
+        return currentMembers.map { memberHistory ->
+            GbsMemberResponse(
+                id = memberHistory.member.id ?: 0L,
+                name = memberHistory.member.name,
+                email = memberHistory.member.email,
+                birthDate = memberHistory.member.birthDate,
+                joinDate = memberHistory.startDate,
+                phoneNumber = memberHistory.member.phoneNumber
+            )
+        }
+    }
+
+    /**
+     * GBS 그룹 삭제
+     */
+    @Transactional
+    fun deleteGbsGroup(gbsGroupId: Long) {
+        val gbsGroup = gbsGroupRepository.findById(gbsGroupId)
+            .orElseThrow { AttendlyApiException(ErrorMessage.GBS_GROUP_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.GBS_GROUP_NOT_FOUND, gbsGroupId)) }
+
+        // 현재 활성화된 조원이 있는지 확인
+        val currentMembers = gbsMemberHistoryRepository.findCurrentMembersByGbsId(gbsGroupId, LocalDate.now())
+        if (currentMembers.isNotEmpty()) {
+            throw AttendlyApiException(ErrorMessage.CANNOT_DELETE_GBS_GROUP_WITH_MEMBERS, ErrorMessageUtils.withField(ErrorMessage.CANNOT_DELETE_GBS_GROUP_WITH_MEMBERS, "조원 수", currentMembers.size))
+        }
+
+        // 현재 활성화된 리더가 있는지 확인
+        val currentLeader = gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsGroupId)
+        if (currentLeader != null) {
+            throw AttendlyApiException(ErrorMessage.CANNOT_DELETE_GBS_GROUP_WITH_LEADER, ErrorMessageUtils.withField(ErrorMessage.CANNOT_DELETE_GBS_GROUP_WITH_LEADER, "리더 이름", currentLeader.name))
+        }
+
+        // 과거 출석 데이터가 있는지 확인 (참고 목적)
+        // TODO: 출석 데이터 확인 로직 추가 가능
+
+        // GBS 그룹 삭제
+        gbsGroupRepository.deleteById(gbsGroupId)
+    }
+
+    /**
+     * GBS 그룹의 리더 해제
+     */
+    @Transactional
+    fun removeLeaderFromGbs(gbsGroupId: Long, request: GbsLeaderRemoveRequest) {
+        val gbsGroup = gbsGroupRepository.findById(gbsGroupId)
+            .orElseThrow { AttendlyApiException(ErrorMessage.GBS_GROUP_NOT_FOUND, ErrorMessageUtils.withId(ErrorMessage.GBS_GROUP_NOT_FOUND, gbsGroupId)) }
+
+        // 현재 활성화된 리더 조회
+        val currentLeaderHistory = gbsLeaderHistoryRepository.findCurrentLeaderHistoryByGbsId(gbsGroupId, LocalDate.now())
+            ?: throw AttendlyApiException(ErrorMessage.NO_ACTIVE_LEADER, ErrorMessageUtils.withId(ErrorMessage.NO_ACTIVE_LEADER, gbsGroupId))
+
+        // 리더 해제 - 종료일 설정
+        val endDate = request.endDate ?: LocalDate.now()
+        
+        val updatedHistory = GbsLeaderHistory(
+            id = currentLeaderHistory.id,
+            gbsGroup = currentLeaderHistory.gbsGroup,
+            leader = currentLeaderHistory.leader,
+            startDate = currentLeaderHistory.startDate,
+            endDate = endDate,
+            createdAt = currentLeaderHistory.createdAt
+        )
+        
+        gbsLeaderHistoryRepository.save(updatedHistory)
+    }
 } 
