@@ -3,6 +3,7 @@ package com.attendly.api.controller
 import com.attendly.api.dto.GbsMemberResponse
 import com.attendly.api.dto.GbsMembersListResponse
 import com.attendly.api.dto.LeaderGbsHistoryListResponse
+import com.attendly.api.dto.LeaderGbsHistoryRequestDto
 import com.attendly.api.dto.LeaderGbsHistoryResponse
 import com.attendly.api.dto.LeaderGbsResponse
 import com.attendly.domain.entity.*
@@ -303,7 +304,7 @@ class GbsMemberControllerTest {
         )
         
         every { userService.getCurrentUser(authentication) } returns leader
-        every { gbsMemberService.getLeaderGbsHistories(leaderId, leader) } returns historyResponse
+        every { gbsMemberService.getLeaderGbsHistories(any<LeaderGbsHistoryRequestDto>()) } returns historyResponse
         
         // When
         val result = controller.getLeaderGbsHistories(leaderId, authentication)
@@ -366,7 +367,7 @@ class GbsMemberControllerTest {
         )
         
         every { userService.getCurrentUser(authentication) } returns admin
-        every { gbsMemberService.getLeaderGbsHistories(leaderId, admin) } returns historyResponse
+        every { gbsMemberService.getLeaderGbsHistories(any<LeaderGbsHistoryRequestDto>()) } returns historyResponse
         
         // When
         val result = controller.getLeaderGbsHistories(leaderId, authentication)

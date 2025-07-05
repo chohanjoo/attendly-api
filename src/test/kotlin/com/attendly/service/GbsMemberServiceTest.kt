@@ -4,6 +4,8 @@ import com.attendly.api.dto.GbsAssignment
 import com.attendly.api.dto.GbsAssignmentSaveRequest
 import com.attendly.api.dto.GbsMemberResponse
 import com.attendly.api.dto.GbsMembersListResponse
+import com.attendly.api.dto.LeaderGbsHistoryMemberDto
+import com.attendly.api.dto.LeaderGbsHistoryRequestDto
 import com.attendly.domain.entity.*
 import com.attendly.domain.model.UserFilterDto
 import com.attendly.domain.repository.*
@@ -319,12 +321,83 @@ class GbsMemberServiceTest {
 
         every { leaderUser.gbsLeaderHistories }.returns(mutableListOf(history1, history2))
 
-        // When
-        every { organizationService.getGbsMembers(gbsGroup1.id!!, history1.endDate!!) } returns members1Response
-        every { organizationService.getGbsMembers(gbsGroup2.id!!) } returns members2Response
-        every { gbsLeaderHistoryRepository.findByLeaderIdWithDetailsOrderByStartDateDesc(leaderId) } returns listOf(history2, history1)
+        // 새로운 DTO 메서드 사용 - 각 히스토리별로 멤버를 개별적으로 표현
+        val historyMemberDtos = listOf(
+            // history2의 첫 번째 멤버
+            LeaderGbsHistoryMemberDto(
+                historyId = history2.id!!,
+                gbsId = gbsGroup2.id!!,
+                gbsName = gbsGroup2.name,
+                villageId = village.id!!,
+                villageName = village.name,
+                startDate = history2.startDate,
+                endDate = history2.endDate,
+                isActive = true,
+                memberId = members2Response.members[0].id,
+                memberName = members2Response.members[0].name,
+                memberEmail = members2Response.members[0].email,
+                memberBirthDate = members2Response.members[0].birthDate,
+                memberPhoneNumber = members2Response.members[0].phoneNumber,
+                memberJoinDate = members2Response.members[0].joinDate
+            ),
+            // history2의 두 번째 멤버
+            LeaderGbsHistoryMemberDto(
+                historyId = history2.id!!,
+                gbsId = gbsGroup2.id!!,
+                gbsName = gbsGroup2.name,
+                villageId = village.id!!,
+                villageName = village.name,
+                startDate = history2.startDate,
+                endDate = history2.endDate,
+                isActive = true,
+                memberId = members2Response.members[1].id,
+                memberName = members2Response.members[1].name,
+                memberEmail = members2Response.members[1].email,
+                memberBirthDate = members2Response.members[1].birthDate,
+                memberPhoneNumber = members2Response.members[1].phoneNumber,
+                memberJoinDate = members2Response.members[1].joinDate
+            ),
+            // history1의 첫 번째 멤버
+            LeaderGbsHistoryMemberDto(
+                historyId = history1.id!!,
+                gbsId = gbsGroup1.id!!,
+                gbsName = gbsGroup1.name,
+                villageId = village.id!!,
+                villageName = village.name,
+                startDate = history1.startDate,
+                endDate = history1.endDate,
+                isActive = false,
+                memberId = members1Response.members[0].id,
+                memberName = members1Response.members[0].name,
+                memberEmail = members1Response.members[0].email,
+                memberBirthDate = members1Response.members[0].birthDate,
+                memberPhoneNumber = members1Response.members[0].phoneNumber,
+                memberJoinDate = members1Response.members[0].joinDate
+            ),
+            // history1의 두 번째 멤버
+            LeaderGbsHistoryMemberDto(
+                historyId = history1.id!!,
+                gbsId = gbsGroup1.id!!,
+                gbsName = gbsGroup1.name,
+                villageId = village.id!!,
+                villageName = village.name,
+                startDate = history1.startDate,
+                endDate = history1.endDate,
+                isActive = false,
+                memberId = members1Response.members[1].id,
+                memberName = members1Response.members[1].name,
+                memberEmail = members1Response.members[1].email,
+                memberBirthDate = members1Response.members[1].birthDate,
+                memberPhoneNumber = members1Response.members[1].phoneNumber,
+                memberJoinDate = members1Response.members[1].joinDate
+            )
+        )
 
-        val result = gbsMemberService.getLeaderGbsHistories(leaderId, leaderUser)
+        // When
+        every { gbsLeaderHistoryRepository.findLeaderGbsHistoriesWithMembers(leaderId) } returns historyMemberDtos
+        
+        val request = LeaderGbsHistoryRequestDto(leaderId, leaderUser)
+        val result = gbsMemberService.getLeaderGbsHistories(request)
 
         // Then
         assertEquals(2, result.historyCount)
@@ -360,10 +433,11 @@ class GbsMemberServiceTest {
         val leaderId = 100L
         val currentUserId = 200L
         val currentUser = createUser(Role.LEADER, currentUserId)
+        val request = LeaderGbsHistoryRequestDto(leaderId, currentUser)
 
         // When & Then
         val exception = assertThrows(AttendlyApiException::class.java) {
-            gbsMemberService.getLeaderGbsHistories(leaderId, currentUser)
+            gbsMemberService.getLeaderGbsHistories(request)
         }
 
         assertEquals(ErrorMessage.ACCESS_DENIED_LEADER_HISTORY.code, exception.errorMessage.code)

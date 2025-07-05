@@ -94,56 +94,87 @@ class GbsMemberService(
     /**
      * 리더가 지금까지 참여했던 GBS 히스토리 리스트를 조회합니다.
      * 각 GBS 히스토리에는 리더가 언제부터 언제까지 참여했는지에 대한 정보와 해당 GBS 내의 조원들에 대한 정보도 포함됩니다.
+     * 
+     * 최적화된 버전: N+1 문제 해결
+     * - 기존: 1 + N개의 쿼리 (N은 리더 히스토리 개수)
+     * - 개선: 1개의 복잡한 조인 쿼리
      */
     @Transactional(readOnly = true)
-    fun getLeaderGbsHistories(leaderId: Long, currentUser: User): LeaderGbsHistoryListResponse {
-        // 자신이거나 관리자/교역자/마을장만 조회 가능
-        if (currentUser.id != leaderId && 
-            currentUser.role != Role.ADMIN && 
-            currentUser.role != Role.MINISTER && 
-            (currentUser.role != Role.VILLAGE_LEADER || currentUser.villageLeader == null)) {
-                throw AttendlyApiException(ErrorMessage.ACCESS_DENIED_LEADER_HISTORY)
-        }
+    fun getLeaderGbsHistories(request: LeaderGbsHistoryRequestDto): LeaderGbsHistoryListResponse {
+        validateLeaderHistoryAccessPermission(request)
+        return buildLeaderGbsHistoryResponse(request)
+    }
+    
+    /**
+     * 리더 히스토리 조회 권한을 검증합니다.
+     */
+    private fun validateLeaderHistoryAccessPermission(request: LeaderGbsHistoryRequestDto) {
+        val currentUser = request.currentUser
         
+        // 자신의 히스토리 조회는 허용
+        if (currentUser.id == request.leaderId) return
+        
+        // 관리자, 교역자는 모든 히스토리 조회 가능
+        if (currentUser.role in listOf(Role.ADMIN, Role.MINISTER)) return
+        
+        // 마을장은 자신의 마을 리더들의 히스토리 조회 가능
+        if (currentUser.role == Role.VILLAGE_LEADER && currentUser.villageLeader != null) return
+        
+        throw AttendlyApiException(ErrorMessage.ACCESS_DENIED_LEADER_HISTORY)
+    }
+    
+    /**
+     * 리더 GBS 히스토리 응답을 생성합니다.
+     */
+    private fun buildLeaderGbsHistoryResponse(request: LeaderGbsHistoryRequestDto): LeaderGbsHistoryListResponse {
         // 사용자 정보 조회
-        val leader = if (currentUser.id == leaderId) {
-            currentUser
+        val leader = if (request.currentUser.id == request.leaderId) {
+            request.currentUser
         } else {
-            userService.findById(leaderId).orElseThrow { 
-                AttendlyApiException(ErrorMessage.LEADER_NOT_FOUND, leaderId) 
+            userService.findById(request.leaderId).orElseThrow { 
+                AttendlyApiException(ErrorMessage.LEADER_NOT_FOUND, request.leaderId) 
             }
         }
         
-        // fetch join을 통해 연관 엔티티를 함께 로딩
-        val leaderHistories: List<GbsLeaderHistory> = gbsLeaderHistoryRepository.findByLeaderIdWithDetailsOrderByStartDateDesc(leaderId)
+        // Querydsl을 사용하여 리더 히스토리와 멤버 정보를 한 번에 조회
+        val historyMemberDtos = gbsLeaderHistoryRepository.findLeaderGbsHistoriesWithMembers(request.leaderId)
+        
+        // 히스토리별로 그룹화
+        val groupedByHistory = historyMemberDtos.groupBy { it.historyId }
         
         // 각 히스토리에 대한 상세 정보 매핑
-        val historyResponses = leaderHistories.map { history: GbsLeaderHistory ->
-            val isActive = history.endDate == null
-            val membersResponse = if (isActive) {
-                // 현재 활성화된 GBS라면 현재 멤버 조회
-                organizationService.getGbsMembers(history.gbsGroup.id!!)
-            } else {
-                // 과거 GBS라면 해당 기간의 멤버 조회
-                val endDate = history.endDate ?: LocalDate.now()
-                organizationService.getGbsMembers(history.gbsGroup.id!!, endDate)
+        val historyResponses = groupedByHistory.map { (historyId, memberDtos) ->
+            val firstDto = memberDtos.first()
+            
+            // 멤버 정보 매핑 (null 값은 제외)
+            val members = memberDtos.mapNotNull { dto ->
+                if (dto.memberId != null) {
+                    GbsMemberResponse(
+                        id = dto.memberId,
+                        name = dto.memberName!!,
+                        email = dto.memberEmail!!,
+                        birthDate = dto.memberBirthDate,
+                        joinDate = (dto.memberJoinDate ?: firstDto.startDate) as LocalDate,
+                        phoneNumber = dto.memberPhoneNumber
+                    )
+                } else null
             }
             
             LeaderGbsHistoryResponse(
-                historyId = history.id!!,
-                gbsId = history.gbsGroup.id!!,
-                gbsName = history.gbsGroup.name,
-                villageId = history.gbsGroup.village.id!!,
-                villageName = history.gbsGroup.village.name,
-                startDate = history.startDate,
-                endDate = history.endDate,
-                isActive = isActive,
-                members = membersResponse.members
+                historyId = historyId,
+                gbsId = firstDto.gbsId,
+                gbsName = firstDto.gbsName,
+                villageId = firstDto.villageId,
+                villageName = firstDto.villageName,
+                startDate = firstDto.startDate,
+                endDate = firstDto.endDate,
+                isActive = firstDto.isActive,
+                members = members
             )
-        }
+        }.sortedByDescending { it.startDate }
         
         return LeaderGbsHistoryListResponse(
-            leaderId = leaderId,
+            leaderId = request.leaderId,
             leaderName = leader.name,
             historyCount = historyResponses.size,
             histories = historyResponses
