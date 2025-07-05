@@ -97,6 +97,50 @@ data class GbsGroupResponse(
     val updatedAt: LocalDateTime
 )
 
+data class AdminGbsGroupListResponse(
+    val id: Long,
+    val name: String,
+    val villageId: Long,
+    val villageName: String,
+    val termStartDate: LocalDate,
+    val termEndDate: LocalDate,
+    val leaderId: Long?,
+    val leaderName: String?,
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime,
+    val memberCount: Int
+)
+
+data class AdminGbsGroupQueryDto(
+    val id: Long,
+    val name: String,
+    val villageId: Long,
+    val villageName: String,
+    val termStartDate: LocalDate,
+    val termEndDate: LocalDate,
+    val leaderId: Long?,
+    val leaderName: String?,
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime,
+    val memberCount: Long
+) {
+    fun toResponse(): AdminGbsGroupListResponse {
+        return AdminGbsGroupListResponse(
+            id = id,
+            name = name,
+            villageId = villageId,
+            villageName = villageName,
+            termStartDate = termStartDate,
+            termEndDate = termEndDate,
+            leaderId = leaderId,
+            leaderName = leaderName,
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+            memberCount = memberCount.toInt()
+        )
+    }
+}
+
 data class GbsLeaderAssignRequest(
     @field:NotNull(message = "리더 ID는 필수입니다")
     val leaderId: Long,

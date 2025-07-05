@@ -1,5 +1,6 @@
 package com.attendly.api.controller.admin
 
+import com.attendly.api.dto.AdminGbsGroupListResponse
 import com.attendly.api.dto.PageResponse
 import com.attendly.api.dto.VillageResponse
 import com.attendly.service.AdminOrganizationService
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @ExtendWith(MockKExtension::class)
@@ -227,5 +229,158 @@ class AdminOrganizationControllerTest {
             .andExpect(jsonPath("$.message").value("마을 목록 조회 성공"))
         
         verify(exactly = 1) { adminOrganizationService.getAllVillages(null, null, pageable) }
+    }
+    
+    @Test
+    @DisplayName("GBS 그룹 목록 조회 - 성공")
+    fun getAllGbsGroups_Success() {
+        // given
+        val now = LocalDateTime.now()
+        val gbsResponses = listOf(
+            AdminGbsGroupListResponse(
+                id = 1L,
+                name = "믿음 GBS",
+                villageId = 1L,
+                villageName = "1마을",
+                termStartDate = LocalDate.of(2024, 1, 1),
+                termEndDate = LocalDate.of(2024, 6, 30),
+                leaderId = 101L,
+                leaderName = "김리더",
+                createdAt = now,
+                updatedAt = now,
+                memberCount = 5
+            ),
+            AdminGbsGroupListResponse(
+                id = 2L,
+                name = "소망 GBS",
+                villageId = 1L,
+                villageName = "1마을",
+                termStartDate = LocalDate.of(2024, 1, 1),
+                termEndDate = LocalDate.of(2024, 6, 30),
+                leaderId = null,
+                leaderName = null,
+                createdAt = now,
+                updatedAt = now,
+                memberCount = 3
+            )
+        )
+        
+        val pageResponse = PageResponse(
+            items = gbsResponses,
+            totalCount = 2L,
+            hasMore = false
+        )
+        
+        val pageable = PageRequest.of(0, 20, Sort.by("id").descending())
+        
+        every { 
+            adminOrganizationService.getAllGbsGroups(pageable) 
+        } returns pageResponse
+        
+        val mockMvc = setupMockMvc()
+        
+        // when & then
+        mockMvc.perform(get("/api/admin/organization/gbs-groups"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data.items.length()").value(2))
+            .andExpect(jsonPath("$.data.items[0].id").value(1))
+            .andExpect(jsonPath("$.data.items[0].name").value("믿음 GBS"))
+            .andExpect(jsonPath("$.data.items[0].villageId").value(1))
+            .andExpect(jsonPath("$.data.items[0].villageName").value("1마을"))
+            .andExpect(jsonPath("$.data.items[0].leaderId").value(101))
+            .andExpect(jsonPath("$.data.items[0].leaderName").value("김리더"))
+            .andExpect(jsonPath("$.data.items[0].memberCount").value(5))
+            .andExpect(jsonPath("$.data.items[1].id").value(2))
+            .andExpect(jsonPath("$.data.items[1].name").value("소망 GBS"))
+            .andExpect(jsonPath("$.data.items[1].leaderId").isEmpty)
+            .andExpect(jsonPath("$.data.items[1].leaderName").isEmpty)
+            .andExpect(jsonPath("$.data.items[1].memberCount").value(3))
+            .andExpect(jsonPath("$.data.totalCount").value(2))
+            .andExpect(jsonPath("$.data.hasMore").value(false))
+            .andExpect(jsonPath("$.message").value("GBS 그룹 목록 조회 성공"))
+        
+        verify(exactly = 1) { adminOrganizationService.getAllGbsGroups(pageable) }
+    }
+    
+    @Test
+    @DisplayName("GBS 그룹 목록 조회 - 페이징")
+    fun getAllGbsGroups_WithPaging() {
+        // given
+        val page = 1
+        val size = 10
+        val now = LocalDateTime.now()
+        val gbsResponses = listOf(
+            AdminGbsGroupListResponse(
+                id = 1L,
+                name = "믿음 GBS",
+                villageId = 1L,
+                villageName = "1마을",
+                termStartDate = LocalDate.of(2024, 1, 1),
+                termEndDate = LocalDate.of(2024, 6, 30),
+                leaderId = 101L,
+                leaderName = "김리더",
+                createdAt = now,
+                updatedAt = now,
+                memberCount = 5
+            )
+        )
+        
+        val pageResponse = PageResponse(
+            items = gbsResponses,
+            totalCount = 25L,
+            hasMore = true
+        )
+        
+        val pageable = PageRequest.of(page, size, Sort.by("id").descending())
+        
+        every { 
+            adminOrganizationService.getAllGbsGroups(pageable) 
+        } returns pageResponse
+        
+        val mockMvc = setupMockMvc()
+        
+        // when & then
+        mockMvc.perform(get("/api/admin/organization/gbs-groups")
+                .param("page", page.toString())
+                .param("size", size.toString()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data.items.length()").value(1))
+            .andExpect(jsonPath("$.data.totalCount").value(25))
+            .andExpect(jsonPath("$.data.hasMore").value(true))
+            .andExpect(jsonPath("$.message").value("GBS 그룹 목록 조회 성공"))
+        
+        verify(exactly = 1) { adminOrganizationService.getAllGbsGroups(pageable) }
+    }
+    
+    @Test
+    @DisplayName("GBS 그룹 목록 조회 - 빈 결과")
+    fun getAllGbsGroups_EmptyResult() {
+        // given
+        val pageResponse = PageResponse<AdminGbsGroupListResponse>(
+            items = emptyList(),
+            totalCount = 0L,
+            hasMore = false
+        )
+        
+        val pageable = PageRequest.of(0, 20, Sort.by("id").descending())
+        
+        every { 
+            adminOrganizationService.getAllGbsGroups(pageable) 
+        } returns pageResponse
+        
+        val mockMvc = setupMockMvc()
+        
+        // when & then
+        mockMvc.perform(get("/api/admin/organization/gbs-groups"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data.items.length()").value(0))
+            .andExpect(jsonPath("$.data.totalCount").value(0))
+            .andExpect(jsonPath("$.data.hasMore").value(false))
+            .andExpect(jsonPath("$.message").value("GBS 그룹 목록 조회 성공"))
+        
+        verify(exactly = 1) { adminOrganizationService.getAllGbsGroups(pageable) }
     }
 } 

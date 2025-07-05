@@ -679,4 +679,102 @@ class AdminOrganizationServiceTest {
         verify { villageLeaderRepository.findByVillageIdAndEndDateIsNull(villageId) }
         verify(exactly = 0) { villageLeaderRepository.save(any()) } // 변경 사항 없음
     }
+
+    @Test
+    @DisplayName("모든 GBS 그룹 조회 - 성공")
+    fun getAllGbsGroups_Success() {
+        // given
+        val now = LocalDateTime.now()
+        
+        val gbsQueryDto1 = AdminGbsGroupQueryDto(
+            id = 1L,
+            name = "믿음 GBS",
+            villageId = 1L,
+            villageName = "1마을",
+            termStartDate = LocalDate.of(2024, 1, 1),
+            termEndDate = LocalDate.of(2024, 6, 30),
+            leaderId = 101L,
+            leaderName = "김리더",
+            createdAt = now,
+            updatedAt = now,
+            memberCount = 5L
+        )
+        
+        val gbsQueryDto2 = AdminGbsGroupQueryDto(
+            id = 2L,
+            name = "소망 GBS",
+            villageId = 1L,
+            villageName = "1마을",
+            termStartDate = LocalDate.of(2024, 1, 1),
+            termEndDate = LocalDate.of(2024, 6, 30),
+            leaderId = null,
+            leaderName = null,
+            createdAt = now,
+            updatedAt = now,
+            memberCount = 3L
+        )
+        
+        val pageable = PageRequest.of(0, 20, Sort.by("id").descending())
+        val page = PageImpl(listOf(gbsQueryDto1, gbsQueryDto2), pageable, 2)
+        
+        every { gbsGroupRepository.findAllGbsGroupsWithCompleteDetails(pageable) } returns page
+        
+        // when
+        val result = adminOrganizationService.getAllGbsGroups(pageable)
+        
+        // then
+        assertNotNull(result)
+        assertEquals(2, result.items.size)
+        assertEquals(2, result.totalCount)
+        assertFalse(result.hasMore)
+        
+        val firstGbs = result.items[0]
+        assertEquals(1L, firstGbs.id)
+        assertEquals("믿음 GBS", firstGbs.name)
+        assertEquals(1L, firstGbs.villageId)
+        assertEquals("1마을", firstGbs.villageName)
+        assertEquals(LocalDate.of(2024, 1, 1), firstGbs.termStartDate)
+        assertEquals(LocalDate.of(2024, 6, 30), firstGbs.termEndDate)
+        assertEquals(101L, firstGbs.leaderId)
+        assertEquals("김리더", firstGbs.leaderName)
+        assertEquals(5, firstGbs.memberCount)
+        assertEquals(now, firstGbs.createdAt)
+        assertEquals(now, firstGbs.updatedAt)
+        
+        val secondGbs = result.items[1]
+        assertEquals(2L, secondGbs.id)
+        assertEquals("소망 GBS", secondGbs.name)
+        assertEquals(1L, secondGbs.villageId)
+        assertEquals("1마을", secondGbs.villageName)
+        assertEquals(LocalDate.of(2024, 1, 1), secondGbs.termStartDate)
+        assertEquals(LocalDate.of(2024, 6, 30), secondGbs.termEndDate)
+        assertNull(secondGbs.leaderId)
+        assertNull(secondGbs.leaderName)
+        assertEquals(3, secondGbs.memberCount)
+        assertEquals(now, secondGbs.createdAt)
+        assertEquals(now, secondGbs.updatedAt)
+        
+        verify(exactly = 1) { gbsGroupRepository.findAllGbsGroupsWithCompleteDetails(pageable) }
+    }
+
+    @Test
+    @DisplayName("모든 GBS 그룹 조회 - 빈 결과")
+    fun getAllGbsGroups_EmptyResult() {
+        // given
+        val pageable = PageRequest.of(0, 20, Sort.by("id").descending())
+        val emptyPage = PageImpl<AdminGbsGroupQueryDto>(emptyList(), pageable, 0)
+        
+        every { gbsGroupRepository.findAllGbsGroupsWithCompleteDetails(pageable) } returns emptyPage
+        
+        // when
+        val result = adminOrganizationService.getAllGbsGroups(pageable)
+        
+        // then
+        assertNotNull(result)
+        assertEquals(0, result.items.size)
+        assertEquals(0, result.totalCount)
+        assertFalse(result.hasMore)
+        
+        verify(exactly = 1) { gbsGroupRepository.findAllGbsGroupsWithCompleteDetails(pageable) }
+    }
 } 

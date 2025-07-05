@@ -140,6 +140,23 @@ class AdminOrganizationController(
     }
 
     @Operation(
+        summary = "GBS 그룹 목록 조회", 
+        description = "모든 GBS 그룹 목록을 조회합니다",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @GetMapping("/gbs-groups")
+    fun getAllGbsGroups(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int
+    ): ResponseEntity<ApiResponse<PageResponse<AdminGbsGroupListResponse>>> {
+        val pageable = PageRequest.of(page, size, Sort.by("id").descending())
+        val response = adminOrganizationService.getAllGbsGroups(pageable)
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "GBS 그룹 목록 조회 성공"))
+    }
+
+    @Operation(
         summary = "GBS 그룹 수정", 
         description = "GBS 그룹 정보를 수정합니다",
         security = [SecurityRequirement(name = "bearerAuth")]

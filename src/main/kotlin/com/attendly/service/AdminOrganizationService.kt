@@ -507,4 +507,20 @@ class AdminOrganizationService(
             hasMore = villages.hasNext()
         )
     }
+
+    /**
+     * 모든 GBS 그룹 조회
+     */
+    @Transactional(readOnly = true)
+    fun getAllGbsGroups(pageable: Pageable): PageResponse<AdminGbsGroupListResponse> {
+        val gbsGroups = gbsGroupRepository.findAllGbsGroupsWithCompleteDetails(pageable)
+        
+        val items = gbsGroups.content.map { it.toResponse() }
+        
+        return PageResponse(
+            items = items,
+            totalCount = gbsGroups.totalElements,
+            hasMore = gbsGroups.hasNext()
+        )
+    }
 } 
