@@ -9,4 +9,10 @@ interface GbsMemberHistoryRepositoryCustom {
     fun findActiveMembers(condition: GbsMemberHistorySearchCondition): List<GbsMemberHistory>
     fun findCurrentMemberHistoryByMemberId(memberId: Long): GbsMemberHistory?
     fun findCurrentMembersByGbsId(gbsId: Long, date: LocalDate): List<GbsMemberHistory>
+    
+    /**
+     * 마을의 모든 활성 GBS 멤버들을 한 번에 조회합니다.
+     * N+1 문제를 방지하기 위해 IN 쿼리를 사용합니다.
+     */
+    fun findActiveMembersByVillageGbsIds(gbsIds: List<Long>, date: LocalDate): List<GbsMemberHistory>
 } 

@@ -9,6 +9,7 @@ import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
 import com.attendly.domain.model.GbsMemberHistorySearchCondition
 import com.attendly.domain.model.GbsWithLeader
+import com.attendly.domain.model.VillageGbsWithLeaderInfo
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
@@ -309,28 +310,30 @@ class OrganizationServiceTest {
     }
     
     @Test
-    fun `getVillageGbsInfo 마을의 모든 GBS 정보를 반환해야 함`() {
+    fun `getVillageGbsInfo 마을의 모든 GBS 정보를 반환해야 함 - 최적화된 버전`() {
         // given
         val date = LocalDate.now()
-        val gbsGroups = listOf(gbsGroup, gbsGroup2)
-        val condition1 = GbsMemberHistorySearchCondition(
-            gbsId = 1L,
-            startDate = date,
-            endDate = date
-        )
-        val condition2 = GbsMemberHistorySearchCondition(
-            gbsId = 2L,
-            startDate = date,
-            endDate = date
+        val gbsWithLeaderInfoList = listOf(
+            VillageGbsWithLeaderInfo(
+                gbsId = 1L,
+                gbsName = "1GBS",
+                leaderId = 1L,
+                leaderName = "홍길동",
+                memberCount = 2
+            ),
+            VillageGbsWithLeaderInfo(
+                gbsId = 2L,
+                gbsName = "2GBS",
+                leaderId = null,
+                leaderName = null,
+                memberCount = 0
+            )
         )
         val memberHistories = listOf(memberHistory1, memberHistory2)
         
         every { villageRepository.findById(1L) } returns Optional.of(village)
-        every { gbsGroupRepository.findActiveGroupsByVillageId(1L, date) } returns gbsGroups
-        every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(1L) } returns leader
-        every { gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(2L) } returns null
-        every { gbsMemberHistoryRepository.findActiveMembers(condition1) } returns memberHistories
-        every { gbsMemberHistoryRepository.findActiveMembers(condition2) } returns emptyList()
+        every { gbsGroupRepository.findVillageGbsWithLeaderInfo(1L, date) } returns gbsWithLeaderInfoList
+        every { gbsMemberHistoryRepository.findActiveMembersByVillageGbsIds(listOf(1L, 2L), date) } returns memberHistories
         
         // when
         val result = organizationService.getVillageGbsInfo(1L, date)
@@ -357,6 +360,25 @@ class OrganizationServiceTest {
         assertEquals("리더 없음", gbsInfo2.leaderName)
         assertEquals(0, gbsInfo2.memberCount)
         assertEquals(0, gbsInfo2.members.size)
+    }
+
+    @Test
+    fun `getVillageGbsInfo 활성 GBS가 없는 경우 빈 리스트를 반환해야 함`() {
+        // given
+        val date = LocalDate.now()
+        
+        every { villageRepository.findById(1L) } returns Optional.of(village)
+        every { gbsGroupRepository.findVillageGbsWithLeaderInfo(1L, date) } returns emptyList()
+        
+        // when
+        val result = organizationService.getVillageGbsInfo(1L, date)
+        
+        // then
+        assertEquals(1L, result.villageId)
+        assertEquals("1마을", result.villageName)
+        assertEquals(0, result.gbsCount)
+        assertEquals(0, result.totalMemberCount)
+        assertEquals(0, result.gbsList.size)
     }
 
     @Test

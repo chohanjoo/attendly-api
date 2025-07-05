@@ -246,4 +246,140 @@ class GbsGroupRepositoryCustomTest {
         assertThat(result.gbsGroup.name).isEqualTo("GBS 그룹")
         assertThat(result.leader).isNull()
     }
+
+    @Test
+    fun `findVillageGbsWithLeaderInfo - 마을의 모든 GBS와 리더 정보를 한 번에 조회한다`() {
+        // given
+        val gbsGroup1 = GbsGroup(
+            name = "GBS 그룹 1",
+            village = village,
+            termStartDate = LocalDate.of(2023, 1, 1),
+            termEndDate = LocalDate.of(2023, 12, 31),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(gbsGroup1)
+
+        val gbsGroup2 = GbsGroup(
+            name = "GBS 그룹 2",
+            village = village,
+            termStartDate = LocalDate.of(2023, 1, 1),
+            termEndDate = LocalDate.of(2023, 12, 31),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(gbsGroup2)
+
+        val leader1 = User(
+            name = "리더 1",
+            role = Role.LEADER,
+            department = department,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(leader1)
+
+        val leaderHistory1 = GbsLeaderHistory(
+            gbsGroup = gbsGroup1,
+            leader = leader1,
+            startDate = LocalDate.of(2023, 1, 1),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(leaderHistory1)
+
+        // GBS 그룹 2는 리더가 없음
+
+        // when
+        val result = gbsGroupRepository.findVillageGbsWithLeaderInfo(village.id!!, LocalDate.of(2023, 7, 1))
+
+        // then
+        assertThat(result).hasSize(2)
+        
+        val gbsInfo1 = result.find { it.gbsName == "GBS 그룹 1" }
+        assertThat(gbsInfo1).isNotNull
+        assertThat(gbsInfo1!!.gbsId).isEqualTo(gbsGroup1.id)
+        assertThat(gbsInfo1.leaderName).isEqualTo("리더 1")
+        assertThat(gbsInfo1.leaderId).isEqualTo(leader1.id)
+        
+        val gbsInfo2 = result.find { it.gbsName == "GBS 그룹 2" }
+        assertThat(gbsInfo2).isNotNull
+        assertThat(gbsInfo2!!.gbsId).isEqualTo(gbsGroup2.id)
+        assertThat(gbsInfo2.leaderName).isNull()
+        assertThat(gbsInfo2.leaderId).isNull()
+    }
+    
+    @Test
+    fun `findVillageGbsWithLeaderInfo - 활성 GBS만 조회한다`() {
+        // given
+        val activeGbsGroup = GbsGroup(
+            name = "활성 GBS 그룹",
+            village = village,
+            termStartDate = LocalDate.of(2023, 1, 1),
+            termEndDate = LocalDate.of(2023, 12, 31),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(activeGbsGroup)
+
+        val inactiveGbsGroup = GbsGroup(
+            name = "비활성 GBS 그룹",
+            village = village,
+            termStartDate = LocalDate.of(2023, 1, 1),
+            termEndDate = LocalDate.of(2023, 6, 30),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(inactiveGbsGroup)
+
+        // when
+        val result = gbsGroupRepository.findVillageGbsWithLeaderInfo(village.id!!, LocalDate.of(2023, 7, 1))
+
+        // then
+        assertThat(result).hasSize(1)
+        assertThat(result[0].gbsName).isEqualTo("활성 GBS 그룹")
+    }
+    
+    @Test
+    fun `findVillageGbsWithLeaderInfo - 다른 마을의 GBS는 조회되지 않는다`() {
+        // given
+        val gbsGroup1 = GbsGroup(
+            name = "1마을 GBS 그룹",
+            village = village,
+            termStartDate = LocalDate.of(2023, 1, 1),
+            termEndDate = LocalDate.of(2023, 12, 31),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(gbsGroup1)
+
+        val gbsGroup2 = GbsGroup(
+            name = "2마을 GBS 그룹",
+            village = otherVillage,
+            termStartDate = LocalDate.of(2023, 1, 1),
+            termEndDate = LocalDate.of(2023, 12, 31),
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        entityManager.persist(gbsGroup2)
+
+        // when
+        val result = gbsGroupRepository.findVillageGbsWithLeaderInfo(village.id!!, LocalDate.of(2023, 7, 1))
+
+        // then
+        assertThat(result).hasSize(1)
+        assertThat(result[0].gbsName).isEqualTo("1마을 GBS 그룹")
+    }
+
+    @Test
+    fun `findVillageGbsWithLeaderInfo - 존재하지 않는 마을의 경우 빈 리스트를 반환한다`() {
+        // given
+        val nonExistentVillageId = 999L
+
+        // when
+        val result = gbsGroupRepository.findVillageGbsWithLeaderInfo(nonExistentVillageId, LocalDate.of(2023, 7, 1))
+
+        // then
+        assertThat(result).isEmpty()
+    }
 } 
