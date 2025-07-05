@@ -503,7 +503,9 @@ class AdminOrganizationControllerTest {
         justRun { adminOrganizationService.removeLeaderFromGbs(gbsGroupId, request) }
 
         val mockMvc = setupMockMvc()
-        val objectMapper = ObjectMapper()
+        val objectMapper = ObjectMapper().apply {
+            registerModule(com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+        }
 
         // when & then
         mockMvc.perform(delete("/api/admin/organization/gbs-groups/{gbsGroupId}/leaders", gbsGroupId)
