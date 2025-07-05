@@ -17,11 +17,6 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-# Discord 웹훅 설정
-discord:
-  webhook:
-    url: ${discord.webhook.url}
-    min-level: DEBUG
 
 logging:
   level:
