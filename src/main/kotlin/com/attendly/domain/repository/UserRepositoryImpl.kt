@@ -3,6 +3,7 @@ package com.attendly.domain.repository
 import com.attendly.domain.entity.QUser.user
 import com.attendly.domain.entity.User
 import com.attendly.domain.model.UserFilterDto
+import com.attendly.enums.Role
 import com.querydsl.core.BooleanBuilder
 import com.querydsl.jpa.impl.JPAQuery
 import com.querydsl.jpa.impl.JPAQueryFactory
@@ -83,6 +84,20 @@ class UserRepositoryImpl : UserRepositoryCustom {
         return queryFactory
             .selectFrom(user)
             .where(predicate)
+            .orderBy(user.id.asc())
+            .fetch()
+    }
+
+    override fun findByRoles(roles: List<Role>): List<User> {
+        if (roles.isEmpty()) {
+            return emptyList()
+        }
+        
+        val queryFactory = JPAQueryFactory(entityManager)
+        
+        return queryFactory
+            .selectFrom(user)
+            .where(user.role.`in`(roles))
             .orderBy(user.id.asc())
             .fetch()
     }

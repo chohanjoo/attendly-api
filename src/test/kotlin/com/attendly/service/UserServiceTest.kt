@@ -262,8 +262,7 @@ class UserServiceTest {
             updatedAt = now
         )
         
-        every { userRepository.findByRole(Role.LEADER) } returns listOf(leaderUser)
-        every { userRepository.findByRole(Role.MEMBER) } returns listOf(memberUser)
+        every { userRepository.findByRoles(listOf(Role.LEADER, Role.MEMBER)) } returns listOf(leaderUser, memberUser)
         
         val request = UserListByRolesRequest(roles = listOf("LEADER", "MEMBER"))
         
@@ -277,8 +276,7 @@ class UserServiceTest {
         assertEquals("Member User", result[1].name)
         assertEquals(Role.MEMBER, result[1].role)
         
-        verify { userRepository.findByRole(Role.LEADER) }
-        verify { userRepository.findByRole(Role.MEMBER) }
+        verify { userRepository.findByRoles(listOf(Role.LEADER, Role.MEMBER)) }
     }
     
     @Test
@@ -294,7 +292,7 @@ class UserServiceTest {
     }
     
     @Test
-    fun `getUsersByRoles should filter out duplicate users`() {
+    fun `getUsersByRoles should not return duplicate users from single query`() {
         // Given
         val department = Department(id = 1L, name = "IT 부서")
         val now = LocalDateTime.now()
@@ -312,9 +310,8 @@ class UserServiceTest {
             updatedAt = now
         )
         
-        // User appears in both role queries (this is a test case, though it shouldn't happen in real data)
-        every { userRepository.findByRole(Role.LEADER) } returns listOf(leaderUser)
-        every { userRepository.findByRole(Role.VILLAGE_LEADER) } returns listOf(leaderUser)
+        // Single query returns only one user per role
+        every { userRepository.findByRoles(listOf(Role.LEADER, Role.VILLAGE_LEADER)) } returns listOf(leaderUser)
         
         val request = UserListByRolesRequest(roles = listOf("LEADER", "VILLAGE_LEADER"))
         
@@ -322,11 +319,10 @@ class UserServiceTest {
         val result = userService.getUsersByRoles(request)
         
         // Then
-        assertEquals(1, result.size) // Only one user despite being in two roles
+        assertEquals(1, result.size) // Only one user returned
         assertEquals("Leader User", result[0].name)
         
-        verify { userRepository.findByRole(Role.LEADER) }
-        verify { userRepository.findByRole(Role.VILLAGE_LEADER) }
+        verify { userRepository.findByRoles(listOf(Role.LEADER, Role.VILLAGE_LEADER)) }
     }
 
     @Test

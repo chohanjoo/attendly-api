@@ -107,7 +107,7 @@ class UserService(
         }
         
         val roles = request.roles.map { roleStr -> Role.valueOf(roleStr) }
-        val users = roles.flatMap { role -> userRepository.findByRole(role) }.distinct()
+        val users = userRepository.findByRoles(roles)
         
         return users.map { user ->
             UserResponse(
