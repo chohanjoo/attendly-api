@@ -472,7 +472,7 @@
                     "관리자-사용자"
                 ],
                 "summary": "사용자 목록 조회",
-                "description": "사용자 목록을 페이징하여 조회합니다. name 파라미터를 통해 이름으로 검색이 가능합니다. departmentId로 부서별 필터링, roles로 역할 필터링이 가능합니다.",
+                "description": "사용자 목록을 페이징하여 조회합니다. name 파라미터를 통해 이름으로 검색이 가능합니다. departmentId로 부서별 필터링, villageId로 마을별 필터링, roles로 역할 필터링이 가능합니다.",
                 "operationId": "getAllUsers",
                 "parameters": [
                     {
@@ -485,6 +485,15 @@
                     },
                     {
                         "name": "departmentId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "villageId",
                         "in": "query",
                         "required": false,
                         "schema": {
@@ -1168,6 +1177,58 @@
             }
         },
         "/api/admin/organization/gbs-groups": {
+            "get": {
+                "tags": [
+                    "관리자-조직구조"
+                ],
+                "summary": "GBS 그룹 목록 조회",
+                "description": "모든 GBS 그룹 목록을 조회합니다",
+                "operationId": "getAllGbsGroups",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "$ref": "#/components/parameters/X-Request-ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponsePageResponseAdminGbsGroupListResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "관리자-조직구조"
@@ -2155,22 +2216,22 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "마을별 통계 조회 성공",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/VillageDetailStatisticsResponse"
-                                }
-                            }
-                        }
-                    },
                     "403": {
                         "description": "권한 없음",
                         "content": {
                             "*/*": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiResponseVillageDetailStatisticsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "마을별 통계 조회 성공",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VillageDetailStatisticsResponse"
                                 }
                             }
                         }
@@ -2239,16 +2300,6 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "부서 통계 조회 성공",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/DepartmentStatisticsResponse"
-                                }
-                            }
-                        }
-                    },
                     "400": {
                         "description": "잘못된 요청",
                         "content": {
@@ -2265,6 +2316,16 @@
                             "*/*": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiResponseDepartmentStatisticsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "부서 통계 조회 성공",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DepartmentStatisticsResponse"
                                 }
                             }
                         }
@@ -2345,18 +2406,18 @@
                     "404": {
                         "description": "부서를 찾을 수 없음"
                     },
+                    "400": {
+                        "description": "잘못된 요청"
+                    },
+                    "403": {
+                        "description": "권한 없음"
+                    },
                     "200": {
                         "description": "통계 데이터 다운로드 성공",
                         "content": {
                             "application/vnd.ms-excel": {},
                             "text/csv": {}
                         }
-                    },
-                    "400": {
-                        "description": "잘못된 요청"
-                    },
-                    "403": {
-                        "description": "권한 없음"
                     }
                 },
                 "security": [
@@ -4087,6 +4148,114 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/VillageResponse"
+                        }
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "hasMore": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "AdminGbsGroupListResponse": {
+                "required": [
+                    "createdAt",
+                    "id",
+                    "memberCount",
+                    "name",
+                    "termEndDate",
+                    "termStartDate",
+                    "updatedAt",
+                    "villageId",
+                    "villageName"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "villageId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "villageName": {
+                        "type": "string"
+                    },
+                    "termStartDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "termEndDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "leaderId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "leaderName": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "memberCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "ApiResponsePageResponseAdminGbsGroupListResponse": {
+                "required": [
+                    "code",
+                    "message",
+                    "success",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/PageResponseAdminGbsGroupListResponse"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "PageResponseAdminGbsGroupListResponse": {
+                "required": [
+                    "hasMore",
+                    "items",
+                    "totalCount"
+                ],
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AdminGbsGroupListResponse"
                         }
                     },
                     "totalCount": {
