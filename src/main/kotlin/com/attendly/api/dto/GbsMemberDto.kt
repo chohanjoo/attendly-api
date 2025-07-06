@@ -1,18 +1,19 @@
 package com.attendly.api.dto
 
+import com.attendly.domain.entity.User
 import java.time.LocalDate
 
-/**
- * 리더 GBS 히스토리 조회를 위한 요청 DTO
- */
-data class LeaderGbsHistoryRequestDto(
-    val leaderId: Long,
-    val currentUser: com.attendly.domain.entity.User
+data class GbsMemberSearchDto(
+    val gbsId: Long,
+    val targetDate: LocalDate,
+    val currentUser: User
 )
 
-/**
- * 리더 GBS 히스토리와 멤버 정보를 함께 조회하기 위한 DTO
- */
+data class LeaderGbsHistoryRequestDto(
+    val leaderId: Long,
+    val currentUser: User
+)
+
 data class LeaderGbsHistoryMemberDto(
     val historyId: Long,
     val gbsId: Long,
@@ -28,4 +29,10 @@ data class LeaderGbsHistoryMemberDto(
     val memberBirthDate: LocalDate?,
     val memberPhoneNumber: String?,
     val memberJoinDate: LocalDate?
+)
+
+data class LeaderCandidateResponse(
+    val villageId: Long,
+    val villageName: String,
+    val candidates: List<LeaderCandidate>
 ) 

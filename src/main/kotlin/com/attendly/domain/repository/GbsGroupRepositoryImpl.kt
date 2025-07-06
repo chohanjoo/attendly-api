@@ -149,7 +149,7 @@ class GbsGroupRepositoryImpl(
     override fun findVillageGbsWithLeaderInfo(villageId: Long, date: LocalDate): List<VillageGbsWithLeaderInfo> {
         // 멤버 카운트를 구하는 서브쿼리
         val memberCountSubQuery = queryFactory
-            .select(gbsMemberHistory.count())
+            .select(gbsMemberHistory.count().castToNum(Int::class.java))
             .from(gbsMemberHistory)
             .where(
                 gbsMemberHistory.gbsGroup.id.eq(gbsGroup.id),
@@ -157,8 +157,17 @@ class GbsGroupRepositoryImpl(
                 gbsMemberHistory.endDate.isNull.or(gbsMemberHistory.endDate.goe(date))
             )
 
-        val results = queryFactory
-            .select(gbsGroup.id, gbsGroup.name, user.id, user.name, memberCountSubQuery)
+        return queryFactory
+            .select(
+                Projections.constructor(
+                    VillageGbsWithLeaderInfo::class.java,
+                    gbsGroup.id,
+                    gbsGroup.name,
+                    user.id,
+                    user.name,
+                    memberCountSubQuery
+                )
+            )
             .from(gbsGroup)
             .leftJoin(gbsLeaderHistory)
             .on(
@@ -175,15 +184,5 @@ class GbsGroupRepositoryImpl(
             )
             .orderBy(gbsGroup.name.asc())
             .fetch()
-
-        return results.map { tuple ->
-            VillageGbsWithLeaderInfo(
-                gbsId = tuple.get(gbsGroup.id)!!,
-                gbsName = tuple.get(gbsGroup.name)!!,
-                leaderId = tuple.get(user.id),
-                leaderName = tuple.get(user.name),
-                memberCount = tuple.get(memberCountSubQuery)?.toInt() ?: 0
-            )
-        }
     }
 } 
