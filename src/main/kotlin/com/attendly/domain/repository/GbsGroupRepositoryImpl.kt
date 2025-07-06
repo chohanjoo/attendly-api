@@ -10,6 +10,7 @@ import com.attendly.domain.entity.QVillage.village
 import com.attendly.domain.entity.User
 import com.attendly.domain.entity.Village
 import com.attendly.domain.model.GbsWithLeader
+import com.attendly.domain.model.VillageGbsWithLeaderInfo
 import com.querydsl.core.types.Projections
 import com.querydsl.jpa.impl.JPAQueryFactory
 import org.springframework.data.domain.Page
@@ -143,5 +144,45 @@ class GbsGroupRepositoryImpl(
             .fetch()
         
         return PageImpl(results, pageable, totalCount)
+    }
+
+    override fun findVillageGbsWithLeaderInfo(villageId: Long, date: LocalDate): List<VillageGbsWithLeaderInfo> {
+        // 멤버 카운트를 구하는 서브쿼리
+        val memberCountSubQuery = queryFactory
+            .select(gbsMemberHistory.count().castToNum(Int::class.java))
+            .from(gbsMemberHistory)
+            .where(
+                gbsMemberHistory.gbsGroup.id.eq(gbsGroup.id),
+                gbsMemberHistory.startDate.loe(date),
+                gbsMemberHistory.endDate.isNull.or(gbsMemberHistory.endDate.goe(date))
+            )
+
+        return queryFactory
+            .select(
+                Projections.constructor(
+                    VillageGbsWithLeaderInfo::class.java,
+                    gbsGroup.id,
+                    gbsGroup.name,
+                    user.id,
+                    user.name,
+                    memberCountSubQuery
+                )
+            )
+            .from(gbsGroup)
+            .leftJoin(gbsLeaderHistory)
+            .on(
+                gbsLeaderHistory.gbsGroup.eq(gbsGroup),
+                gbsLeaderHistory.startDate.loe(date),
+                gbsLeaderHistory.endDate.isNull.or(gbsLeaderHistory.endDate.goe(date))
+            )
+            .leftJoin(user)
+            .on(gbsLeaderHistory.leader.eq(user))
+            .where(
+                gbsGroup.village.id.eq(villageId),
+                gbsGroup.termStartDate.loe(date),
+                gbsGroup.termEndDate.goe(date)
+            )
+            .orderBy(gbsGroup.name.asc())
+            .fetch()
     }
 } 

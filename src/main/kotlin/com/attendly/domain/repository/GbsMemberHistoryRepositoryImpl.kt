@@ -60,4 +60,22 @@ class GbsMemberHistoryRepositoryImpl(
             )
             .fetch()
     }
+
+    override fun findActiveMembersByVillageGbsIds(gbsIds: List<Long>, date: LocalDate): List<GbsMemberHistory> {
+        if (gbsIds.isEmpty()) {
+            return emptyList()
+        }
+        
+        return queryFactory
+            .selectFrom(gbsMemberHistory)
+            .join(gbsMemberHistory.member).fetchJoin()
+            .join(gbsMemberHistory.gbsGroup).fetchJoin()
+            .where(
+                gbsMemberHistory.gbsGroup.id.`in`(gbsIds),
+                gbsMemberHistory.startDate.loe(date),
+                gbsMemberHistory.endDate.isNull.or(gbsMemberHistory.endDate.goe(date))
+            )
+            .orderBy(gbsMemberHistory.gbsGroup.id.asc(), gbsMemberHistory.member.name.asc())
+            .fetch()
+    }
 } 

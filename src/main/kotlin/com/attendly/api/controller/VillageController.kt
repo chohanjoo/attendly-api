@@ -87,9 +87,9 @@ class VillageController(
     )
     @GetMapping("/{id}/leader-candidates")
     @PreAuthorize("isAuthenticated()")
-    fun getLeaderCandidates(@PathVariable id: Long): ResponseEntity<ApiResponse<PageResponse<LeaderCandidate>>> {
+    fun getLeaderCandidates(@PathVariable id: Long): ResponseEntity<ApiResponse<LeaderCandidateResponse>> {
         val candidatesResponse = gbsMemberService.getLeaderCandidates(id)
-        return ResponseUtil.successList(candidatesResponse)
+        return ResponseUtil.success(candidatesResponse, "GBS 리더 후보 목록 조회 성공")
     }
     
     @Operation(

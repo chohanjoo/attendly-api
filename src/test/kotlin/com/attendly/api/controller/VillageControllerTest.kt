@@ -184,24 +184,28 @@ class VillageControllerTest {
     fun `GBS 리더 후보 목록을 조회한다`() {
         // given
         val villageId = 1L
-        val candidates = listOf(
-            LeaderCandidate(
-                id = 789L,
-                name = "박지성",
-                email = "park@example.com",
-                isLeader = true,
-                previousGbsCount = 2
-            ),
-            LeaderCandidate(
-                id = 101L,
-                name = "손흥민",
-                email = "son@example.com",
-                isLeader = true,
-                previousGbsCount = 1
+        val candidateResponse = LeaderCandidateResponse(
+            villageId = villageId,
+            villageName = "테스트 마을",
+            candidates = listOf(
+                LeaderCandidate(
+                    id = 789L,
+                    name = "박지성",
+                    email = "park@example.com",
+                    isLeader = true,
+                    previousGbsCount = 2
+                ),
+                LeaderCandidate(
+                    id = 101L,
+                    name = "손흥민",
+                    email = "son@example.com",
+                    isLeader = true,
+                    previousGbsCount = 1
+                )
             )
         )
 
-        every { gbsMemberService.getLeaderCandidates(villageId) } returns candidates
+        every { gbsMemberService.getLeaderCandidates(villageId) } returns candidateResponse
 
         // when
         val responseEntity = villageController.getLeaderCandidates(villageId)
@@ -214,19 +218,22 @@ class VillageControllerTest {
         assertNotNull(apiResponse)
         assertTrue(apiResponse!!.success)
         assertEquals(200, apiResponse.code)
+        assertEquals("GBS 리더 후보 목록 조회 성공", apiResponse.message)
 
         val result = apiResponse.data
         assertNotNull(result)
-        assertEquals(2, result!!.items.size)
+        assertEquals(villageId, result!!.villageId)
+        assertEquals("테스트 마을", result.villageName)
+        assertEquals(2, result.candidates.size)
 
-        val firstCandidate = result.items[0]
+        val firstCandidate = result.candidates[0]
         assertEquals(789L, firstCandidate.id)
         assertEquals("박지성", firstCandidate.name)
         assertEquals("park@example.com", firstCandidate.email)
         assertEquals(true, firstCandidate.isLeader)
         assertEquals(2, firstCandidate.previousGbsCount)
 
-        val secondCandidate = result.items[1]
+        val secondCandidate = result.candidates[1]
         assertEquals(101L, secondCandidate.id)
         assertEquals("손흥민", secondCandidate.name)
         assertEquals("son@example.com", secondCandidate.email)

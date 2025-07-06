@@ -3,7 +3,9 @@ package com.attendly.api.controller
 import com.attendly.api.dto.ApiResponse
 import com.attendly.api.dto.GbsMembersListResponse
 import com.attendly.api.dto.LeaderGbsHistoryListResponse
+import com.attendly.api.dto.LeaderGbsHistoryRequestDto
 import com.attendly.api.dto.LeaderGbsResponse
+import com.attendly.api.dto.GbsMemberSearchDto
 import com.attendly.api.util.ResponseUtil
 import com.attendly.service.GbsMemberService
 import com.attendly.service.UserService
@@ -38,7 +40,8 @@ class GbsMemberController(
         val currentUser = userService.getCurrentUser(authentication)
         val targetDate = date ?: LocalDate.now()
         
-        val response = gbsMemberService.getGbsMembers(gbsId, targetDate, currentUser)
+        val searchDto = GbsMemberSearchDto(gbsId, targetDate, currentUser)
+        val response = gbsMemberService.getGbsMembers(searchDto)
         return ResponseUtil.success(response)
     }
     
@@ -62,7 +65,8 @@ class GbsMemberController(
         authentication: Authentication
     ): ResponseEntity<ApiResponse<LeaderGbsHistoryListResponse>> {
         val currentUser = userService.getCurrentUser(authentication)
-        val response = gbsMemberService.getLeaderGbsHistories(leaderId, currentUser)
+        val request = LeaderGbsHistoryRequestDto(leaderId, currentUser)
+        val response = gbsMemberService.getLeaderGbsHistories(request)
         return ResponseUtil.success(response)
     }
 } 

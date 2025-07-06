@@ -7,6 +7,7 @@ import com.attendly.domain.entity.Department
 import com.attendly.domain.entity.GbsGroup
 import com.attendly.domain.entity.Village
 import com.attendly.domain.model.GbsMemberHistorySearchCondition
+import com.attendly.domain.model.VillageGbsWithLeaderInfo
 import com.attendly.domain.repository.DepartmentRepository
 import com.attendly.domain.repository.GbsGroupRepository
 import com.attendly.domain.repository.GbsLeaderHistoryRepository
@@ -122,29 +123,44 @@ class OrganizationService(
     /**
      * 마을장을 위한 마을내 모든 GBS 정보 조회
      * 각 GBS별 리더 및 조원 정보를 포함하여 반환
+     * 
+     * 최적화된 버전: N+1 문제 해결
+     * - 기존: 2 + 2N개의 쿼리 (N은 GBS 개수)
+     * - 개선: 3개의 쿼리 (Village 조회 + GBS&리더 정보 조회 + 모든 멤버 조회)
      */
     @Transactional(readOnly = true)
     fun getVillageGbsInfo(villageId: Long, date: LocalDate = LocalDate.now()): VillageGbsInfoResponse {
         val village = getVillageById(villageId)
-        val activeGbsGroups = getActiveGbsGroupsByVillage(villageId, date)
         
-        val gbsInfoList = activeGbsGroups.map { gbsGroup ->
-            val leaderId = gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsGroup.id!!)?.id
-            val leaderName = gbsLeaderHistoryRepository.findCurrentLeaderByGbsId(gbsGroup.id!!)?.name ?: "리더 없음"
-            
-            // 각 GBS의 모든 멤버 조회
-            val condition = GbsMemberHistorySearchCondition(
-                gbsId = gbsGroup.id!!,
-                startDate = date,
-                endDate = date
+        // 1. 마을의 모든 GBS와 리더 정보를 한 번에 조회
+        val gbsWithLeaderInfoList = gbsGroupRepository.findVillageGbsWithLeaderInfo(villageId, date)
+        
+        if (gbsWithLeaderInfoList.isEmpty()) {
+            return VillageGbsInfoResponse(
+                villageId = villageId,
+                villageName = village.name,
+                gbsCount = 0,
+                totalMemberCount = 0,
+                gbsList = emptyList()
             )
-            val members = gbsMemberHistoryRepository.findActiveMembers(condition)
+        }
+        
+        // 2. 모든 GBS의 멤버들을 한 번에 조회
+        val gbsIds = gbsWithLeaderInfoList.map { it.gbsId }
+        val allMembers = gbsMemberHistoryRepository.findActiveMembersByVillageGbsIds(gbsIds, date)
+        
+        // 3. GBS별로 멤버들을 그룹화
+        val membersByGbsId = allMembers.groupBy { it.gbsGroup.id!! }
+        
+        // 4. 결과 생성
+        val gbsInfoList = gbsWithLeaderInfoList.map { gbsInfo ->
+            val members = membersByGbsId[gbsInfo.gbsId] ?: emptyList()
             
             VillageGbsInfoResponse.GbsInfo(
-                gbsId = gbsGroup.id!!,
-                gbsName = gbsGroup.name,
-                leaderId = leaderId,
-                leaderName = leaderName,
+                gbsId = gbsInfo.gbsId,
+                gbsName = gbsInfo.gbsName,
+                leaderId = gbsInfo.leaderId,
+                leaderName = gbsInfo.leaderName ?: "리더 없음",
                 memberCount = members.size,
                 members = members.map { GbsMemberResponse.from(it) }
             )
